@@ -15,6 +15,7 @@ From the project root:
 
 ```powershell
 python evals/coding_bench.py self-check
+python evals/coding_bench.py self-check --condition-set hybrid
 ```
 
 The self-check verifies that each original bug fails tests, then runs 12 reference
@@ -22,6 +23,9 @@ trials and 12 unchanged-code trials across four conditions. References should pa
 unchanged code should fail. It checks that confirmed synthetic lessons enter memory
 context and stale lessons do not. No model/provider is called. Artifacts go into
 an ignored `.eval-runs/self-check-<id>` directory unless you specify `--output`.
+The opt-in hybrid set runs 21 reference and 21 unchanged trials across seven
+conditions, including six fresh and six stale memory checks. These are calibration
+outcomes, never model-success statistics.
 
 Acceptance tests (`checks.py`) and reference fixes (`reference.json`) live outside
 each task's `repo/`. Only source/public tests from `repo/` are copied and indexed.
@@ -37,6 +41,15 @@ accidental retrieval leakage; it is not OS access isolation.
 | `graph` | Bounded investigator gathers related symbols; no lesson database |
 | `memory` | Same investigator with an explicit confirmed pre-task synthetic lesson |
 | `stale_memory` | Same fixture lesson, then an evidence-file comment change makes it stale before retrieval |
+| `hybrid` | Code-aware lexical/graph ranking, with no lesson database |
+| `hybrid_memory` | Hybrid ranking and scoped lesson reservation with confirmed synthetic memory |
+| `hybrid_stale_memory` | Hybrid with the same stale-evidence control; stale advice is excluded |
+
+The first four retain legacy policies and remain the default. Add
+`--condition-set hybrid` to prepare/run/self-check for all seven. This adds three
+calls per task before retries. Use the same condition set when preparing and
+replaying. Reports compare graph/hybrid, fresh and stale counterparts, and advice
+controls within hybrid; only tasks scored on both sides enter a pair.
 
 All conditions use the same task description, editable-source rules, requested
 model ID, temperature 0, maximum estimated full-prompt input budget and declared
@@ -128,6 +141,9 @@ timeout/process/format errors stay distinct from executable task failures.
 ## Results, checkpoints and scoring
 
 `manifest.json` pins task/source/grader/reference provenance and requested settings.
+Policy version 2 also pins selected conditions and every package Python source
+hash. Old version-1 outputs require a new directory; changed execution source
+rejects resume even if a particular packet's text remains identical.
 `runner.json` records adapter identity. `requests/` stores input packets, `trials/`
 stores atomic per-trial checkpoints, and `report.json` contains condition summaries
 and matched-task comparisons. Candidate edits are stored for reproducibility.

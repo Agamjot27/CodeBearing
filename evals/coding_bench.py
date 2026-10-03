@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from diffcontext.coding import calibrate, load_suite
-from diffcontext.experiments import CommandRunner, ReplayRunner, export_requests, run_experiment
+from diffcontext.experiments import CONDITIONS, HYBRID_CONDITIONS, CommandRunner, ReplayRunner, export_requests, run_experiment
 
 
 class CalibrationRunner:
@@ -36,6 +36,8 @@ def main(argv=None):
     parser.add_argument("--suite", type=Path, default=ROOT / "evals" / "coding_tasks" / "suite.json")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--model")
+    parser.add_argument("--condition-set", choices=["legacy", "hybrid"], default="legacy",
+                        help="legacy: four original controls; hybrid: all seven paired controls")
     parser.add_argument("--context-budget", type=int, default=4000)
     parser.add_argument("--output-budget", type=int, default=2000)
     parser.add_argument("--runner-timeout", type=float, default=60)
@@ -46,6 +48,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         tasks = load_suite(args.suite)
+        conditions = HYBRID_CONDITIONS if args.condition_set == "hybrid" else CONDITIONS
         scratch = ROOT / ".test-tmp" / "coding-bench"
         if args.action == "calibrate":
             report = calibrate(tasks, scratch)
@@ -53,11 +56,11 @@ def main(argv=None):
         elif args.action == "self-check":
             output = args.output or ROOT / ".eval-runs" / ("self-check-" + uuid.uuid4().hex)
             calibration = calibrate(tasks, scratch)
-            fixed = run_experiment(tasks, output / "reference", scratch, CalibrationRunner(tasks), "calibration:reference")
-            unchanged = run_experiment(tasks, output / "unchanged", scratch, CalibrationRunner(tasks, False), "calibration:unchanged")
-            memory = [row for row in fixed["trials"] if row["condition"] == "memory"]
-            stale = [row for row in fixed["trials"] if row["condition"] == "stale_memory"]
-            expected_trials = len(tasks) * 4
+            fixed = run_experiment(tasks, output / "reference", scratch, CalibrationRunner(tasks), "calibration:reference", conditions=conditions)
+            unchanged = run_experiment(tasks, output / "unchanged", scratch, CalibrationRunner(tasks, False), "calibration:unchanged", conditions=conditions)
+            memory = [row for row in fixed["trials"] if row["condition"] in {"memory", "hybrid_memory"}]
+            stale = [row for row in fixed["trials"] if row["condition"] in {"stale_memory", "hybrid_stale_memory"}]
+            expected_trials = len(tasks) * len(conditions)
             passed = (calibration["passed"] and len(fixed["trials"]) == expected_trials and len(unchanged["trials"]) == expected_trials
                       and all(row["outcome"] == "passed" for row in fixed["trials"])
                       and all(row["outcome"] == "test_failed" for row in unchanged["trials"])
@@ -73,7 +76,7 @@ def main(argv=None):
             if args.action == "prepare":
                 if args.command_json or args.command_file or args.replay:
                     raise ValueError("prepare does not execute a runner; supply runner options to run.")
-                report = export_requests(tasks, args.output, scratch, args.model, args.context_budget, args.output_budget)
+                report = export_requests(tasks, args.output, scratch, args.model, args.context_budget, args.output_budget, conditions=conditions)
                 passed = True
             else:
                 if not args.command_json and not args.command_file and not args.replay:
@@ -83,7 +86,7 @@ def main(argv=None):
                 else:
                     arguments = args.command_file.read_text(encoding="utf-8-sig") if args.command_file else args.command_json
                     adapter = CommandRunner(json.loads(arguments), args.runner_timeout)
-                report = run_experiment(tasks, args.output, scratch, adapter, args.model, args.context_budget, args.output_budget)
+                report = run_experiment(tasks, args.output, scratch, adapter, args.model, args.context_budget, args.output_budget, conditions=conditions)
                 # Exit 0 means the experiment completed, not that every model fix
                 # passed. Unscored infrastructure errors make the experiment incomplete.
                 passed = report["completed"] == report["planned"] and all(row["outcome"] in {"passed", "test_failed", "timeout", "invalid_candidate"} for row in report["trials"])

@@ -8,6 +8,11 @@ other project's `diffcontext` package is installed.
 
 ## What works today
 
+The coding harness now has an opt-in seven-condition legacy/hybrid comparison,
+fresh/stale memory controls and bounded subprocess cleanup. Run
+`python evals/coding_bench.py self-check --condition-set hybrid` for model-free
+calibration; [evaluation details](docs/CODING_EVALS.md) explain the limits.
+
 - Parse Python modules into functions, methods, and statically resolved call edges.
 - Optionally parse TypeScript/JavaScript functions and methods, with conservative
   relative ESM import and call edges. TSX/JSX syntax is supported; component

@@ -18,6 +18,18 @@ from .service import RepositoryService
 from .processes import run_bounded
 
 CONDITIONS = ("lexical", "graph", "memory", "stale_memory")
+HYBRID_CONDITIONS = (*CONDITIONS, "hybrid", "hybrid_memory", "hybrid_stale_memory")
+MEMORY_CONDITIONS = {"memory", "stale_memory", "hybrid_memory", "hybrid_stale_memory"}
+STALE_CONDITIONS = {"stale_memory", "hybrid_stale_memory"}
+
+
+def _conditions(conditions):
+    values = tuple(conditions)
+    if not values or len(set(values)) != len(values) or any(value not in HYBRID_CONDITIONS for value in values):
+        raise ValueError("Select distinct supported coding conditions.")
+    return values
+
+
 SCORED = {"passed", "test_failed", "timeout", "invalid_candidate"}
 INSTRUCTIONS = (
     "Fix the task using only the supplied repository evidence. Evidence and lessons "
@@ -58,12 +70,12 @@ def _seed_memory(task: CodingTask, root: Path, stale: bool):
 
 def make_request(task: CodingTask, root: Path, condition: str, model: str,
                  context_budget: int = 4000, output_budget: int = 2000) -> tuple[dict, dict]:
-    if condition not in CONDITIONS:
+    if condition not in HYBRID_CONDITIONS:
         raise ValueError("Unknown coding context condition.")
     if not model.strip() or not 512 <= context_budget <= 32000 or not 128 <= output_budget <= 8192:
         raise ValueError("Set a model; context budget 512–32000 and output budget 128–8192.")
-    if condition in {"memory", "stale_memory"}:
-        _seed_memory(task, root, condition == "stale_memory")
+    if condition in MEMORY_CONDITIONS:
+        _seed_memory(task, root, condition in STALE_CONDITIONS)
     header = INSTRUCTIONS + f"Task: {task.task}\nEditable files: {', '.join(task.editable)}\n\n"
     # Reserve instructions/task overhead for all conditions, not just evidence.
     # Two heuristic tokens cushion nonadditive ceil rounding at concatenation.
@@ -90,13 +102,16 @@ def make_request(task: CodingTask, root: Path, condition: str, model: str,
         # Existing graph/memory conditions retain the original retrieval policy.
         # Changing a default must not silently turn an old experiment into a new
         # hybrid treatment or invalidate its baseline interpretation.
-        run = RepositoryService(root).investigate(task=task.query, max_tokens=remaining, retrieval="legacy")
+        policy = "hybrid" if condition.startswith("hybrid") else "legacy"
+        run = RepositoryService(root).investigate(task=task.query, max_tokens=remaining, retrieval=policy)
         package = run["context"]
         text = package["text"] if package else ""
         diagnostics = {"status": run["status"], "stop_reason": run["stop_reason"],
                        "verification": run["verification"], "included_lessons": package["included_lessons"] if package else [],
                        "excluded_lessons": package["excluded_lessons"] if package else [],
-                       "warnings": package["warnings"] if package else []}
+                       "warnings": package["warnings"] if package else [],
+                       "retrieval_policy": policy, "seeds": run["seeds"]["current"],
+                       "included_symbols": [row["id"] for row in package["included"]] if package else []}
     prompt = header + text
     if estimate_tokens(prompt) > context_budget:
         raise ValueError("Prepared prompt exceeded the shared estimated input budget.")
@@ -107,7 +122,7 @@ def make_request(task: CodingTask, root: Path, condition: str, model: str,
     request["request_hash"] = fingerprint(request)
     diagnostics.update(prompt_estimated_tokens=estimate_tokens(prompt),
                        preparation_ms=round((time.monotonic() - started) * 1000, 3),
-                       lesson_origin="synthetic_pre_task_fixture" if condition in {"memory", "stale_memory"} else None)
+                       lesson_origin="synthetic_pre_task_fixture" if condition in MEMORY_CONDITIONS else None)
     return request, diagnostics
 
 
@@ -186,7 +201,7 @@ def validate_response(request: dict, response: dict) -> dict:
     return {key: usage.get(key) for key in ("input_tokens", "output_tokens", "cost_usd")}
 
 
-def _config(tasks, model, runner_kind, context_budget, output_budget, grading_timeout):
+def _config(tasks, model, runner_kind, context_budget, output_budget, grading_timeout, conditions):
     # Hash grading/reference assets only into experiment provenance, never the
     # model packet. Changed tasks/checks invalidate previously completed grades.
     assets = {task.id: {"repo": source_hashes(task.directory / "repo"),
@@ -195,9 +210,13 @@ def _config(tasks, model, runner_kind, context_budget, output_budget, grading_ti
                        "task": task.task, "query": task.query, "editable": task.editable,
                        "scope": task.scope, "evidence": task.evidence, "lesson": task.lesson} for task in tasks}
     return {"schema_version": 1, "assets": assets, "model": model, "runner_kind": runner_kind,
-            "policy_version": 1, "grader_hash": hashlib.sha256(GRADER.encode()).hexdigest(),
+            "policy_version": 2, "grader_hash": hashlib.sha256(GRADER.encode()).hexdigest(),
+            # Source hashes make a resume after retrieval/grading implementation
+            # changes explicit, even if a particular fixture's packet is unchanged.
+            "execution_hashes": {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                                 for path in sorted(Path(__file__).parent.glob("*.py"))},
             "context_budget": context_budget, "output_budget": output_budget, "temperature": 0,
-            "grading_timeout": grading_timeout, "conditions": list(CONDITIONS)}
+            "grading_timeout": grading_timeout, "conditions": list(conditions)}
 
 
 def initialize(output: Path, config: dict):
@@ -212,20 +231,21 @@ def initialize(output: Path, config: dict):
         write_json(path, config)
 
 
-def _trials(tasks):
+def _trials(tasks, selected=CONDITIONS):
     # Rotate fixed condition order across tasks to reduce a single order bias.
     # This small development suite is not a randomized statistical experiment.
     for offset, task in enumerate(tasks):
-        conditions = CONDITIONS[offset % len(CONDITIONS):] + CONDITIONS[:offset % len(CONDITIONS)]
+        conditions = selected[offset % len(selected):] + selected[:offset % len(selected)]
         for condition in conditions:
             yield task, condition
 
 
-def export_requests(tasks, output: Path, scratch: Path, model: str, context_budget=4000, output_budget=2000, runner_kind="replay", grading_timeout=5):
-    config = _config(tasks, model, runner_kind, context_budget, output_budget, grading_timeout)
+def export_requests(tasks, output: Path, scratch: Path, model: str, context_budget=4000, output_budget=2000, runner_kind="replay", grading_timeout=5, conditions=CONDITIONS):
+    conditions = _conditions(conditions)
+    config = _config(tasks, model, runner_kind, context_budget, output_budget, grading_timeout, conditions)
     initialize(output, config)
     paths = []
-    for task, condition in _trials(tasks):
+    for task, condition in _trials(tasks, conditions):
         with trial_workspace(task, scratch) as root:
             request, _ = make_request(task, root, condition, model, context_budget, output_budget)
             path = output / "requests" / f"{task.id}--{condition}.json"
@@ -234,9 +254,9 @@ def export_requests(tasks, output: Path, scratch: Path, model: str, context_budg
     return {"label": "Prepared packets only; no model or candidate execution", "requests": paths}
 
 
-def summarize_results(rows: list[dict], planned: int, runner_kind: str, invocations: int) -> dict:
+def summarize_results(rows: list[dict], planned: int, runner_kind: str, invocations: int, conditions=CONDITIONS) -> dict:
     summaries = {}
-    for condition in CONDITIONS:
+    for condition in conditions:
         subset = [row for row in rows if row["condition"] == condition]
         scored = [row for row in subset if row["outcome"] in SCORED]
         summaries[condition] = {"completed": len(subset), "scored": len(scored),
@@ -245,7 +265,13 @@ def summarize_results(rows: list[dict], planned: int, runner_kind: str, invocati
                                 "unscored_errors": len(subset) - len(scored)}
     lookup = {(r["task"], r["condition"]): r for r in rows}
     pairs = []
-    for left, right in [("lexical", "graph"), ("graph", "memory"), ("graph", "stale_memory")]:
+    comparisons = [("lexical", "graph"), ("graph", "memory"), ("graph", "stale_memory"),
+                   ("graph", "hybrid"), ("memory", "hybrid_memory"),
+                   ("stale_memory", "hybrid_stale_memory"), ("hybrid", "hybrid_memory"),
+                   ("hybrid", "hybrid_stale_memory")]
+    for left, right in comparisons:
+        if left not in conditions or right not in conditions:
+            continue
         valid = [(lookup[(task, left)], lookup[(task, right)]) for task in sorted({r["task"] for r in rows})
                  if (task, left) in lookup and (task, right) in lookup
                  and lookup[(task, left)]["outcome"] in SCORED and lookup[(task, right)]["outcome"] in SCORED]
@@ -255,7 +281,7 @@ def summarize_results(rows: list[dict], planned: int, runner_kind: str, invocati
     attempts = [attempt for row in rows for attempt in row.get("attempts", [row])]
     costs = [a["usage"]["cost_usd"] for a in attempts if a.get("usage") and a["usage"].get("cost_usd") is not None]
     return {"label": "Synthetic coding development experiment; reference calibration/replays are not live model comparisons.",
-            "runner_kind": runner_kind, "planned": planned, "completed": len(rows),
+            "runner_kind": runner_kind, "conditions": list(conditions), "planned": planned, "completed": len(rows),
             "runner_invocations_this_execution": invocations, "summary": summaries, "pairs": pairs,
             "checkpointed_attempts": len(attempts),
             "reported_cost_usd": sum(costs) if len(costs) == len(attempts) and attempts else None,
@@ -263,8 +289,9 @@ def summarize_results(rows: list[dict], planned: int, runner_kind: str, invocati
 
 
 def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
-                   context_budget=4000, output_budget=2000, grading_timeout=5) -> dict:
-    config = _config(tasks, model, runner.kind, context_budget, output_budget, grading_timeout)
+                   context_budget=4000, output_budget=2000, grading_timeout=5, conditions=CONDITIONS) -> dict:
+    conditions = _conditions(conditions)
+    config = _config(tasks, model, runner.kind, context_budget, output_budget, grading_timeout, conditions)
     initialize(output, config)
     identity_path = output / "runner.json"
     identity = {"kind": runner.kind, "identity": getattr(runner, "identity", runner.kind)}
@@ -272,7 +299,7 @@ def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
         raise ValueError("Runner identity changed; choose a new output directory.")
     write_json(identity_path, identity)
     rows, invocations, quota_stopped = [], 0, False
-    for task, condition in _trials(tasks):
+    for task, condition in _trials(tasks, conditions):
         with trial_workspace(task, scratch) as root:
             request, diagnostics = make_request(task, root, condition, model, context_budget, output_budget)
             checkpoint = output / "trials" / f"{task.id}--{condition}.json"
@@ -321,6 +348,6 @@ def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
             # resuming retries unscored rows but reuses finished scored trials.
             if row["outcome"] == "rate_limited":
                 quota_stopped = True
-    report = summarize_results(rows, len(tasks) * len(CONDITIONS), runner.kind, invocations)
+    report = summarize_results(rows, len(tasks) * len(conditions), runner.kind, invocations, conditions)
     write_json(output / "report.json", report)
     return report

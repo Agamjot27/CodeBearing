@@ -68,8 +68,10 @@ lessons. Static graphs miss runtime/framework dependencies. The reserve can trad
 code coverage for advice, and whole-file hashes can over-invalidate memory.
 
 The existing coding harness explicitly retains `retrieval="legacy"` for its
-lexical/graph/memory/stale conditions. The next phase must add explicit hybrid
-treatments and held-out tasks before collecting paired real-model results.
+lexical/graph/memory/stale conditions. Opt into all seven paired controls with
+`python evals/coding_bench.py self-check --condition-set hybrid`; see
+[coding evaluation](CODING_EVALS.md). These remain authored development fixtures;
+held-out tasks and paired real-model results have not yet been collected.
 
 Rationale D-019, actual execution F-029, work item WI-009. BM25 defaults and IDF
 reference: [official Lucene documentation](https://lucene.apache.org/core/9_9_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).

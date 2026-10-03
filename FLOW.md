@@ -7,7 +7,8 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 ## Current modification scope
 
 WI-011 replaces grading/adapter pipe capture with bounded file-backed execution
-(F-030), modifying F-021/F-022. WI-012 will add explicit hybrid experiment controls.
+(F-030), modifying F-021/F-022. WI-012 adds explicit hybrid experiment controls
+(F-031), extending F-022–F-024; existing four-control defaults are retained.
 
 WI-009 adds code-aware lexical/graph/reviewed-memory retrieval and task lesson
 reservation (F-029), extending service/investigation F-016/F-018, packing F-006,
@@ -621,6 +622,8 @@ syntax errors, timeout and fresh trials. D-014/WI-005.
 
 ## F-022 — Coding prompt preparation and memory controls
 
+F-031 extends this flow with opt-in hybrid treatments and explicit policy diagnostics.
+
 **Trigger:** `evals/coding_bench.py prepare --model --output`, or trial setup.
 
 **Execution Path:** script `main()` → `coding.py:load_suite()` →
@@ -691,6 +694,8 @@ Nine experiment tests exercise IPC, replay, provenance, memory/budget/leakage, i
 edits, provider/quota classification and scored checkpoint reuse. D-015/WI-005.
 
 ## F-024 — Coding report aggregation and model-free harness self-check
+
+F-031 extends aggregation/self-check to the selected four/seven-condition set.
 
 **Trigger:** End of run or `python evals/coding_bench.py self-check` (core CI).
 
@@ -938,3 +943,36 @@ Disk output has no quota and this is not a security sandbox.
 
 **Output:** Completed ProcessResult or bounded execution/cleanup exception;
 unchanged grade results and adapter response/error contracts. D-020, WI-011.
+
+## F-031 — Paired hybrid coding controls and provenance
+
+**Trigger:** coding_bench.py:main() with --condition-set hybrid, or experiment
+functions with conditions=HYBRID_CONDITIONS. Default remains CONDITIONS (legacy four).
+
+**Execution Path:** main() chooses tuple → experiments.py:_conditions() validates
+unique supported names → export_requests()/run_experiment() → _config() task assets,
+package source hashes, policy_version=2, selected conditions → initialize() checks
+manifest equality → _trials() rotates selected order → fresh trial_workspace() →
+make_request() → optional _seed_memory() → RepositoryService.investigate() with
+hybrid for the three new names, legacy for old graph/memory names → request hash
+→ unchanged F-023 runner/quota/checkpoint/grading → summarize_results() selected
+condition summaries and eight possible scored-only pairs → report.json.
+
+**Data Transformation:** Same task, settings and total estimated prompt budget
+produce different cited evidence. Fresh/stale pairs share identical source hashes
+across legacy/hybrid. Diagnostics disclose retrieval_policy, seeds, included_symbols,
+lessons and preparation time. Source/config/condition changes reject resume before
+dispatch. Unscored provider errors are excluded from paired task denominators.
+
+**Database Interaction:** Only disposable memory.sqlite3 for four memory controls,
+confirmed synthetic lesson and normal freshness reads. No report database.
+
+**External Interaction:** Local assets, source hashing, JSON checkpoints, bounded
+trusted grading/adapter subprocesses (F-030). Real network/model calls depend on an
+explicit adapter; self-check uses privileged references and unchanged edits only.
+
+**Output:** Four or seven packets per task; selected summaries, matched-task
+passes/regressions and unchanged quota/error/cost contracts. Hybrid self-check
+expects 21 reference passes and 21 unchanged failures across three authored tasks,
+with six fresh and six stale checks. This is calibration, not held-out/model evidence.
+D-021, WI-012. No frontend/API/worker changes.

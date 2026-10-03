@@ -14,6 +14,7 @@ jobs:
       - run: python evals/indexing.py
       - run: python evals/hybrid.py
       - run: python evals/coding_bench.py self-check
+      - run: python evals/coding_bench.py self-check --condition-set hybrid
   mcp:
     strategy:
       matrix:

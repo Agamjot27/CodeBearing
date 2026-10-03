@@ -47,13 +47,18 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-011 completed: [Bounded harness subprocesses](docs/work-items/WI-011-bounded-subprocesses/BUG.md).
+WI-012 completed: [Hybrid coding controls](docs/work-items/WI-012-hybrid-coding-controls/FEATURE.md).
+Opt-in seven-condition comparison implemented, four new tests pass. Final full
+regression passed 142 tests; hybrid self-check passed 21 reference/21 unchanged
+trials and six fresh/six stale checks. D-021/F-031; manifests now pin
+all package source hashes and reject old version-1 outputs. No new provider calls.
+
+WI-011 completed (d364adb): [Bounded harness subprocesses](docs/work-items/WI-011-bounded-subprocesses/BUG.md).
 processes.py now uses file-backed I/O and bounded owned-tree/group cleanup for
 grading and command adapters (D-020/F-030). Three process, four grading and nine
-experiment tests pass with Windows process permissions. Next add opt-in explicit
-hybrid experiment conditions (WI-012). No real model trial has run.
+experiment tests pass with Windows process permissions. No real model trial has run.
 
-WI-009 completed:
+WI-009 completed and pushed as 3738e3a:
 [Hybrid retrieval](docs/work-items/WI-009-hybrid-retrieval/FEATURE.md).
 Version 0.5.0: default search/task investigation combines code-aware lexical
 ranking, bounded graph candidates and fresh developer-confirmed memory. Explicit
@@ -76,10 +81,10 @@ public PyPI release or live model outcomes. Check final Git synchronization afte
 
 ## Next planned slice
 
-Add explicitly named hybrid coding-harness treatments and held-out tasks; existing
-graph/memory conditions deliberately retain legacy retrieval for comparability.
-Harden Windows subprocess timeout cleanup before provider adapters, then run
-paired trials once a model/provider is selected and configured. Dedicated graph storage needs
+Collect independent held-out tasks and observed prior corrections. Existing graph/
+memory conditions retain legacy; seven-condition hybrid comparison is opt-in.
+Windows bounded subprocess cleanup is implemented. Next add a provider adapter
+and run paired trials once a model/provider is selected and configured. Dedicated graph storage needs
 measured workload justification; derived symbols/edges now persist in local SQLite.
 Public publication needs a selected distinct name/publisher identity, neither
 configured. CodeBearing was suggested, not selected or availability-checked.
@@ -90,7 +95,7 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 
 ## Broken / blockers / limitations
 
-- Final WI-009 full suite passed 135 tests. Earlier attempts had a transient Git
+- Final WI-012 full suite passed 142 tests. Earlier WI-009 attempts had a transient Git
   timeout, restricted MCP pipe errors, and a startup-sensitive assertion fixed in
   WI-010. Restricted MCP pipes require approved access.
   An earlier suite stalled at grading timeout; WI-011 replaces inherited pipe

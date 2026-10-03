@@ -671,6 +671,10 @@ only if whole-file responses materially distort measured coding outcomes.
 
 ## D-015 — Provider-independent paired experiments with resumable trial artifacts
 
+**Scope update:** D-021 extends the four original controls with opt-in hybrid
+conditions and replaces manifest policy version 1 with version 2. Original control
+meanings remain; old manifests require a new output directory.
+
 **Status:** Accepted on 2026-10-04.
 
 **Decision**
@@ -1009,3 +1013,56 @@ and Linux checks; local Windows checks alone do not prove POSIX behavior.
 
 **Implementation:** processes.py:run_bounded()/_stop_tree()/_tail(),
 coding.py:grade(), experiments.py:CommandRunner.__call__(). **Flow:** F-030. **Work item:** WI-011.
+
+## D-021 — Opt into paired hybrid conditions and pin execution source
+
+**Decision**
+
+Keep the default four legacy conditions; --condition-set hybrid adds hybrid,
+hybrid_memory and hybrid_stale_memory, giving seven conditions. Record selected
+conditions and all package Python source hashes in policy-version-2 manifests.
+
+**Context**
+
+Hybrid retrieval is implemented, but earlier coding controls intentionally retain
+legacy behavior. Comparing results requires named treatments with the same source,
+task/model/instruction/output budgets and matching memory freshness controls.
+Resuming after implementation changes must not mix historical and new outcomes.
+
+**Alternatives Considered**
+
+Silently change the old graph/memory defaults; run seven conditions unconditionally;
+create a second harness; resume using only task/packet hashes; claim the existing
+authored tasks are held-out because the retrieval implementation changed.
+
+**Why This Approach**
+
+Reuse the quota/replay/checkpoint/grading paths with an explicit selected tuple.
+Opt-in controls added call volume while keeping names interpretable. Compare
+graph/hybrid, memory/hybrid_memory and stale counterparts, plus advice controls
+within hybrid. Input budgets cap the complete prompt uniformly; actual tokens may
+differ. Record policy, seeds and included symbols in diagnostics. Whole-package
+hashes invalidate resume when retrieval, index, memory or grader code changes,
+even when an individual fixture's packet happens to match. Model-free references
+and unchanged edits calibrate every condition without API costs.
+
+**Trade-offs**
+
+The seven-condition set costs 75% more provider calls per task than the four-control
+set before retries. Source hashes conservatively reject resume after unrelated
+package changes too. Old manifests cannot resume under policy version 2. Rotating
+condition order is deterministic, not a randomized repeated-sample experiment.
+Three authored tasks and synthetic lessons do not establish generalization,
+real correction-memory benefit or coding-agent improvement.
+
+**Future Reconsideration**
+
+Add independently collected held-out tasks, observed prior corrections, provider
+adapters and repeated paired samples before quality/cost claims. Replace whole
+package hashes with explicit dependency fingerprints only if conservative resume
+rejection becomes an operational problem. Interactive agent/tool evaluation is
+a separate future scope from one-response edits.
+
+**Implementation:** experiments.py:_conditions()/make_request()/_config()/_trials(),
+export_requests()/run_experiment()/summarize_results(), coding_bench.py:main().
+**Flow:** F-031. **Work item:** WI-012.

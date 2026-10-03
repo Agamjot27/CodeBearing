@@ -177,17 +177,15 @@ class ReplayRunner:
         return response
 
 
-def validate_response(request: dict, response: dict) -> dict:
+def response_usage(request: dict, response: dict) -> dict:
+    """Validate provenance and usage before classifying paid response failures."""
     if not isinstance(response, dict) or response.get("schema_version") != 1:
         raise RunnerError("invalid_response", "Response needs schema_version 1.")
     if response.get("model") != request["model"] or response.get("request_hash") != request["request_hash"]:
         raise RunnerError("invalid_response", "Response model/request fingerprint does not match this trial.")
-    status = response.get("status")
-    if status in {"rate_limited", "provider_error"}:
-        raise RunnerError(status, "Runner reported a transient provider failure.")
-    if status != "ok" or not isinstance(response.get("edits"), dict):
-        raise RunnerError("invalid_response", "Successful response needs status=ok and an edits mapping.")
-    usage = response.get("usage") or {}
+    usage = response.get("usage")
+    if usage is None:
+        usage = {}
     if not isinstance(usage, dict):
         raise RunnerError("invalid_response", "Usage must be a mapping or null.")
     for key in ("input_tokens", "output_tokens", "cost_usd"):
@@ -196,9 +194,19 @@ def validate_response(request: dict, response: dict) -> dict:
             raise RunnerError("invalid_response", "Usage values must be finite nonnegative numbers or null.")
         if key.endswith("tokens") and value is not None and not isinstance(value, int):
             raise RunnerError("invalid_response", "Reported token counts must be integers.")
+    return {key: usage.get(key) for key in ("input_tokens", "output_tokens", "cost_usd")}
+
+
+def validate_response(request: dict, response: dict) -> dict:
+    usage = response_usage(request, response)
+    status = response.get("status")
+    if status in {"rate_limited", "provider_error", "invalid_response", "model_mismatch"}:
+        raise RunnerError(status, "Runner reported a provider or response failure.")
+    if status != "ok" or not isinstance(response.get("edits"), dict):
+        raise RunnerError("invalid_response", "Successful response needs status=ok and an edits mapping.")
     if usage.get("output_tokens") is not None and usage["output_tokens"] > request["max_output_tokens"]:
         raise RunnerError("budget_violation", "Runner reported output above the declared output budget.")
-    return {key: usage.get(key) for key in ("input_tokens", "output_tokens", "cost_usd")}
+    return usage
 
 
 def _config(tasks, model, runner_kind, context_budget, output_budget, grading_timeout, conditions):
@@ -295,6 +303,8 @@ def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
     initialize(output, config)
     identity_path = output / "runner.json"
     identity = {"kind": runner.kind, "identity": getattr(runner, "identity", runner.kind)}
+    if getattr(runner, "settings", None) is not None:
+        identity["settings"] = runner.settings
     if identity_path.exists() and json.loads(identity_path.read_text(encoding="utf-8")) != identity:
         raise ValueError("Runner identity changed; choose a new output directory.")
     write_json(identity_path, identity)
@@ -311,7 +321,7 @@ def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
                 if prior.get("outcome") in SCORED:
                     rows.append(prior)
                     continue
-                previous_attempts = prior.get("attempts", [{key: prior.get(key) for key in ("outcome", "usage", "runner_wall_ms", "error")}])
+                previous_attempts = prior.get("attempts", [{key: prior.get(key) for key in ("outcome", "usage", "runner_wall_ms", "error", "provider_metadata")}])
             if quota_stopped:
                 continue
             write_json(output / "requests" / f"{task.id}--{condition}.json", request)
@@ -324,7 +334,12 @@ def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
             try:
                 invocations += 1
                 response = runner(request)
-                row["usage"] = validate_response(request, response)
+                if runner.kind == "openrouter" and isinstance(response, dict):
+                    row["provider_metadata"] = response.get("provider_metadata", {})
+                # A malformed or mismatched paid answer still incurred usage.
+                # Keep validated usage/provenance before raising its unscored error.
+                row["usage"] = response_usage(request, response)
+                validate_response(request, response)
                 row["response"] = response
                 row["runner_wall_ms"] = round((time.monotonic() - started) * 1000, 3)
                 try:
@@ -341,7 +356,7 @@ def run_experiment(tasks, output: Path, scratch: Path, runner, model: str,
                 row.update(outcome=exc.outcome, error=str(exc), runner_wall_ms=round((time.monotonic() - started) * 1000, 3))
             # Keep transient attempts when retrying: dropping their unknown cost
             # could make a later successful response look like the entire bill.
-            row["attempts"] = [*previous_attempts, {key: row.get(key) for key in ("outcome", "usage", "runner_wall_ms", "error")}]
+            row["attempts"] = [*previous_attempts, {key: row.get(key) for key in ("outcome", "usage", "runner_wall_ms", "error", "provider_metadata")}]
             write_json(checkpoint, row)
             rows.append(row)
             # Quota errors are not task failures. Stop dispatch immediately;

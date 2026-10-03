@@ -674,6 +674,8 @@ only if whole-file responses materially distort measured coding outcomes.
 **Scope update:** D-021 extends the four original controls with opt-in hybrid
 conditions and replaces manifest policy version 1 with version 2. Original control
 meanings remain; old manifests require a new output directory.
+Usage-before-status handling is superseded by D-022 so unusable paid responses
+retain validated accounting instead of silently becoming unknown cost.
 
 **Status:** Accepted on 2026-10-04.
 
@@ -1066,3 +1068,59 @@ a separate future scope from one-response edits.
 **Implementation:** experiments.py:_conditions()/make_request()/_config()/_trials(),
 export_requests()/run_experiment()/summarize_results(), coding_bench.py:main().
 **Flow:** F-031. **Work item:** WI-012.
+
+## D-022 — Explicit OpenRouter adapter with usage preserved before status checks
+
+**Decision**
+
+Add an opt-in fixed-endpoint standard-library HTTP adapter, environment-only key,
+strict requested/returned model equality, JSON edits, parameter-support routing
+and optional provider pinning. Preserve validated usage/provenance on unusable
+responses before classifying them as unscored errors. No automatic retries.
+
+**Context**
+
+The next evaluation slice needs a real provider boundary without requiring users
+to write their own adapter. OpenRouter was among providers discussed; no model
+choice is available yet. Previous validation discarded usage before reporting an
+invalid response, which could hide the bill for a paid failure.
+
+**Alternatives Considered**
+
+Provider SDKs; implement several native APIs immediately; generic arbitrary URL
+support; automatic fallback/retry; accept model aliases silently; leave command
+adapters as the only live path; estimate cost from remembered price tables.
+
+**Why This Approach**
+
+One explicit HTTP boundary is easy to test with fake transports and requires no
+runtime dependency. Official API, routing and usage documents establish field
+contracts. Keep the prompt/settings unchanged across conditions; require supported
+parameters, request no model fallback list and allow explicit provider-only routing.
+Strict model equality prevents accidental comparisons under a different label.
+Use provider-reported tokens/cost, never invented pricing; absent usage remains
+unknown. Quota stop/resume already exists. Settings and per-attempt model/provider/
+generation metadata are reviewable without exposing the key or HTTP error bodies.
+Local preflight verifies configuration without network calls or claiming account
+availability. User selection is still required before live evaluation.
+
+**Trade-offs**
+
+Only OpenRouter is implemented here. JSON mode/support restrictions exclude some
+models; canonical aliases and :free variants may return a different model string
+and are rejected until explicitly addressed. Provider routing may vary unless
+pinned, and pinning a base slug can still cover multiple regional endpoints.
+Usage is provider-reported, not independently audited. HTTP timeouts are socket
+operation limits, not a strict total wall-clock deadline; no retry repairs a
+malformed response. Public benchmark execution remains outside this adapter.
+
+**Future Reconsideration**
+
+Add native APIs when a selected provider requires them. Add explicit canonical
+model mapping only with a documented equivalence contract, not fuzzy matching.
+Evaluate strict total deadlines/isolated execution before long production trials.
+Use independent tasks and repeated paired samples before outcome or cost claims.
+
+**Implementation:** providers.py:OpenRouterRunner/_NoRedirect,
+experiments.py:response_usage()/validate_response()/run_experiment(),
+coding_bench.py:main(). **Flow:** F-032. **Work item:** WI-013.

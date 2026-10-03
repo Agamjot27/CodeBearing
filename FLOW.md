@@ -6,6 +6,9 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
+WI-013 adds explicit OpenRouter evaluation and usage-preserving error accounting
+(F-032), extending F-023/F-024/F-031. MCP/source retrieval does not call a model.
+
 WI-011 replaces grading/adapter pipe capture with bounded file-backed execution
 (F-030), modifying F-021/F-022. WI-012 adds explicit hybrid experiment controls
 (F-031), extending F-022–F-024; existing four-control defaults are retained.
@@ -976,3 +979,37 @@ passes/regressions and unchanged quota/error/cost contracts. Hybrid self-check
 expects 21 reference passes and 21 unchanged failures across three authored tasks,
 with six fresh and six stale checks. This is calibration, not held-out/model evidence.
 D-021, WI-012. No frontend/API/worker changes.
+
+## F-032 — Explicit live model request and accountable failure
+
+**Trigger:** coding_bench.py:main() run --openrouter; check-provider only validates
+local settings and makes zero network calls. Default self-check remains model-free.
+
+**Execution Path:** main() → providers.py:OpenRouterRunner.__init__() reads key
+from OPENROUTER_API_KEY, builds settings identity → run_experiment() pins runner
+settings → make_request() → OpenRouterRunner.__call__() → fixed-endpoint POST via
+urllib opener with _NoRedirect → bounded retained response → usage/model/choice/
+finish/edits checks → envelope → response_usage() validates provenance and numbers
+before validate_response() classifies status/budget → success apply_edits()/grade(),
+or unscored RunnerError → checkpoint attempt incl usage/provider_metadata → report.
+HTTP 429 and embedded quota errors produce rate_limited and stop later dispatch.
+
+**Data Transformation:** Request prompt/model/temperature/max_output_tokens →
+one non-streaming JSON-mode completion. Provider prompt/completion tokens and cost
+map to input_tokens/output_tokens/cost_usd; missing stays null. API generation ID,
+returned model/provider and finish reason become typed provenance. Partial/refused/
+malformed output and model mismatch never become scored fixes. Credentials and
+HTTP error bodies never enter packets/checkpoints. Per-attempt provenance survives
+retry, including paid failures whose usage is valid.
+
+**Database Interaction:** None added. Existing disposable lessons and JSON report/
+checkpoint storage remain F-031. Source retrieval/MCP behavior unchanged.
+
+**External Interaction:** Explicit live HTTPS POST to OpenRouter only on run;
+optional provider-only routing, supported-parameter requirement, no redirects or
+automatic retries. HTTP timeout limits socket operations, not strict total time.
+Offline tests substitute the opener; no provider/account/model has been exercised.
+
+**Output:** Checked edits envelope or classified unscored error with known usage;
+local preflight returns locally_configured, settings and network_calls=0, without
+proving API access. D-022, WI-013.

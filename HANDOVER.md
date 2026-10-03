@@ -47,7 +47,16 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-012 completed: [Hybrid coding controls](docs/work-items/WI-012-hybrid-coding-controls/FEATURE.md).
+WI-013 completed: [Live provider adapter](docs/work-items/WI-013-live-provider-adapter/FEATURE.md).
+Explicit --openrouter and local check-provider added; environment-only key, strict
+model/JSON checks, optional provider-only routing and paid-failure usage retention.
+Full suite passed 149 tests; final seven provider and nine legacy experiment
+checks passed after per-attempt accounting/usage-validation cleanup.
+D-022/F-032. No model/key selected, no network provider call. Independent benchmark
+requirements are documented in docs/INDEPENDENT_EVALS.md; dataset import/isolation
+remain unimplemented. Await user provider/model choice without inspecting secrets.
+
+WI-012 completed and pushed as 4a71cde: [Hybrid coding controls](docs/work-items/WI-012-hybrid-coding-controls/FEATURE.md).
 Opt-in seven-condition comparison implemented, four new tests pass. Final full
 regression passed 142 tests; hybrid self-check passed 21 reference/21 unchanged
 trials and six fresh/six stale checks. D-021/F-031; manifests now pin
@@ -83,8 +92,9 @@ public PyPI release or live model outcomes. Check final Git synchronization afte
 
 Collect independent held-out tasks and observed prior corrections. Existing graph/
 memory conditions retain legacy; seven-condition hybrid comparison is opt-in.
-Windows bounded subprocess cleanup is implemented. Next add a provider adapter
-and run paired trials once a model/provider is selected and configured. Dedicated graph storage needs
+Windows bounded subprocess cleanup and explicit OpenRouter adapter are implemented.
+Next verify a selected model/account, add independent isolated benchmark execution
+and collect repeated paired trials. Dedicated graph storage needs
 measured workload justification; derived symbols/edges now persist in local SQLite.
 Public publication needs a selected distinct name/publisher identity, neither
 configured. CodeBearing was suggested, not selected or availability-checked.
@@ -95,7 +105,7 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 
 ## Broken / blockers / limitations
 
-- Final WI-012 full suite passed 142 tests. Earlier WI-009 attempts had a transient Git
+- WI-013 full suite passed 149 tests. Earlier WI-009 attempts had a transient Git
   timeout, restricted MCP pipe errors, and a startup-sensitive assertion fixed in
   WI-010. Restricted MCP pipes require approved access.
   An earlier suite stalled at grading timeout; WI-011 replaces inherited pipe

@@ -119,10 +119,38 @@ For live trials, provide a local command that reads one request JSON from stdin
 and writes exactly one response JSON to stdout, following the same envelope above.
 The adapter sends `prompt` to the chosen model, honors model/temperature/output
 settings, parses its edits, and wraps them with the exact model/request hash and
-provider usage. Diagnostics belong on stderr. We have not added a provider SDK or
-configured a model account; the adapter is an explicit integration boundary.
+provider usage. Diagnostics belong on stderr. An optional built-in OpenRouter
+adapter now uses the standard library; no account/model has been verified here.
 
-Example launch shape in PowerShell, after creating your adapter:
+For OpenRouter, set `OPENROUTER_API_KEY` locally and select an exact model ID.
+Never put the key in command arguments or tracked files. Local preflight:
+
+```powershell
+python evals/coding_bench.py check-provider --model YOUR_EXACT_MODEL_ID
+```
+
+This makes no network calls and does not validate account/model availability.
+When ready for actual provider calls:
+
+```powershell
+python evals/coding_bench.py run --openrouter --model YOUR_EXACT_MODEL_ID --condition-set hybrid --output .eval-runs/live-openrouter-01
+```
+
+This dispatches up to 21 calls on the three authored tasks before retries, sequentially.
+Optional `--provider PROVIDER_SLUG` pins provider-only routing. Strict returned-model
+equality rejects canonical aliases/variants that differ from the requested string;
+no silent equivalence is assumed. JSON mode and supported-parameter requirements
+can exclude models. No automatic fallback model or retry is requested. Model/API
+errors remain unscored; paid unusable responses retain validated reported usage.
+Missing costs stay unknown. Per-attempt provider/generation metadata is saved.
+`--runner-timeout` limits socket operations for this direct HTTP adapter, not a
+strict total deadline. We have only tested with fake transport responses so far.
+
+Field contracts follow official [completion API](https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion),
+[routing](https://openrouter.ai/docs/guides/routing/provider-selection) and
+[usage accounting](https://openrouter.ai/docs/cookbook/administration/usage-accounting).
+
+For a different provider, the existing custom-command boundary still works:
 
 ```powershell
 '["python", "adapter.py"]' | Set-Content -Encoding utf8 runner.json

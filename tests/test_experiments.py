@@ -108,7 +108,8 @@ class ExperimentTests(unittest.TestCase):
         base = {"schema_version": 1, "model": "test", "request_hash": "hash", "status": "ok", "edits": {}}
         self.assertEqual(validate_response(request, base)["cost_usd"], None)
         for update in [{"model": "wrong"}, {"request_hash": "wrong"}, {"status": "provider_error"},
-                       {"usage": {"cost_usd": -1}}, {"usage": {"output_tokens": 129}}, {"usage": "bad"}]:
+                       {"usage": {"cost_usd": -1}}, {"usage": {"output_tokens": 129}}, {"usage": "bad"},
+                       {"usage": False}, {"usage": 0}, {"usage": ""}]:
             with self.assertRaises(RunnerError):
                 validate_response(request, {**base, **update})
 

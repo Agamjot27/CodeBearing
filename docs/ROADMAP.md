@@ -64,8 +64,10 @@ shared declared model/budgets, prompt fingerprints, JSON command/replay contract
 atomic scored checkpoints, quota-stop/resume and matched-task reports. Model-free
 CI calibrates reference passes and unchanged failures. No live model outcomes have
 been collected; authored lessons are not genuine historical corrections. See
-[CODING_EVALS.md](CODING_EVALS.md). Actual model/provider integration, repeat samples,
-strong execution isolation and independent temporal task splits remain next.
+[CODING_EVALS.md](CODING_EVALS.md). Opt-in hybrid controls and a built-in OpenRouter
+HTTP adapter are implemented; only fake transport tests have exercised it. Live
+model/account verification, repeat samples, strong execution isolation and
+[independent temporal task splits](INDEPENDENT_EVALS.md) remain next.
 
 Use temporally separated development and held-out tasks. Index only the repository
 state available before each task; do not expose gold patches or future corrections.

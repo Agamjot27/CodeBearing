@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 from diffcontext.coding import calibrate, load_suite
 from diffcontext.experiments import CONDITIONS, HYBRID_CONDITIONS, CommandRunner, ReplayRunner, export_requests, run_experiment
+from diffcontext.providers import OpenRouterRunner
 
 
 class CalibrationRunner:
@@ -32,7 +33,7 @@ class CalibrationRunner:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["calibrate", "self-check", "prepare", "run"])
+    parser.add_argument("action", choices=["calibrate", "self-check", "prepare", "run", "check-provider"])
     parser.add_argument("--suite", type=Path, default=ROOT / "evals" / "coding_tasks" / "suite.json")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--model")
@@ -41,16 +42,26 @@ def main(argv=None):
     parser.add_argument("--context-budget", type=int, default=4000)
     parser.add_argument("--output-budget", type=int, default=2000)
     parser.add_argument("--runner-timeout", type=float, default=60)
+    parser.add_argument("--provider", help="Optional exact OpenRouter provider slug; otherwise routing may vary")
     runner = parser.add_mutually_exclusive_group()
     runner.add_argument("--command-json", help='Argument array, e.g. ["python", "adapter.py"]')
     runner.add_argument("--command-file", type=Path, help="UTF-8 JSON argument array, avoiding native shell quoting")
     runner.add_argument("--replay", type=Path)
+    runner.add_argument("--openrouter", action="store_true", help="Use OPENROUTER_API_KEY for explicit live trials")
     args = parser.parse_args(argv)
     try:
         tasks = load_suite(args.suite)
         conditions = HYBRID_CONDITIONS if args.condition_set == "hybrid" else CONDITIONS
         scratch = ROOT / ".test-tmp" / "coding-bench"
-        if args.action == "calibrate":
+        if args.action == "check-provider":
+            if not args.model:
+                raise ValueError("check-provider requires --model; it checks local settings only.")
+            adapter = OpenRouterRunner(timeout=args.runner_timeout, provider=args.provider)
+            report = {"status": "locally_configured", "model": args.model,
+                      "settings": adapter.settings, "network_calls": 0,
+                      "label": "Local configuration only; account/model availability unverified"}
+            passed = True
+        elif args.action == "calibrate":
             report = calibrate(tasks, scratch)
             passed = report["passed"]
         elif args.action == "self-check":
@@ -74,14 +85,16 @@ def main(argv=None):
             if args.output is None or not args.model:
                 raise ValueError("prepare/run require --output and --model.")
             if args.action == "prepare":
-                if args.command_json or args.command_file or args.replay:
+                if args.command_json or args.command_file or args.replay or args.openrouter:
                     raise ValueError("prepare does not execute a runner; supply runner options to run.")
                 report = export_requests(tasks, args.output, scratch, args.model, args.context_budget, args.output_budget, conditions=conditions)
                 passed = True
             else:
-                if not args.command_json and not args.command_file and not args.replay:
-                    raise ValueError("run requires --command-file, --command-json or --replay.")
-                if args.replay:
+                if not args.command_json and not args.command_file and not args.replay and not args.openrouter:
+                    raise ValueError("run requires --command-file, --command-json, --replay or --openrouter.")
+                if args.openrouter:
+                    adapter = OpenRouterRunner(timeout=args.runner_timeout, provider=args.provider)
+                elif args.replay:
                     adapter = ReplayRunner(args.replay)
                 else:
                     arguments = args.command_file.read_text(encoding="utf-8-sig") if args.command_file else args.command_json

@@ -79,8 +79,14 @@ def verify(wheel: Path, typescript: bool = False):
             raise ValueError("Installed MCP server failed discovery/search.")
         if (repo / ".diffcontext").exists():
             raise ValueError("Read-only check created repository state.")
+        cold = json.loads(run([str(core), "--repo", str(repo), "--cache", "index"], scratch))
+        warm = json.loads(run([str(launcher), "--repo", str(repo), "--cache", "--check"], scratch))
+        if cold["indexing"]["parsed_files"] < 1 or warm["indexing"]["parsed_files"] != 0 or warm["indexing"]["reused_files"] < 1:
+            raise ValueError("Installed cache did not persist/reuse parse facts across processes.")
+        if (repo / ".diffcontext" / "memory.sqlite3").exists():
+            raise ValueError("Cache-enabled tools created engineering memory.")
         print(json.dumps({"wheel": wheel.name, "status": "passed", "tools": checked["tools"],
-                          "checks": ["clean install", "outside-checkout CLI", "client configs", "stdio discovery and search"]}, indent=2))
+                          "checks": ["clean install", "outside-checkout CLI", "client configs", "stdio discovery and search", "persistent cache reuse"]}, indent=2))
     finally:
         shutil.rmtree(scratch)
 

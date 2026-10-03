@@ -20,6 +20,7 @@ def summarize(report: dict) -> dict:
             "selector": report["selector"], "search_matches": report["search_matches"],
             "seeds": report["seeds"], "snapshot": report["snapshot"], "limits": report["limits"],
             "usage": report["usage"], "estimated_tokens": package["estimated_tokens"] if package else 0,
+            **({"indexing": report["indexing"]} if "indexing" in report else {}),
             "evidence": {version: [{key: row[key] for key in ("id", "path", "start", "end", "reasons")}
                                     for row in data["included"]] for version, data in versions.items()},
             "included_lessons": {version: data["included_lessons"] for version, data in versions.items()},

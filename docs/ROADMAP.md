@@ -14,7 +14,7 @@ evidence/source hashes for conservative freshness checks. CLI, a refund example,
 regression tests, and a synthetic evaluation fixture make the slice runnable.
 Git revision localization now maps tracked old/current line changes into both
 graphs, retains deleted evidence, and compiles labeled packages under one budget.
-Imports/constants/non-Python changes remain explicit unresolved gaps.
+Imports/constants/unsupported-language changes remain explicit unresolved gaps.
 
 ## 2. Agent integration and change localization — partially implemented
 
@@ -24,7 +24,10 @@ Imports/constants/non-Python changes remain explicit unresolved gaps.
   usage in a real coding-assistant session; transport checks do not prove outcomes.
 - Extend implemented Git-diff seeds with complete module/class evidence and
   configuration dependencies; current fallback seeds symbols and reports gaps.
-- Proper lexical ranking and source-root configuration; incremental indexing.
+- Implemented: optional TS/JS parsing and persistent incremental parse reuse
+  with full current-graph relinking; see [INDEXING.md](INDEXING.md).
+- Next: proper lexical/hybrid ranking and source-root configuration; compare
+  retrieval under matched budgets before adding new infrastructure.
 - Implemented for investigation: inline run IDs, captured-byte snapshot identities,
   candidates, verification, limits, timing and stop reasons; explicit saved-JSON
   CLI inspection. Persistent history and traces for unexpected errors remain planned.

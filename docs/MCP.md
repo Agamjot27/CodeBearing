@@ -7,7 +7,7 @@ DiffContext needs no model API key; your assistant keeps its own account/setting
 
 ## 1. Install
 
-Requires Python 3.10+. **This project's 0.3.0 package is not published to PyPI yet.**
+Requires Python 3.10+. **This project's 0.4.0 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
 After this implementation is committed and pushed, install ours from GitHub
 (Git must be installed):
@@ -33,7 +33,7 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/diffcontext_lab-0.3.0-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/diffcontext_lab-0.4.0-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
 Python-only core CLI installation requires no runtime dependencies.
 For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`
@@ -196,3 +196,15 @@ environments may need permission to open subprocess pipes.
 SDK references: [tools](https://py.sdk.modelcontextprotocol.io/servers/tools/),
 [running a server](https://py.sdk.modelcontextprotocol.io/run/), and
 [client usage](https://py.sdk.modelcontextprotocol.io/client/).
+
+## Reuse the repository index
+
+Add `--cache` when generating configuration to persist unchanged parse facts:
+
+```powershell
+diffcontext-lab-mcp --repo "C:/path/to/your-project" --cache --config claude
+```
+
+Use the corresponding client name for Cursor/Codex. Tools still read source and
+lessons; cache-enabled requests write derived state in `.diffcontext/index.sqlite3`.
+Without the flag, retrieval creates no local state. See [indexing details](INDEXING.md).

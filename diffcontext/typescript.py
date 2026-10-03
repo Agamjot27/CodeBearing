@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import posixpath
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 
 from tree_sitter import Language, Parser
 import tree_sitter_javascript
@@ -193,131 +193,178 @@ def _resolve_module(path, module, files):
     return matches[0] if len(matches) == 1 else None
 
 
-def extend_index(index: Index, sources: dict[str, bytes]) -> Index:
-    """Extend a validated captured Index; never read files or execute target code."""
+def _call_facts(file, name, owner, node):
+    """Capture call syntax without binding it to the current repository graph.
+
+    An unchanged importer can acquire or lose edges when a different file changes.
+    Store unresolved call *facts*, not resolved edges or old warning counts.
+    """
+    shadowed = _shadowed(file, node)
+    facts = []
+    body = node.child_by_field_name("body")
+    for call in _body_walk(body) if body else []:
+        if call.type != "call_expression":
+            continue
+        target = call.child_by_field_name("function")
+        fact = {"kind": "unresolved"}
+        if target and target.type == "identifier":
+            local = file.text(target)
+            if local not in shadowed and local not in file.unsafe_bindings:
+                if local in file.imports and file.imports[local]:
+                    module, exported = file.imports[local]
+                    fact = {"kind": "import", "module": module, "export": exported}
+                elif local not in file.imports:
+                    fact = {"kind": "local", "name": local}
+        elif target and target.type == "member_expression":
+            receiver = target.child_by_field_name("object")
+            property_node = target.child_by_field_name("property")
+            member = file.text(property_node)
+            if receiver and receiver.type == "this" and owner and property_node and property_node.type == "property_identifier":
+                target_name = f"{owner}.{member}"
+                other = file.definitions.get(target_name)
+                # Static and instance methods use different runtime receivers.
+                static = lambda n: any(c.type == "static" for c in n.children)
+                if not other or static(node) == static(other[1]):
+                    fact = {"kind": "local", "name": target_name}
+            elif receiver and receiver.type == "identifier" and file.text(receiver) not in shadowed and file.text(receiver) not in file.unsafe_bindings:
+                binding = file.imports.get(file.text(receiver))
+                if binding and binding[1] == "*" and property_node and property_node.type == "property_identifier":
+                    fact = {"kind": "import", "module": binding[0], "export": member}
+        facts.append(fact)
+    return facts
+
+
+def _parse_unit(path, raw, parsers):
+    """Return portable per-file facts; no parser trees survive this function."""
+    unit = {"ok": False, "symbols": [], "imports": {}, "exports": {},
+            "unsafe_bindings": [], "warnings": [], "calls": {}}
+    warnings = unit["warnings"]
+    language = "typescript" if path.endswith((".ts", ".tsx", ".mts")) else "javascript"
+    try:
+        raw.decode("utf-8")
+    except UnicodeError:
+        warnings.append(f"Cannot parse {path}: invalid UTF-8")
+        return unit
+    root = parsers["tsx" if path.endswith(".tsx") else language].parse(raw).root_node
+    if root.has_error:
+        warnings.append(f"Cannot parse {path}: tree-sitter syntax errors")
+        return unit
+    imports = [raw[n.start_byte:n.end_byte].decode("utf-8") for n in root.named_children if n.type == "import_statement"]
+    file = _File(raw, root, language, "\n".join(imports))
+    for statement in root.named_children:
+        if statement.type == "import_statement":
+            _imports(file, statement, path, warnings)
+            continue
+        exported = statement.type == "export_statement"
+        if exported and any(child.type == "type" for child in statement.children):
+            continue
+        declaration = statement.child_by_field_name("declaration") if exported else statement
+        if exported and statement.child_by_field_name("source"):
+            warnings.append(f"Unsupported ESM re-export: {path}")
+            continue
+        if declaration:
+            definitions = list(_definitions(file, declaration))
+            for name, owner, node, excerpt in definitions:
+                if name in file.definitions or name in file.duplicate_names:
+                    file.definitions.pop(name, None)
+                    file.duplicate_names.add(name)
+                    warnings.append(f"Ambiguous duplicate definition {name!r}: {path}")
+                    continue
+                file.definitions[name] = (owner, node, statement if exported and owner is None else excerpt)
+            if exported:
+                is_default = any(child.type == "default" for child in statement.children)
+                for name, owner, _, _ in definitions:
+                    if owner is None:
+                        _put_export(file, "default" if is_default else name, name, path, warnings)
+                if not definitions and is_default:
+                    warnings.append(f"Unsupported anonymous/default export: {path}")
+        if exported:
+            clause = next((n for n in statement.named_children if n.type == "export_clause"), None)
+            if clause:
+                for specifier in clause.named_children:
+                    if any(token.type == "type" for token in specifier.children):
+                        continue
+                    name = specifier.child_by_field_name("name")
+                    alias = specifier.child_by_field_name("alias") or name
+                    if name:
+                        _put_export(file, file.text(alias), file.text(name), path, warnings)
+            value = statement.child_by_field_name("value")
+            if value and value.type == "identifier":
+                _put_export(file, "default", file.text(value), path, warnings)
+            elif value:
+                warnings.append(f"Unsupported anonymous/default export: {path}")
+    if any(n.type == "call_expression" and file.text(n.child_by_field_name("function")) == "require" for n in _walk(root)):
+        warnings.append(f"Unsupported CommonJS require: {path}")
+    if any(n.type in {"jsx_element", "jsx_self_closing_element"} for n in _walk(root)):
+        warnings.append(f"Unsupported JSX component/reference resolution: {path}")
+    # A module-level reassignment can replace a captured callable before a
+    # later invocation. Keep its source searchable, but never resolve calls
+    # against that binding as if its initial value remained authoritative.
+    for item in _body_walk(root):
+        if item.type in {"assignment_expression", "augmented_assignment_expression"}:
+            file.unsafe_bindings.update(_bindings(file, item.child_by_field_name("left")))
+    if file.unsafe_bindings:
+        warnings.append(f"Reassigned module bindings are not resolved ({', '.join(sorted(file.unsafe_bindings))}): {path}")
+
+    for name, (owner, node, excerpt) in file.definitions.items():
+        key = f"{path}:{name}"
+        symbol = Symbol(key, path, name, path.rsplit(".", 1)[0].replace("/", "."), owner,
+                        excerpt.start_point.row + 1, excerpt.end_point.row + 1,
+                        file.text(excerpt), file.preamble, language=file.language)
+        unit["symbols"].append(asdict(symbol))
+        unit["calls"][name] = _call_facts(file, name, owner, node)
+    unit.update(ok=True, imports={name: list(binding) if binding else None
+                                 for name, binding in file.imports.items()},
+                exports=dict(file.exports), unsafe_bindings=sorted(file.unsafe_bindings))
+    return unit
+
+
+def extend_index(index: Index, sources: dict[str, bytes], units: dict | None = None) -> Index:
+    """Extend a captured index, optionally reusing validated JSON parse facts.
+
+    The cache owner verifies byte digests and parser/version fingerprints before
+    supplying units. Missing units are parsed and inserted into the same mapping.
+    Current raw bytes are always retained; all current edges are rebuilt, so edits
+    to exports or removed files never leave cached importer edges behind.
+    """
     parsers = {
         "typescript": Parser(Language(tree_sitter_typescript.language_typescript())),
         "tsx": Parser(Language(tree_sitter_typescript.language_tsx())),
         "javascript": Parser(Language(tree_sitter_javascript.language())),
     }
+    if units is None:
+        units = {}
     files = {}
     for path, raw in sorted(sources.items()):
         index.sources[path] = raw
-        language = "typescript" if path.endswith((".ts", ".tsx", ".mts")) else "javascript"
-        try:
-            raw.decode("utf-8")
-        except UnicodeError:
-            index.warnings.append(f"Cannot parse {path}: invalid UTF-8")
+        unit = units.get(path)
+        if unit is None:
+            unit = _parse_unit(path, raw, parsers)
+            units[path] = unit
+        index.warnings.extend(unit["warnings"])
+        if not unit["ok"]:
             continue
-        root = parsers["tsx" if path.endswith(".tsx") else language].parse(raw).root_node
-        if root.has_error:
-            index.warnings.append(f"Cannot parse {path}: tree-sitter syntax errors")
-            continue
-        imports = [raw[n.start_byte:n.end_byte].decode("utf-8") for n in root.named_children if n.type == "import_statement"]
-        file = _File(raw, root, language, "\n".join(imports))
-        files[path] = file
+        files[path] = unit
         index.hashes[path] = hashlib.sha256(raw).hexdigest()
-        for statement in root.named_children:
-            if statement.type == "import_statement":
-                _imports(file, statement, path, index.warnings)
-                continue
-            exported = statement.type == "export_statement"
-            if exported and any(child.type == "type" for child in statement.children):
-                continue
-            declaration = statement.child_by_field_name("declaration") if exported else statement
-            if exported and statement.child_by_field_name("source"):
-                index.warnings.append(f"Unsupported ESM re-export: {path}")
-                continue
-            if declaration:
-                definitions = list(_definitions(file, declaration))
-                for name, owner, node, excerpt in definitions:
-                    if name in file.definitions or name in file.duplicate_names:
-                        file.definitions.pop(name, None)
-                        file.duplicate_names.add(name)
-                        index.warnings.append(f"Ambiguous duplicate definition {name!r}: {path}")
-                        continue
-                    file.definitions[name] = (owner, node, statement if exported and owner is None else excerpt)
-                if exported:
-                    is_default = any(child.type == "default" for child in statement.children)
-                    for name, owner, _, _ in definitions:
-                        if owner is None:
-                            _put_export(file, "default" if is_default else name, name, path, index.warnings)
-                    if not definitions and is_default:
-                        index.warnings.append(f"Unsupported anonymous/default export: {path}")
-            if exported:
-                clause = next((n for n in statement.named_children if n.type == "export_clause"), None)
-                if clause:
-                    for specifier in clause.named_children:
-                        if any(token.type == "type" for token in specifier.children):
-                            continue
-                        name = specifier.child_by_field_name("name")
-                        alias = specifier.child_by_field_name("alias") or name
-                        if name:
-                            _put_export(file, file.text(alias), file.text(name), path, index.warnings)
-                value = statement.child_by_field_name("value")
-                if value and value.type == "identifier":
-                    _put_export(file, "default", file.text(value), path, index.warnings)
-                elif value:
-                    index.warnings.append(f"Unsupported anonymous/default export: {path}")
-        if any(n.type == "call_expression" and file.text(n.child_by_field_name("function")) == "require" for n in _walk(root)):
-            index.warnings.append(f"Unsupported CommonJS require: {path}")
-        if any(n.type in {"jsx_element", "jsx_self_closing_element"} for n in _walk(root)):
-            index.warnings.append(f"Unsupported JSX component/reference resolution: {path}")
-        # A module-level reassignment can replace a captured callable before a
-        # later invocation. Keep its source searchable, but never resolve calls
-        # against that binding as if its initial value remained authoritative.
-        for item in _body_walk(root):
-            if item.type in {"assignment_expression", "augmented_assignment_expression"}:
-                file.unsafe_bindings.update(_bindings(file, item.child_by_field_name("left")))
-        if file.unsafe_bindings:
-            index.warnings.append(f"Reassigned module bindings are not resolved ({', '.join(sorted(file.unsafe_bindings))}): {path}")
-
-    for path, file in files.items():
-        for name, (owner, node, excerpt) in file.definitions.items():
+        for description in unit["symbols"]:
+            symbol = Symbol(**description)
+            index.symbols[symbol.id] = symbol
+            index.edges[symbol.id] = set()
+    # Resolve against all *current* successful units, including newly parsed
+    # exports. Warning order matches a cold build: file warnings, then calls.
+    for path, unit in files.items():
+        for name, facts in unit["calls"].items():
             key = f"{path}:{name}"
-            index.symbols[key] = Symbol(key, path, name, path.rsplit(".", 1)[0].replace("/", "."), owner,
-                                        excerpt.start_point.row + 1, excerpt.end_point.row + 1,
-                                        file.text(excerpt), file.preamble, language=file.language)
-            index.edges[key] = set()
-    for path, file in files.items():
-        for name, (owner, node, _) in file.definitions.items():
-            key = f"{path}:{name}"
-            shadowed = _shadowed(file, node)
             unresolved = 0
-            body = node.child_by_field_name("body")
-            for call in _body_walk(body) if body else []:
-                if call.type != "call_expression":
-                    continue
-                target = call.child_by_field_name("function")
+            for fact in facts:
                 target_path, target_name = path, None
-                if target and target.type == "identifier":
-                    local = file.text(target)
-                    if local not in shadowed and local not in file.unsafe_bindings:
-                        if local in file.imports and file.imports[local]:
-                            module, exported = file.imports[local]
-                            target_path = _resolve_module(path, module, files)
-                            target_name = files[target_path].exports.get(exported) if target_path else None
-                        elif local not in file.imports:
-                            target_name = local
-                elif target and target.type == "member_expression":
-                    receiver = target.child_by_field_name("object")
-                    property_node = target.child_by_field_name("property")
-                    member = file.text(property_node)
-                    if receiver and receiver.type == "this" and owner and property_node and property_node.type == "property_identifier":
-                        # Static methods and instance methods are distinct runtime
-                        # receivers; do not claim a cross-kind 'this' dispatch.
-                        target_name = f"{owner}.{member}"
-                        other = file.definitions.get(target_name)
-                        static = lambda n: any(c.type == "static" for c in n.children)
-                        if other and static(node) != static(other[1]):
-                            target_name = None
-                    elif receiver and receiver.type == "identifier" and file.text(receiver) not in shadowed and file.text(receiver) not in file.unsafe_bindings:
-                        binding = file.imports.get(file.text(receiver))
-                        if binding and binding[1] == "*" and property_node and property_node.type == "property_identifier":
-                            target_path = _resolve_module(path, binding[0], files)
-                            target_name = files[target_path].exports.get(member) if target_path else None
+                if fact["kind"] == "local":
+                    target_name = fact["name"]
+                elif fact["kind"] == "import":
+                    target_path = _resolve_module(path, fact["module"], files)
+                    target_name = files[target_path]["exports"].get(fact["export"]) if target_path else None
                 candidate = f"{target_path}:{target_name}"
-                if target_path in files and target_name in files[target_path].unsafe_bindings:
+                if target_path in files and target_name in files[target_path]["unsafe_bindings"]:
                     target_name = None
                 if target_name and candidate in index.symbols:
                     index.edges[key].add(candidate)

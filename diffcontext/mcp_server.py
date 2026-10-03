@@ -28,9 +28,9 @@ def _call(operation, *arguments):
         raise ToolError(str(exc)) from exc
 
 
-def create_server(root: Path) -> MCPServer:
+def create_server(root: Path, *, cache: bool = False) -> MCPServer:
     """The launcher selects the root; client tool arguments cannot replace it."""
-    service = RepositoryService(root)
+    service = RepositoryService(root, cache=cache)
     server = MCPServer(
         "DiffContext", version=__version__,
         instructions="Search for indexed symbol IDs, then analyze impact and compile context. "

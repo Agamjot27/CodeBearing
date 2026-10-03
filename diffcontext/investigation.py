@@ -35,6 +35,7 @@ def run(
     max_steps: int = 7, max_seconds: float = 30,
     lesson_reader: Callable[[set[str]], list[dict]] | None = None,
     clock: Callable[[], float] = time.monotonic,
+    cache: bool = False,
 ) -> dict:
     """Locate once, widen depth while observable graph evidence is missing, then stop.
 
@@ -85,8 +86,8 @@ def run(
     reason = exhausted()
     if reason:
         return finish("partial", reason)
-    changed = localize_changes(root, ref) if ref is not None else None
-    current = changed.current if changed else build_index(root)
+    changed = (localize_changes(root, ref, cache=True) if cache else localize_changes(root, ref)) if ref is not None else None
+    current = changed.current if changed else (build_index(root, cache=True) if cache else build_index(root))
     historical = changed.historical if changed else None
     operations += 1
     report["snapshot"] = {"current": _identity(current)}
@@ -101,6 +102,8 @@ def run(
             current.hashes.get(record["scope"].split(":", 1)[0]) != record["scope_hash"]
         )
     event("capture", snapshot=report["snapshot"], symbols=len(current.symbols), warnings=current.warnings)
+    if current.indexing:
+        report["indexing"] = current.indexing
     reason = exhausted()
     if reason:
         return finish("partial", reason)

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .context import compile_context, estimate_tokens, impact
-from .index import Index, MAX_FILE_BYTES, build_index, build_index_from_sources, is_source_path
+from .index import Index, MAX_FILE_BYTES, capture_sources, build_index_from_sources, is_source_path
 
 
 def _git(root: Path, *args: str) -> bytes:
@@ -48,7 +48,7 @@ def _mapped(index: Index, path: str, start: int, end: int) -> tuple[list[str], b
     return touched, uncovered
 
 
-def localize_changes(root: Path, ref: str = "HEAD") -> Changes:
+def localize_changes(root: Path, ref: str = "HEAD", *, cache: bool = False) -> Changes:
     root = root.resolve()
     top = Path(_git(root, "rev-parse", "--show-toplevel").decode("utf-8").strip()).resolve()
     if top != root:
@@ -76,10 +76,15 @@ def localize_changes(root: Path, ref: str = "HEAD") -> Changes:
         old_sources[path] = _git(root, "cat-file", "blob", oid.decode())
     historical = build_index_from_sources(root, old_sources, historical_warnings)
     tracked = set(_paths(_git(root, "ls-files", "--cached", "-z")))
-    captured = build_index(root)
+    sources, capture_warnings = capture_sources(root)
     # A staged deletion can leave a file on disk as untracked. Do not resurrect it
     # in the current graph; likewise untracked files are outside this comparison.
-    current = build_index_from_sources(root, {p: raw for p, raw in captured.sources.items() if p in tracked}, captured.warnings)
+    current_sources = {p: raw for p, raw in sources.items() if p in tracked}
+    if cache:
+        from .index_store import build_cached_sources
+        current = build_cached_sources(root, current_sources, capture_warnings)
+    else:
+        current = build_index_from_sources(root, current_sources, capture_warnings)
     entries = _paths(_git(root, "diff", "--name-status", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", commit, "--"))
     statuses = dict(zip(entries[1::2], entries[::2]))
     untracked = _paths(_git(root, "ls-files", "--others", "--exclude-standard", "-z"))
@@ -132,6 +137,7 @@ def localize_changes(root: Path, ref: str = "HEAD") -> Changes:
         "files": rows, "current_seeds": sorted(current_seeds), "historical_seeds": sorted(old_seeds),
         "removed_symbols": removed, "unresolved": unresolved, "excluded_untracked": untracked,
         "warnings": warnings,
+        **({"indexing": current.indexing} if current.indexing else {}),
     }
     return Changes(current, historical, report)
 

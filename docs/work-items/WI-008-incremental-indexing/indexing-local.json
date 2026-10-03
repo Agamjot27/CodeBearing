@@ -1,0 +1,158 @@
+{
+  "label": "120 authored Python files, 960 functions, three repetitions; local wall-clock timings, no production or coding-benefit claim",
+  "measurement_scope": "Capture, content hashing, parsing or reuse, global relinking and cache writes; all source files are freshly read",
+  "warmup": "Separate one-file parser/cache warmup before repetitions; filesystem/OS caches are not flushed. Cold means absent persisted facts. Full/warm and edit-pair ordering alternates across repetitions",
+  "median_ms": {
+    "full_ms": 105.255,
+    "cold_cache_ms": 276.86,
+    "warm_cache_ms": 30.95,
+    "full_edit_ms": 99.242,
+    "single_edit_cache_ms": 69.762
+  },
+  "measurements": [
+    {
+      "repetition": 1,
+      "pair_order": "full-first",
+      "full_ms": 96.756,
+      "cold_cache_ms": 306.76,
+      "warm_cache_ms": 30.208,
+      "full_edit_ms": 99.242,
+      "single_edit_cache_ms": 62.536,
+      "cold_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 0,
+        "parsed_files": 120,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 129.233,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 177.075,
+        "total_ms": 306.747
+      },
+      "warm_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 120,
+        "parsed_files": 0,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 13.373,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 16.452,
+        "total_ms": 30.201
+      },
+      "edit_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 119,
+        "parsed_files": 1,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 46.044,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 15.975,
+        "total_ms": 62.524
+      },
+      "cold_parity": true,
+      "warm_parity": true,
+      "edit_parity": true
+    },
+    {
+      "repetition": 2,
+      "pair_order": "cache-first",
+      "full_ms": 105.255,
+      "cold_cache_ms": 273.811,
+      "warm_cache_ms": 30.95,
+      "full_edit_ms": 98.949,
+      "single_edit_cache_ms": 69.762,
+      "cold_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 0,
+        "parsed_files": 120,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 133.93,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 139.327,
+        "total_ms": 273.798
+      },
+      "warm_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 120,
+        "parsed_files": 0,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 12.735,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 17.725,
+        "total_ms": 30.938
+      },
+      "edit_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 119,
+        "parsed_files": 1,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 47.661,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 21.531,
+        "total_ms": 69.748
+      },
+      "cold_parity": true,
+      "warm_parity": true,
+      "edit_parity": true
+    },
+    {
+      "repetition": 3,
+      "pair_order": "full-first",
+      "full_ms": 124.735,
+      "cold_cache_ms": 276.86,
+      "warm_cache_ms": 31.589,
+      "full_edit_ms": 100.296,
+      "single_edit_cache_ms": 93.329,
+      "cold_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 0,
+        "parsed_files": 120,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 147.277,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 128.644,
+        "total_ms": 276.841
+      },
+      "warm_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 120,
+        "parsed_files": 0,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 12.967,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 18.198,
+        "total_ms": 31.58
+      },
+      "edit_counts": {
+        "cache": "persistent",
+        "captured_files": 120,
+        "reused_files": 119,
+        "parsed_files": 1,
+        "uncached_files": 0,
+        "removed_files": 0,
+        "elapsed_ms": 76.052,
+        "scope": "capture is measured separately; all dependency facts are relinked",
+        "capture_ms": 16.668,
+        "total_ms": 93.317
+      },
+      "cold_parity": true,
+      "warm_parity": true,
+      "edit_parity": true
+    }
+  ]
+}

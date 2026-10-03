@@ -26,6 +26,9 @@ other project's `diffcontext` package is installed.
   service as the CLI. Agent requests cannot confirm lessons or switch repositories.
 - Gather evidence automatically with a bounded task/symbol/revision investigator,
   visible gaps, snapshot IDs, stop reasons and an inspectable trace.
+- Optionally persist parse facts and the current graph in local SQLite with
+  `--cache`; reuse unchanged files and refresh dependencies after edits/deletions.
+  See [incremental indexing](docs/INDEXING.md) for setup, counters and measurements.
 
 The core CLI needs no API keys or runtime dependencies. Python 3.10+ is required.
 MCP support uses an optional SDK extra; see [connection instructions](docs/MCP.md).
@@ -130,6 +133,7 @@ record can be marked `superseded`. Storage lives in `.diffcontext/memory.sqlite3
 python -m unittest discover -s tests -v
 python evals/run.py
 python evals/investigate.py
+python evals/indexing.py
 python evals/coding_bench.py self-check
 ```
 
@@ -154,10 +158,11 @@ before collecting live responses. No model performance claim follows from calibr
 
 ## Current limits
 
-- Python only. Explicit seeds and tracked Git revision localization are supported;
-  non-Python changes are reported as unresolved.
-- Fresh indexing on every command; no persistent graph cache yet.
-- Revision analysis indexes historical Python blobs as well as captured current
+- Python and optional TypeScript/JavaScript syntax graphs. Other-language and
+  unsupported configuration changes are reported as unresolved.
+- Source bytes are freshly read on every request. Opt-in caching reuses parsing;
+  all dependency facts still relink and historical Git blobs still parse afresh.
+- Revision analysis indexes historical supported-source blobs as well as captured current
   tracked sources. Large repositories may be slow; working-tree reads are not atomic.
 - Top-level functions and direct class methods only. Dynamic dispatch, inheritance,
   re-exports, conditional/local imports, nested functions, decorators' behavior,
@@ -171,7 +176,7 @@ before collecting live responses. No model performance claim follows from calibr
 - Token accounting uses `ceil(UTF-8 bytes / 3)`. Real tokenizer counts may differ.
 - Whole-file hashes intentionally over-invalidate lessons. This catches edits but
   does not prove semantic validity or detect changes in other dependencies.
-- Memory evidence currently must be an indexed Python file. Commits, line ranges,
+- Memory evidence currently must be a successfully indexed source file. Commits, line ranges,
   correction diffs, and test-run artifacts will come later.
 - The untrusted-data label is an integration boundary, not a proven prompt-injection
   defense. MCP transport is tested; real coding-assistant task success has not been

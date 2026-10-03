@@ -15,6 +15,7 @@ from .runs import load_summary, summarize
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Local code context and correction memory (optional TypeScript/JavaScript)")
     parser.add_argument("--repo", type=Path, default=Path.cwd())
+    parser.add_argument("--cache", action="store_true", help="Persist/reuse local parse facts in .diffcontext/index.sqlite3")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("index", help="Parse symbols and resolved call relationships")
     commands.add_parser("serve", help="Run read-only MCP tools over stdio (requires the mcp extra)")
@@ -61,14 +62,14 @@ def main(argv: list[str] | None = None) -> int:
                 from .mcp_server import create_server
             except ImportError as exc:
                 raise ValueError('MCP dependencies are missing; install with: python -m pip install -e ".[mcp]"') from exc
-            create_server(args.repo).run(transport="stdio")
+            create_server(args.repo, cache=args.cache).run(transport="stdio")
             return 0
         if args.command == "inspect":
             print(json.dumps(load_summary(args.run_file), indent=2, ensure_ascii=True))
             return 0
-        service = RepositoryService(args.repo)
+        service = RepositoryService(args.repo, cache=args.cache)
         if args.command == "index":
-            result = build_index(args.repo).describe()
+            result = build_index(args.repo, cache=args.cache).describe()
         elif args.command == "search":
             result = service.search_symbols(args.query)
         elif args.command == "changes":
@@ -83,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.summary:
                 result = summarize(result)
         else:
-            index = build_index(args.repo)
+            index = build_index(args.repo, cache=args.cache)
             store = Memory(index.root)
             try:
                 if args.action == "add":

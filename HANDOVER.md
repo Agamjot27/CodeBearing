@@ -47,34 +47,28 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-007 complete locally: [TypeScript/JavaScript indexing](docs/work-items/WI-007-typescript-indexing/FEATURE.md).
-Version 0.3.0 adds an optional parser extra without changing the six-tool interface.
-Full MCP/parser-enabled suite passed 85 tests; the subsequently added real
-TypeScript stdio test passed separately (86 tests covered in total). Existing two
-retrieval and six investigation fixtures pass. One authored TS fixture retrieves
-three expected symbols in 246 estimated tokens; no model-benefit claim.
-Clean-wheel 0.3.0 installation, TS compilation, generated configs and MCP
-subprocess check passed outside the checkout.
-WI-006 is complete and pushed as 8bfe195. No public PyPI release or actual
-assistant-host connection is claimed. The .venv is editable again; reinstall
-metadata after version changes rather than assuming a prior wheel includes edits.
-WI-005 is complete: [controlled coding evaluation](docs/work-items/WI-005-coding-evaluation/FEATURE.md).
-Full MCP-enabled suite passed 63 tests; final adapter/history changes also pass all
-nine affected experiment tests. Model-free self-check: three calibrated bugs,
-12 reference passes, 12 unchanged failures, three confirmed/stale memory controls.
-Fixture/grader milestone: `321d140`; find paired-harness commit using
-`git log --oneline -- diffcontext/experiments.py`. No live model was called.
-MCP SDK 2.3.0 is installed in `.venv`; host settings are not configured.
-Prior work through `11ec359` was verified pushed on main. Check later synchronization
-with `git rev-list --left-right --count main...origin/main` after each push.
+WI-008 implemented: [Persistent incremental indexing](docs/work-items/WI-008-incremental-indexing/FEATURE.md).
+Optional --cache stores JSON parse facts and current symbols/edges in local SQLite;
+unchanged files skip parsing, all call facts relink against current exports.
+Version 0.4.0; generated assistant configuration propagates cache choice.
+Final full suite passed 108 tests; two subsequently added CLI/Git tests passed
+separately (110 covered total). Core-only cache tests pass with TS skipped.
+Saved authored 120-file/960-function local measurement: full 105.255ms, warm
+30.950ms, empty-cache 276.860ms, full/cached edit 99.242/69.762ms. Exact parity
+passed; no production/competitor/coding-benefit claim. Cache storage errors fall
+back to current evidence. Clean wheel 0.4.0 with both extras passed installed compilation, configs,
+MCP discovery/search and cross-process persistent-cache reuse.
+WI-007 pushed as 53dd799; WI-006 pushed as 8bfe195. MCP SDK/parsers are installed
+in .venv; source installation is editable; version metadata is refreshed for 0.4.0. No assistant-host settings configured,
+public PyPI release or live model outcomes. Check final Git synchronization after push.
 
 ## Next planned slice
 
-Implement persistent, versioned incremental indexing: reuse unchanged parsed files,
-rebuild relationships when imports/exports change, verify parity with a full rebuild,
-and measure cold/warm/edit latency. Then add and compare hybrid retrieval and run
-paired live coding trials using the existing harness. A graph database needs a
-measured storage/traversal requirement; currently the call graph is in memory.
+Implement and evaluate hybrid retrieval: improve lexical ranking, combine task
+search with graph expansion and reviewed memory, compare against current retrieval
+under identical budgets. Use the existing coding harness for paired live trials
+once a model/provider is selected and configured. Dedicated graph storage needs
+measured workload justification; derived symbols/edges now persist in local SQLite.
 Public publication needs a selected distinct name/publisher identity, neither
 configured. CodeBearing was suggested, not selected or availability-checked.
 A real host integration and provider/model account remain unverified. Add genuine
@@ -84,8 +78,8 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. Full suite passed 85 tests
-  plus one separate TypeScript MCP test. MCP pipes need approved sandbox access.
+- No failing application check is currently recorded. Full suite passed 108 tests
+  plus two separate CLI/Git cache tests. MCP pipes need approved sandbox access.
   CI was updated for Linux/Windows; hosted CI results are not yet verified here.
 - Coding trials are synthetic single-response edits; lessons are authored pre-task
   data, not real historical corrections. Declared model/settings/usage depend on the
@@ -94,17 +88,19 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 - Static analysis misses dynamic dispatch, inheritance, re-exports, nested
   functions, configuration, and some binding behavior. Missing edges do not prove
   independence. Method excerpts do not reconstruct class context.
-- Every command rebuilds the index. The compile CLI expands the graph twice.
+- Every request reads source bytes; --cache reuses parsing, not graph linking.
+  Cold cache initialization can be slower. Historical Git parsing remains uncached.
+  The compile CLI expands the graph twice.
 - Git analysis requires the repository root, excludes untracked files, represents
   renames as deletion/addition, and reads historical blobs separately. Working-tree
-  capture is not atomic. Out-of-function/non-Python changes remain unresolved even
+  capture is not atomic. Out-of-function/unsupported-language changes remain unresolved even
   with conservative symbol fallback. See `changes.unresolved` before trusting output.
 - Memory uses whole-file hashes, over-invalidates unrelated edits, and does not
   check all dependencies. Code-first packing can leave no budget for lessons.
 - Investigation task selection is lexical. ready means selected static graph
   coverage, not semantic task correctness. Deadline is cooperative; ongoing work
   can overrun before returning. Trace/JSON overhead is outside the text budget.
-- HTTP API, frontend, worker, persistent tracing, model loop, incremental indexing, and
+- HTTP API, frontend, worker, persistent tracing, model loop, and
   independent end-to-end benchmarks are not implemented.
 - Restricted shell execution requires approved escalation for Git writes/network
   operations. Prior approved pushes succeeded. Some `.test-tmp/tmp*` directories

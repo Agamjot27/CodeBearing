@@ -6,10 +6,11 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-006 adds installed MCP startup/configuration (F-025) and connection/distribution
-checks (F-026). Existing service/tool dispatch F-016/F-017 and investigation
-F-018 remain unchanged. See
-[its feature record](docs/work-items/WI-006-mcp-distribution/FEATURE.md)
+WI-008 adds persistent per-file parse reuse and current-graph publication (F-028),
+extending indexing F-002/F-027, tracked revision capture F-013, service/investigation
+F-016/F-018, summary F-019 and launcher/distribution F-025/F-026. MCP tools retain
+their existing names and schemas. See
+[its feature record](docs/work-items/WI-008-incremental-indexing/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
 ## Session documentation path (development workflow)
@@ -26,8 +27,8 @@ for developers/agents, not an automatically executed application function.
 | Requested workflow | Current status / flow |
 | --- | --- |
 | Repository registration | Not implemented; `--repo` is a directory argument, not a persistent registration |
-| Repository indexing | F-002: full in-memory rebuild |
-| Incremental re-indexing | Not implemented |
+| Repository indexing | F-002/F-027; opt-in persistence F-028 |
+| Incremental re-indexing | F-028: content-validated parse reuse; full graph relinking |
 | Natural-language task → localization | F-003: lexical candidates only; no automatic seed selection or semantic planner |
 | Git diff → affected symbols | F-013: base commit to tracked working tree, both code versions |
 | Dependency graph expansion | F-004 (explicit symbols), F-014 (revision) |
@@ -57,12 +58,14 @@ The installed script maps directly to `cli:main` through `pyproject.toml`.
 `main()` parses arguments → constructs `service.py:RepositoryService(args.repo)`
 → dispatches search/changes/impact/compile to service methods (F-016), or calls
 `index.py:build_index()` for index and developer memory commands → `json.dumps()`
-→ stdout. Requests still rebuild indexes; no persistent graph cache exists.
+→ stdout. `--cache` propagates through service/build paths to F-028; otherwise
+requests parse afresh. Investigation and installed launch flows are below.
 
 **Data Transformation:** Arguments become a resolved repository `Path`, a fresh
 `Index`, and command-specific inputs. Results become indented JSON.
 
-**Database Interaction:** None in the shared path. Memory branches are below.
+**Database Interaction:** No shared storage without `--cache`; F-028 stores derived
+index state when enabled. Memory branches remain separate.
 
 **External Interaction:** Local source filesystem and console; revision paths also
 read Git (F-013). `ValueError`,
@@ -75,10 +78,11 @@ errors are handled by argparse; successful commands return 0.
 
 **Trigger:** Any CLI command, or direct `build_index(root)` call.
 
-**Execution Path:** `cli.py:main()` → `index.py:build_index()` → `os.walk()` →
-`Path.read_bytes()` → `build_index_from_sources()` → `tokenize.detect_encoding()`
-→ decode → `ast.parse()` → SHA-256 of captured bytes → create `Symbol` records →
-resolve calls via `_body_walk()` and import/qualified-name maps → return `Index`.
+**Execution Path:** `cli.py:main()` → `index.py:build_index()` → `capture_sources()`
+→ `os.walk()`/`Path.read_bytes()` → `build_index_from_sources()` →
+`_build_python_index()` → `_python_unit()` → `tokenize.detect_encoding()`/decode/
+`ast.parse()` → Symbol/call facts → qualified-map linking → return `Index`.
+Web adapters follow F-027; cached parsing/publication follows F-028.
 For the `index` command, `main()` then calls `Index.describe()`.
 
 **Data Transformation:** `.py` files become source strings and ASTs; top-level
@@ -91,8 +95,8 @@ Historical callers can invoke `build_index_from_sources()` without disk reads.
 Shadowed names are conservatively skipped
 for the local bindings recognized by the current analyzer.
 
-**Database Interaction:** None. `Index.symbols`, `edges`, `warnings`, and `hashes`
-live only in memory. `describe()` serializes call edges with `kind: calls`.
+**Database Interaction:** None in the uncached path. `Index.symbols`, `edges`,
+`warnings`, and `hashes` are returned in memory. Opt-in persistence follows F-028. `describe()` serializes call edges with `kind: calls`.
 
 **External Interaction:** Reads local files without importing or executing them.
 Prunes hidden/common dependency directories and directory symlinks; skips file
@@ -161,7 +165,8 @@ Revision compilation uses F-015; this section describes the explicit-symbol path
 `text`, inclusion metadata, omitted IDs/reasons, included lesson IDs, missing seeds,
 estimated token count, and warnings. The CLI adds status/staleness for rejected
 lessons. Scope checks also exist in the compiler for direct library callers.
-Currently graph expansion runs twice on the CLI path; no cache removes that work.
+Graph expansion still runs twice on the CLI path; parse caching does not remove
+that work. See F-028 for the separate indexing cache.
 
 **Database Interaction:** If no memory file exists, none. Otherwise opens SQLite
 with URI mode=ro and query_only enabled; `list()` reads existing rows without
@@ -786,8 +791,8 @@ list unindexed web files. Ambiguous/import/type/dynamic gaps stay explicit; comp
 metadata also explains universal syntax-graph limitations. No cross-language
 runtime edge is guessed. Selection and token estimates follow existing F-003-F-006.
 
-**Database Interaction:** No persistent symbol/edge tables or indexing cache.
-Confirmed lessons use the existing SQLite schema and evidence hashes; read-only
+**Database Interaction:** Uncached adapter calls use no persistent symbol/edge
+tables. Optional caching follows F-028. Confirmed lessons use the existing SQLite schema and evidence hashes; read-only
 service operations do not create the database. No worker or graph database.
 
 **External Interaction:** Filesystem and, for revision tools, Git blob reads.
@@ -800,3 +805,51 @@ refund fixture and calls `compile_context()` at two budgets to check expected ID
 whole excerpts and estimated tokens; no provider or coding-benefit measurement.
 `scripts/check_wheel.py:verify(..., typescript=True)` extends F-026 by installing
 both extras, copying the web fixture and checking installed compilation. D-017/WI-007.
+
+## F-028 — Persistent parse reuse, graph refresh and cache-enabled requests
+
+**Trigger:** CLI `--cache` or launcher configuration/startup with `--cache`.
+
+**Execution Path:** `cli.py:main()` or `connect.py:main()` →
+`mcp_server.py:create_server(cache=True)` → `RepositoryService(cache=True)` →
+`service.py:_index()` → `index.py:build_index(cache=True)` → `capture_sources()` →
+`index_store.py:build_cached_sources()` → `IndexStore.__init__()/load()` →
+`parser_fingerprint()` plus byte/checksum validation →
+`index.py:build_index_from_sources(units=...)` → `_build_python_index()` uses
+`_python_unit()` only for absent units; web `typescript.py:extend_index()` uses
+`_parse_unit()` only for absent units → complete current-symbol/import map →
+resolve cached/new call facts → `IndexStore.publish()` for a changed generation →
+Index with counters → existing search/impact/compile/lesson paths and MCP response.
+Unchanged generations avoid publication writes. `investigation.py:run(cache=True)`
+captures once and retains `indexing` in reports; `runs.py:summarize()` preserves it.
+
+Revision path: `service.py:_changes()` → `changes.py:localize_changes(cache=True)`
+→ Git historical blobs → uncached `build_index_from_sources()` →
+`capture_sources()` → tracked-current filter → `build_cached_sources()` → existing
+old/current hunk mapping and deletion recovery. Current filtering now precedes
+parsing in uncached mode too; untracked code is not parsed twice or used as evidence.
+
+**Data Transformation:** Fresh eligible bytes → SHA-256/parser fingerprints →
+validated JSON per-file facts (symbols, aliases/exports, warnings, call references)
+→ globally resolved graph. Syntax failures may reuse failure facts, retain bytes
+and have no successful hashes. Edits/new files replace facts; removed paths vanish.
+Schema/root mismatches reset derived tables; checksum/parser mismatch reparses;
+malformed payload reparses all current facts. Cache I/O errors add warnings while
+returning current evidence. Counters distinguish reused/parsed/uncached/removed
+files; cache pipeline time excludes capture, which ordinary current builds measure
+separately. Git/historical costs are outside current-cache counters.
+
+**Database Interaction:** `.diffcontext/index.sqlite3` tables `metadata`, `files`,
+`symbols`, `edges`; transactional generation publication. No lesson-table writes;
+`memory.sqlite3` stays separate. No graph server or worker. Without `--cache`, no
+cache database is opened and previous no-state retrieval behavior remains.
+
+**External Interaction:** Local reads, optional local parsers, SQLite and Git for
+revision tools. No network, LLM, target-code execution or host-settings changes.
+`connect.py:configuration(cache=True)` prints `--cache` without opening storage.
+`check_connection(cache=True)` propagates the choice into its MCP child.
+
+**Output:** Existing evidence responses plus optional `indexing` metadata.
+`evals/indexing.py:main()` → authored workload → `measured()` → full/cold/warm/edit
+builds → `same_graph()` and parse-count gates → timing JSON. Clean wheel F-026 also
+checks cache persistence between installed CLI indexing and MCP search. D-018/WI-008.

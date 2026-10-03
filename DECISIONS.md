@@ -834,3 +834,65 @@ or persistence needs justify it. Revisit dependency pins after compatibility che
 `_build_python_index()`; `typescript.py:extend_index()`, `_definitions()`,
 `_imports()`, `_resolve_module()`, `_shadowed()`; `changes.py` shared eligibility.
 **Flows:** F-027, extending F-001/F-013/F-016/F-018/F-026. **Work item:** WI-007.
+
+## D-018 — Persist JSON parse facts and relink the current graph in local SQLite
+
+**Decision**
+
+Add opt-in `--cache` indexing in `.diffcontext/index.sqlite3`. Persist per-file
+JSON syntax facts keyed by SHA-256 bytes and parser/runtime/adapter fingerprints,
+plus current symbols/edges. Reuse unchanged extraction, then relink all current
+facts; publish changed generations atomically. Keep engineering memory separate.
+Extend D-017's transient graph with derived persistence, retaining uncached mode.
+
+**Context**
+
+Repeated MCP requests currently reread and parse the repository. The user needs
+practical repeated use and an honest performance comparison. Current call edges
+depend on other files' exports, so simply retaining an unchanged caller's resolved
+edges would miss changed or deleted targets.
+
+**Alternatives Considered**
+
+Cache only the complete graph; trust mtimes; serialize AST/tree objects with pickle;
+keep only a process-local cache; a file watcher; targeted graph invalidation;
+Neo4j or another database service; caching by default on every read-only request.
+
+**Why This Approach**
+
+JSON facts survive process restarts and avoid executable object deserialization.
+They retain symbols, imports/exports and unresolved call references, letting the
+current global symbol map resolve edges correctly without reparsing unchanged
+files. Fresh byte hashes detect same-size/same-mtime edits and keep evidence
+freshness honest. SQLite is standard-library infrastructure with transactional
+publication and no deployment server. Separate derived tables can be discarded
+without erasing human-confirmed lessons. Explicit opt-in preserves source-only
+retrieval's existing no-state behavior; generated configurations retain the choice.
+Measurable benefit is fewer parser calls and lower repeated-request latency,
+checked against exact full-build output parity on edits/additions/deletions and
+failure paths. Per-language fingerprints are computed once per store operation
+to avoid repeatedly loading package metadata for every file.
+
+**Trade-offs**
+
+All source files are still read and hashed; all edges relinked. A changed generation
+rewrites derived tables, so this is incremental parsing, not incremental graph
+traversal or selective SQL updates. Empty-cache initialization adds overhead.
+Historical Git snapshots remain uncached; working-tree capture is not atomic.
+Parser facts/source excerpts consume disk. Checksums detect accidental corruption,
+not adversarial local tampering. Corrupt/locked/unwritable cache storage falls back
+to fresh results with warnings; a corrupt database is not silently destroyed.
+No hosted graph DB or production-scale advantage has been established.
+
+**Future Reconsideration**
+
+Measure real repositories before adopting watchers, selective graph updates,
+content-addressed historical caches or dedicated graph storage. Strengthen cache
+fact validation and publication coordination for stronger multi-process demands.
+Consider automatic caching only after the local-state contract is acceptable to
+users. Use retrieval and live coding evaluations to establish product benefit.
+
+**Implementation:** `index.py:capture_sources()`, `_python_unit()`,
+`typescript.py:_parse_unit()`, `index_store.py:IndexStore.load()/publish()`,
+`build_cached_sources()`; `service.py:_index()/_changes()` and launcher `--cache`.
+**Flows:** F-028, extending F-002/F-013/F-016/F-018/F-019/F-025-F-027. **Work item:** WI-008.

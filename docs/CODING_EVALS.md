@@ -4,6 +4,11 @@ The harness checks executable fixes on three synthetic development repositories:
 refund rounding, pagination offsets and retry exhaustion. This is a local experiment
 framework, not a held-out benchmark or evidence that DiffContext improves a model.
 
+Grading and command adapters use bounded file-backed subprocess I/O and owned
+process-tree/group cleanup on timeout (D-020/F-030). Cleanup adds bounded time to
+the deadline; retained output is limited but temporary disk output has no quota.
+Windows cleanup is tested locally; POSIX/hosted CI remains unverified here.
+
 ## Run the model-free self-check
 
 From the project root:

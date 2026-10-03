@@ -15,6 +15,7 @@ from .context import estimate_tokens, search
 from .index import build_index
 from .memory import Memory
 from .service import RepositoryService
+from .processes import run_bounded
 
 CONDITIONS = ("lexical", "graph", "memory", "stale_memory")
 SCORED = {"passed", "test_failed", "timeout", "invalid_candidate"}
@@ -127,8 +128,7 @@ class CommandRunner:
 
     def __call__(self, request: dict) -> dict:
         try:
-            result = subprocess.run(self.command, input=json.dumps(request), capture_output=True,
-                                    text=True, timeout=self.timeout)
+            result = run_bounded(self.command, input_text=json.dumps(request), timeout=self.timeout)
         except subprocess.TimeoutExpired as exc:
             raise RunnerError("runner_timeout", "Runner exceeded its configured timeout.") from exc
         except OSError as exc:
@@ -137,7 +137,7 @@ class CommandRunner:
             # Do not copy arbitrary provider logs into checkpoints: they can
             # contain credentials. Adapters should return classified JSON errors.
             raise RunnerError("provider_error", f"Runner exited with code {result.returncode}.")
-        if len(result.stdout.encode("utf-8")) > 250_000:
+        if result.stdout_truncated or len(result.stdout.encode("utf-8")) > 250_000:
             raise RunnerError("invalid_response", "Runner response exceeds 250 KB.")
         try:
             return json.loads(result.stdout)

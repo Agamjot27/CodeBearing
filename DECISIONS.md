@@ -964,3 +964,48 @@ on development data while keeping a separate held-out suite.
 **Implementation:** `retrieval.py:lexical_search()`, `eligible_lessons()`,
 `hybrid_search()`, `rank_candidates()`; `investigation.py:run()`, compiler options
 in `context.py:compile_context()`, CLI/MCP policy selection. **Flow:** F-029. **Work item:** WI-009.
+
+## D-020 — Bound harness waits using file-backed I/O and owned-tree cleanup
+
+**Decision**
+
+Share processes.py:run_bounded() between grading and command adapters. Replace
+captured pipes with temporary files, bound wait and cleanup calls, and terminate
+the launched PID tree on Windows / isolated process group on POSIX on timeout.
+
+**Context**
+
+WI-009 exposed a Windows grading stall: a descendant retained a captured pipe
+after the venv wrapper exited. subprocess.run timeout recovery can wait for EOF
+without a second deadline. A bounded harness must return without that pipe wait.
+
+**Alternatives Considered**
+
+Longer timeouts; kill only the wrapper; switch to a different interpreter; platform
+job objects; container isolation; file I/O without descendant cleanup.
+
+**Why This Approach**
+
+Files remove the EOF dependency and allow byte-bounded retained output. Shared
+code covers both existing callers without dependencies or changing adapter JSON.
+Kill the owned tree before the Windows wrapper exits; a POSIX session supplies
+a process group. Ordinary stdout/errors and real descendant termination are
+verified locally; cleanup failures remain infrastructure errors. Interpreter
+switching could lose the installed dependencies and would not fix other adapters.
+
+**Trade-offs**
+
+Temporary disk output is not quota-limited. Cleanup can add bounded seconds after
+the execution deadline. taskkill needs Windows process permissions; processes
+escaping their original tree/group are outside this guarantee. This is trusted
+fixture reliability, not hostile-candidate containment. Successful commands that
+deliberately detach background workers are not managed by this helper.
+
+**Future Reconsideration**
+
+Use OS job objects/resource limits or containers for untrusted execution, disk
+quota requirements or detached-worker lifecycle control. Validate hosted Windows
+and Linux checks; local Windows checks alone do not prove POSIX behavior.
+
+**Implementation:** processes.py:run_bounded()/_stop_tree()/_tail(),
+coding.py:grade(), experiments.py:CommandRunner.__call__(). **Flow:** F-030. **Work item:** WI-011.

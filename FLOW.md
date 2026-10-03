@@ -6,6 +6,9 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
+WI-011 replaces grading/adapter pipe capture with bounded file-backed execution
+(F-030), modifying F-021/F-022. WI-012 will add explicit hybrid experiment controls.
+
 WI-009 adds code-aware lexical/graph/reviewed-memory retrieval and task lesson
 reservation (F-029), extending service/investigation F-016/F-018, packing F-006,
 summary F-019 and MCP F-017. The six tool names remain; search/investigate gain
@@ -909,3 +912,29 @@ names unchanged; search/investigate gain a retrieval enum. `evals/hybrid.py:main
 → authored fixtures → same captured Index/lessons per pair → legacy/hybrid search
 and compilation → recall/precision/MRR/budget/eligibility/abstention/latency JSON.
 This is a development retrieval comparison, not live coding outcomes. D-019/WI-009.
+
+## F-030 — Bounded grading and command-adapter execution
+
+**Trigger:** coding.py:grade() or experiments.py:CommandRunner.__call__().
+
+**Execution Path:** caller builds argv/input → processes.py:run_bounded() →
+TemporaryFile input/stdout/stderr → Popen(shell=False, POSIX new session) →
+wait(timeout) → on timeout _stop_tree() → Windows taskkill owned PID / POSIX
+killpg → bounded wait → TimeoutExpired to caller; otherwise _tail() → ProcessResult.
+Cleanup failure raises OSError: grade returns grader_error; adapter provider_error.
+
+**Data Transformation:** JSON request → UTF-8 file stdin. Output bytes → retained
+tail, UTF-8 replacement decoding and universal newlines. Grader retains 64 KB
+stdout / 4 KB stderr and parses CHECK_RESULT. Runner retains 250 KB stdout,
+rejects truncation then parses JSON; stderr is never checkpointed. Timeout keeps
+the existing timeout/runner_timeout classifications when cleanup succeeds.
+
+**Database Interaction:** None. Existing experiment checkpoint files unchanged.
+
+**External Interaction:** Trusted grader/adapter command, temporary local files,
+owned-process OS termination. No new model/network/worker integration. Adapter
+may contact its configured provider externally; helper does not select one.
+Disk output has no quota and this is not a security sandbox.
+
+**Output:** Completed ProcessResult or bounded execution/cleanup exception;
+unchanged grade results and adapter response/error contracts. D-020, WI-011.

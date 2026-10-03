@@ -47,6 +47,12 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
+WI-011 completed: [Bounded harness subprocesses](docs/work-items/WI-011-bounded-subprocesses/BUG.md).
+processes.py now uses file-backed I/O and bounded owned-tree/group cleanup for
+grading and command adapters (D-020/F-030). Three process, four grading and nine
+experiment tests pass with Windows process permissions. Next add opt-in explicit
+hybrid experiment conditions (WI-012). No real model trial has run.
+
 WI-009 completed:
 [Hybrid retrieval](docs/work-items/WI-009-hybrid-retrieval/FEATURE.md).
 Version 0.5.0: default search/task investigation combines code-aware lexical
@@ -87,8 +93,8 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 - Final WI-009 full suite passed 135 tests. Earlier attempts had a transient Git
   timeout, restricted MCP pipe errors, and a startup-sensitive assertion fixed in
   WI-010. Restricted MCP pipes require approved access.
-  An earlier suite stalled at a grading timeout and was stopped; inspect Windows
-  descendant pipe/timeout cleanup before live harness trials. Hosted CI unverified.
+  An earlier suite stalled at grading timeout; WI-011 replaces inherited pipe
+  capture and tests descendant termination. Hosted CI/POSIX cleanup unverified.
 - Coding trials are synthetic single-response edits; lessons are authored pre-task
   data, not real historical corrections. Declared model/settings/usage depend on the
   external adapter. Missing costs stay unknown across retried attempts. Grading

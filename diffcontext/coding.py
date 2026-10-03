@@ -18,6 +18,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
+from .processes import run_bounded
+
 
 @dataclass(frozen=True)
 class CodingTask:
@@ -137,9 +139,9 @@ def grade(task: CodingTask, root: Path, timeout: float = 5) -> dict:
         raise ValueError("Grader timeout must be between 0.1 and 60 seconds.")
     started = time.monotonic()
     try:
-        result = subprocess.run([sys.executable, "-I", "-B", "-c", GRADER, str(root.resolve()),
+        result = run_bounded([sys.executable, "-I", "-B", "-c", GRADER, str(root.resolve()),
                                  str(task.directory / "checks.py")], cwd=root,
-                                capture_output=True, text=True, timeout=timeout)
+                             timeout=timeout, stdout_limit=64_000)
     except subprocess.TimeoutExpired:
         return {"outcome": "timeout", "passed": False, "elapsed_ms": round((time.monotonic() - started) * 1000, 3)}
     except OSError as exc:

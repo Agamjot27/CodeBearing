@@ -662,3 +662,64 @@ only if whole-file responses materially distort measured coding outcomes.
 
 **Implementation:** `coding.py:load_suite()`, `trial_workspace()`, `apply_edits()`,
 `grade()`, `calibrate()`. **Flow:** F-021. **Work item:** WI-005.
+
+## D-015 — Provider-independent paired experiments with resumable trial artifacts
+
+**Status:** Accepted on 2026-10-04.
+
+**Decision**
+
+Prepare versioned prompt packets for lexical/graph/confirmed-memory/stale-memory
+conditions. Support explicit JSON-stdin/stdout command adapters and recorded-response
+replay. Keep reference runners calibration-only. Save configuration/provenance,
+request fingerprints, per-trial atomic checkpoints and matched-pair reports locally.
+
+**Context**
+
+The project needs to measure executable fixes, latency, context and correction
+memory without tying evaluation to one provider or exhausting free quotas during
+development. Interrupted experiments must preserve completed work and avoid treating
+provider failures as incorrect coding solutions. No provider/model is configured now.
+
+**Alternatives Considered**
+
+Embed one provider SDK now; use only manual copy/paste and spreadsheets; run every
+case from scratch on resume; automatically retry quota errors; conflate transport
+errors with failed fixes; report missing token/cost data as zero; auto-score with
+an LLM judge instead of executable checks.
+
+**Why This Approach**
+
+The command contract can connect a selected model later without new core dependencies.
+Replay validates collected response/model/packet identity and grades offline. Shared
+task instructions, requested model/temperature/output limit and full-prompt estimated
+input budget keep declared settings comparable. Memory is explicitly synthetic
+pre-task fixture data; stale control changes an evidence comment after confirmation.
+Atomic checkpoints and manifest/adapter/packet checks permit useful resume while
+rejecting changed experiments. Quota stops dispatch; unscored failures retry only
+on an explicit rerun. Reports compare matched scored tasks and retain missing usage
+as null across retained transient attempt history. Command-file input avoids nested
+JSON/native shell quoting. Tests measure leakage, budget, memory filtering, replay, resumption, error
+classification, provenance, invalid edits and command IPC/timeouts.
+
+**Trade-offs**
+
+Adapters must actually honor settings and report usage; identity is declared, not
+provider-attested. Estimated budgets are not exact token caps and actual usage differs.
+Whole-file single-response trials differ from interactive coding agents. Three
+synthetic tasks and authored lessons do not prove real memory benefits or held-out
+performance. Fixed rotated ordering is not randomization. Crashes between billing
+and checkpoint saving can repeat a call. Replay files may gain missing responses
+at the same path; scored checkpoints stay reused. Output contains fixture source.
+Ordinary subprocess execution has no security sandbox. No live model run was performed.
+
+**Future Reconsideration**
+
+Add a specific provider adapter after selecting a model and configuring access.
+Add exact tokenizer/cost adapters, repeated trials, stronger execution isolation and
+independent temporal task splits before publishing efficacy metrics. Introduce
+concurrency only after latency/cost measurements and reliable quota handling.
+
+**Implementation:** `experiments.py:make_request()`, `CommandRunner`, `ReplayRunner`,
+`validate_response()`, `export_requests()`, `run_experiment()`, `summarize_results()`;
+`evals/coding_bench.py:main()`, `CalibrationRunner`. **Flows:** F-022–F-024. **Work item:** WI-005.

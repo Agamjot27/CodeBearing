@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 .diffcontext/
 .test-tmp/
+.eval-runs/
 .env
 .env.*
 build/

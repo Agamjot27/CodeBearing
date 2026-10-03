@@ -51,7 +51,16 @@ but require review before treating them as authoritative. Handle renamed symbols
 contradictions, changed dependencies, and supersession. Separate repository content
 from trusted instructions and test injection attempts through comments and lessons.
 
-## 5. Controlled evaluations and experiments
+## 5. Controlled evaluations and experiments — development harness implemented
+
+Implemented: three synthetic buggy repositories, separated acceptance/reference
+assets, executable grading, paired lexical/graph/confirmed-memory/stale controls,
+shared declared model/budgets, prompt fingerprints, JSON command/replay contracts,
+atomic scored checkpoints, quota-stop/resume and matched-task reports. Model-free
+CI calibrates reference passes and unchanged failures. No live model outcomes have
+been collected; authored lessons are not genuine historical corrections. See
+[CODING_EVALS.md](CODING_EVALS.md). Actual model/provider integration, repeat samples,
+strong execution isolation and independent temporal task splits remain next.
 
 Use temporally separated development and held-out tasks. Index only the repository
 state available before each task; do not expose gold patches or future corrections.

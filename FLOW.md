@@ -6,8 +6,8 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-005 adds trusted coding fixtures and executable grading (F-021). Paired context
-packets, runners and checkpointed reports are next in this cycle. Investigation
+WI-005 adds trusted coding fixtures/grading (F-021), paired context packets (F-022),
+runners and checkpointed reports (F-023/F-024). Investigation
 F-018 and saved-report F-019 remain unchanged. See
 [its feature record](docs/work-items/WI-005-coding-evaluation/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
@@ -574,7 +574,7 @@ D-013/WI-004. Earlier two-case smoke evaluation remains unchanged at F-011/F-012
 ## F-021 — Coding-fixture calibration, source application and grading
 
 **Trigger:** `coding.py:calibrate(load_suite(manifest), scratch)` or per-trial grade.
-Experiment driver is not implemented at this milestone.
+Driver: `evals/coding_bench.py` calibrate/self-check or experiments per-trial grade.
 
 **Execution Path:** `coding.py:load_suite()` → read suite manifest and validate IDs,
 asset containment/source allowlists → `calibrate()` → `trial_workspace()` creates
@@ -602,3 +602,102 @@ preparation/candidate application. Repositories/checks are trusted local assets.
 **Output:** Calibration report labeled reference-fix checking, not model outcomes.
 Four regression tests cover calibrated tasks, asset separation/atomic edit rejection,
 syntax errors, timeout and fresh trials. D-014/WI-005.
+
+## F-022 — Coding prompt preparation and memory controls
+
+**Trigger:** `evals/coding_bench.py prepare --model --output`, or trial setup.
+
+**Execution Path:** script `main()` → `coding.py:load_suite()` →
+`experiments.py:export_requests()` → `_config()`/`initialize()` → `_trials()`
+rotated condition order → `trial_workspace()` → `make_request()` → for memory:
+`_seed_memory()` → `Memory.add()`/`set_status(confirmed)` → optional stale evidence
+comment append → lexical condition `build_index()`/`context.search()` plus complete
+matched-file packing OR `RepositoryService.investigate()` (F-018) → prompt budget
+check → `source_hashes()`/`fingerprint()` → atomic `write_json(request)` → cleanup.
+
+**Data Transformation:** Same task/instructions/query/settings become condition-
+specific evidence. Reserve task/instruction overhead from the maximum estimated
+full prompt budget. Pack only whole matched files for lexical baseline; graph/memory
+use current investigator. Packet stores prompt, editable paths, requested model,
+temperature/output limits, source hashes and stable request_hash. Diagnostics store
+inclusions/omissions/warnings, lessons and preparation time. No runtime run UUID or
+timing contaminates the stable packet fingerprint.
+
+**Database Interaction:** Synthetic Memory INSERT/confirmation in disposable trial
+copies only for memory controls, followed by existing read-only retrieval. Stale
+control changes the evidence comment after confirmation. Original source/database
+and developer memory are not changed; lessons are labeled authored fixture data.
+
+**External Interaction:** Local copies, JSON, source and SQLite only. No provider,
+Git or candidate execution in prepare. Check/reference bytes are hashed only for
+experiment provenance outside packets; content is never included by preparation.
+
+**Output:** Twelve default JSON packets under output/requests plus manifest; no
+model results. IDs/labels are development hints, not a zero-shot localization test.
+D-015/WI-005.
+
+## F-023 — Candidate execution, checkpoints and quota-aware resumption
+
+**Trigger:** `coding_bench.py run --model --output` with `--command-file`,
+`--command-json` or `--replay`. File arguments are decoded as UTF-8-sig JSON arrays.
+
+**Execution Path:** script `main()` → `CommandRunner()` or `ReplayRunner()` →
+`experiments.py:run_experiment()` → `_config()`/`initialize()` → adapter identity
+check → `_trials()` → fresh `trial_workspace()` → `make_request()` → validate
+checkpoint request_hash/reuse scored row OR write packet → `coding.grade()` baseline
+failure check → runner(request) → `validate_response()` → `coding.apply_edits()` →
+`coding.grade()` candidate → acceptance-failure intersection → atomic trial checkpoint
+→ `summarize_results()` → report.json → cleanup.
+
+**Data Transformation:** Command runner sends packet JSON on stdin and parses one
+stdout JSON response; no shell. Replay maps trial_id to collected responses. Validate
+schema/model/hash/status/usage and declared output limit before applying code.
+Allowlist/payload rejection is invalid_candidate; executable outcomes include passed,
+test_failed and candidate timeout. Provider/quota/process/protocol/budget/grader errors
+remain unscored. Quota stops new dispatch but retains already scored checkpoints.
+Explicit resume retries unscored rows; changed settings/assets/adapter/packet refuse
+reuse. Expected task outcomes never enter prompts. Source edits and diagnostics are
+saved for reproducibility; provider logs are not copied blindly into errors.
+
+**Database Interaction:** F-022 disposable lesson storage only. No experiment DB.
+JSON checkpoints are per-trial files, replaced atomically after complete outcomes.
+Transient attempt history is retained when an unscored trial is retried.
+
+**External Interaction:** Explicit local output/scratch paths, runner subprocess or
+recorded file read, and trusted grading subprocesses. External model/network calls
+occur only if the user-selected adapter performs them. No live adapter is configured
+by the harness. Imports/processes are isolated but OS permissions are not sandboxed.
+
+**Output:** Trial rows with config/model/request identity, condition diagnostics,
+baseline/candidate grades, timing, runner-reported usage, accepted response edits and
+persisting acceptance-failure IDs. Grader timeout is distinct from runner timeout.
+Nine experiment tests exercise IPC, replay, provenance, memory/budget/leakage, invalid
+edits, provider/quota classification and scored checkpoint reuse. D-015/WI-005.
+
+## F-024 — Coding report aggregation and model-free harness self-check
+
+**Trigger:** End of run or `python evals/coding_bench.py self-check` (core CI).
+
+**Execution Path:** `experiments.py:summarize_results()` → group by condition →
+scored denominator → matched lexical/graph, graph/memory, graph/stale tasks → report.
+For self-check: script `main()` → F-021 `calibrate()` → F-023 twice with explicit
+`CalibrationRunner(reference=True/False)` → reference runner reads reference JSON
+only inside this privileged calibration path → verify all reference passes, all
+unchanged failures, confirmed retrieval and stale exclusion → compact self-check JSON.
+
+**Data Transformation:** Scored outcomes produce per-condition success rates;
+unscored errors stay separate. Matched comparisons count wins/losses only for jointly
+scored tasks. Cost sums only when every checkpointed attempt reports it; otherwise null.
+Timing/estimated prompt and provider usage remain per trial. Calibration outcomes
+are labeled test-harness checking, not model accuracy or memory efficacy.
+
+**Database Interaction:** Only disposable memory from F-022; no aggregate DB.
+
+**External Interaction:** Local result files and calibration grading. Self-check
+performs zero model/network calls. Ordinary experiment provider activity depends
+on its explicit adapter; replay has none. No automatic retry/concurrency.
+
+**Output:** report.json plus CLI JSON. Exit 0 means complete scored experiment,
+including all-failed candidates; 1 means failed calibration/unscored incompletion;
+2 means invalid configuration/file input. Default self-check calibrates three bugs
+and checks 12 reference/12 unchanged trials. D-015/WI-005.

@@ -126,7 +126,8 @@ for value in namespace.values():
 result = unittest.TextTestRunner(verbosity=0).run(suite)
 passed = result.wasSuccessful() and result.testsRun > 0
 print("CHECK_RESULT=" + json.dumps({"passed": passed, "tests": result.testsRun,
-    "failures": len(result.failures), "errors": len(result.errors)}))
+    "failures": len(result.failures), "errors": len(result.errors),
+    "failed_tests": [test.id() for test, _ in result.failures + result.errors]}))
 sys.exit(0 if passed else 1)
 '''
 

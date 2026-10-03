@@ -16,7 +16,7 @@ current product is a local Python CLI, not the full planned web application.
   `diffcontext/context.py`. Token counts are estimates, not exact tokenizer counts.
 - SQLite lesson proposal/review, exact-scope retrieval, evidence/source hash
   freshness checks: `diffcontext/memory.py`.
-- CLI: `diffcontext/cli.py`; refund example; 50 regression/protocol tests; 2 existing
+- CLI: `diffcontext/cli.py`; refund example; 63 regression/protocol tests; 2 existing
   retrieval smoke cases and 6 investigation development fixtures; CI configuration.
 - Baseline committed and pushed: `fa2dd36` on `main`, remote
   `https://github.com/Agamjot27/DiffContext.git`.
@@ -34,30 +34,40 @@ current product is a local Python CLI, not the full planned web application.
   captured code snapshot, checked lessons, observable verification, limits and trace.
 - Versioned full JSON reports, `--summary`, explicit saved-file `inspect`, and
   budget-matched seed-only development comparison. D-012/D-013, F-018–F-020.
+- Controlled coding harness: three buggy repositories, separated acceptance checks,
+  reference calibration, paired context/memory controls, command/replay contracts,
+  quota stop/resume, attempt history and provenance-checked JSON artifacts.
+  `coding.py`, `experiments.py`, `evals/coding_bench.py`; D-014/D-015, F-021–F-024.
 
 ## Current work / handoff
 
-WI-005 is active: [controlled coding evaluation](docs/work-items/WI-005-coding-evaluation/FEATURE.md).
-Three fixture bugs and references calibrated through `coding.py` subprocess checks;
-four focused tests pass. Paired packets, runners, checkpointing and reporting are next.
-All prior investigation/core work is complete and passed 50 checks.
+WI-005 is complete: [controlled coding evaluation](docs/work-items/WI-005-coding-evaluation/FEATURE.md).
+Full MCP-enabled suite passed 63 tests; final adapter/history changes also pass all
+nine affected experiment tests. Model-free self-check: three calibrated bugs,
+12 reference passes, 12 unchanged failures, three confirmed/stale memory controls.
+Fixture/grader milestone: `321d140`; find paired-harness commit using
+`git log --oneline -- diffcontext/experiments.py`. No live model was called.
 MCP SDK 2.3.0 is installed in `.venv`; host settings are not configured.
-All commits through `11ec359` are verified pushed on main. Current changes are local.
+Prior work through `11ec359` was verified pushed on main. Check later synchronization
+with `git rev-list --left-right --count main...origin/main` after each push.
 
 ## Next planned slice
 
-Finish controlled coding harness before live model trials: paired conditions with
-equal declared budgets, explicit pre-task synthetic lessons, runner/replay contract,
-quota/provider classification, fingerprints, checkpoints and reports. No live model
-provider or credentials are assumed. Then measure real coding outcomes and improve
-module/class evidence and memory capture based on failures.
+Configure a selected model adapter or collect responses to exported packets, then
+run paired live trials. No model provider/account is configured. Add genuine prior
+correction history and temporal held-out tasks before making memory-benefit claims.
+Use observed failures to improve module/class evidence and retrieval.
 Model planning, autonomous edits, and a dashboard remain planned. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. 50 tests and 8 development
-  fixture cases pass. Windows MCP pipe tests need approved sandbox access.
+- No failing application check is currently recorded. 63 tests, 8 retrieval fixtures
+  and the coding-harness self-check pass. MCP pipe tests need approved sandbox access.
+- Coding trials are synthetic single-response edits; lessons are authored pre-task
+  data, not real historical corrections. Declared model/settings/usage depend on the
+  external adapter. Missing costs stay unknown across retried attempts. Grading
+  subprocesses are not a security sandbox; use trusted local fixtures/candidates.
 - Static analysis misses dynamic dispatch, inheritance, re-exports, nested
   functions, configuration, and some binding behavior. Missing edges do not prove
   independence. Method excerpts do not reconstruct class context.
@@ -87,6 +97,7 @@ git status --short
 python -m unittest discover -s tests -v
 python evals/run.py
 python evals/investigate.py
+python evals/coding_bench.py self-check
 python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
 python -m diffcontext --repo . changes --ref HEAD
 python -m diffcontext --repo . compile --ref HEAD --max-tokens 4000

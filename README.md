@@ -106,6 +106,7 @@ record can be marked `superseded`. Storage lives in `.diffcontext/memory.sqlite3
 python -m unittest discover -s tests -v
 python evals/run.py
 python evals/investigate.py
+python evals/coding_bench.py self-check
 ```
 
 Tests cover graph resolution, import aliases, relative imports, shadowed names,
@@ -120,6 +121,12 @@ An additional job installs the MCP extra and requires protocol tests to run.
 For a model-free client demonstration, follow [docs/MCP.md](docs/MCP.md).
 The new investigation evaluation uses six development fixtures and a seed-only
 comparison at the same maximum text budget; it is not a held-out coding benchmark.
+
+The coding harness adds three buggy repositories with executable acceptance checks,
+paired lexical/graph/memory/stale conditions, request fingerprints, quota-aware
+checkpoints and model-adapter/replay contracts. Its self-check uses reference fixes
+and unchanged candidates without a model call. See [coding evaluation guide](docs/CODING_EVALS.md)
+before collecting live responses. No model performance claim follows from calibration.
 
 ## Current limits
 

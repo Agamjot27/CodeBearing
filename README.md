@@ -98,6 +98,9 @@ See [the build roadmap](docs/ROADMAP.md) for the progression to the full system.
 - [DECISIONS.md](DECISIONS.md): reasons, alternatives, trade-offs, and reconsideration criteria.
 - [FLOW.md](FLOW.md): actual execution paths at file and function level.
 - [AGENTS.md](AGENTS.md): standing development and commit requirements.
+- [HANDOVER.md](HANDOVER.md): current state and reading order for every new session.
+- [Work-item records](docs/work-items/): per-feature and per-bug attempts, outcomes,
+  verification, and handoff. New records use [these templates](docs/templates/).
 
 The initial Git commit records the already-written prototype as a baseline.
 Subsequent meaningful changes should include their tests and documentation updates.

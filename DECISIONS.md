@@ -260,3 +260,47 @@ prototype's pre-Git edit sequence cannot be recovered from commit history.
 
 Keep the policy unless the user changes it. Split large documents into linked files
 only if needed, while retaining these root entry points and stable decision IDs.
+
+## D-007 — Separate living session state from per-item engineering history
+
+**Status:** Accepted on 2026-10-03; user-requested continuity workflow.
+
+**Decision**
+
+Require root HANDOVER.md at every session start. Keep one FEATURE.md or BUG.md
+under a stable `docs/work-items/<id>-<slug>/` directory per meaningful work item.
+Use templates, preserve actual attempts/results, and require intent comments for
+new or changed non-obvious logic.
+
+**Context**
+
+A new AI session needs the current state without rereading a transcript. The user
+also requires complete start-to-finish feature/bug traces and code intent, which
+the existing decision log and execution-flow document do not fully capture.
+
+**Alternatives Considered**
+
+A transcript dump; putting all session status in AGENTS.md; one ever-growing root
+BUG.md/FEATURE.md; relying on commit messages alone.
+
+**Why This Approach**
+
+A short replaceable snapshot makes resuming practical. Dedicated work-item records
+retain detailed attempts and verification without making that snapshot unwieldy
+or mixing unrelated bugs. AGENTS.md supplies a discoverable reading order and
+maintenance requirements. Local comments explain contracts and surprising logic
+where they matter, while decisions and flows retain cross-file detail.
+
+**Trade-offs**
+
+Several documents need coordinated updates. Stale summaries can mislead sessions,
+so claims must be tied to observed checks and implementation. Documentation does
+not automatically enforce compliance. No new runtime component is introduced.
+
+**Future Reconsideration**
+
+If duplication becomes costly, add lightweight checks or an index of work items.
+Keep the current-state snapshot concise and preserve stable historical records.
+
+**Implementation:** `AGENTS.md`, `HANDOVER.md`, `docs/templates/`,
+`docs/work-items/WI-001-documentation-continuity/FEATURE.md`.

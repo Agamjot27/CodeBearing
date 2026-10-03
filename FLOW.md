@@ -4,6 +4,23 @@ This describes the code that exists, not the target architecture. Updated with t
 initial documented Git baseline on 2026-10-03. Paths are relative to the repository.
 Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect changes.
 
+## Current modification scope
+
+WI-001 adds development documentation continuity only. No runtime file/function
+or F-001–F-012 execution path changes in this cycle. See
+[its feature record](docs/work-items/WI-001-documentation-continuity/FEATURE.md)
+and [HANDOVER.md](HANDOVER.md) for current progress and next work.
+Future cycles must identify the exact flows/functions they modify here.
+
+## Session documentation path (development workflow)
+
+Read `AGENTS.md` → `HANDOVER.md` → linked active
+`docs/work-items/<id>-<slug>/FEATURE.md` or `BUG.md` → relevant `DECISIONS.md:D-XXX`
+→ affected `FLOW.md:F-XXX` → source files/functions → inspect Git status.
+During changes, update the work-item record and local intent comments, then the
+affected decisions/flows and handover in the same cycle. This is an instruction
+for developers/agents, not an automatically executed application function.
+
 ## Implementation coverage
 
 | Requested workflow | Current status / flow |

@@ -2,6 +2,44 @@
 
 These are the user's standing development requirements for this repository.
 
+## Session continuity — read first
+
+- At the start of every session, read `HANDOVER.md` after this file. Then read the
+  linked active work-item record, relevant DECISIONS.md entries, and affected
+  FLOW.md paths. Check Git status before modifying files.
+- Keep HANDOVER.md a short living snapshot: completed capabilities, current work,
+  blockers/broken behavior, next steps, verification, and things to avoid. Update
+  it during meaningful milestones and before ending or handing off a session.
+- Replace outdated current-state text; put detailed history in work-item records
+  and Git. Do not dump transcripts, secrets, or unverified success claims into it.
+- Record interrupted work honestly: exact files/functions touched, current failures,
+  commands already run, and the next concrete action. Mark planned work as planned.
+
+## Per-feature and per-bug records
+
+- Before implementing a feature or meaningful bug fix, create one dedicated record
+  at `docs/work-items/<stable-id>-<slug>/FEATURE.md` or `BUG.md`. Keep that same record
+  through completion rather than replacing it with a final summary.
+- Use the templates in `docs/templates/`. Record scope/discovery, actual execution
+  path, affected files/functions, attempts and outcomes (including unsuccessful
+  approaches), verification evidence, remaining limits, and related decisions.
+- Update the record as work progresses. Do not invent attempts, causes, metrics,
+  or historical reasoning. Label reconstructed baseline notes explicitly.
+- Link active work from HANDOVER.md and identify affected flows in FLOW.md.
+  Include the work-item record with its implementation/tests/documentation commit.
+- A commit cannot contain its own final hash. Find introducing/modifying commits
+  with `git log --oneline -- <record-path>`; record earlier hashes when relevant.
+
+## Comments for non-obvious logic
+
+- Comment non-obvious logic while writing or changing it: its purpose, why it is
+  needed, callers or downstream assumptions, ordering constraints, and edge cases.
+- Explain intent rather than restating syntax. Put comments beside the logic and
+  use function/module docstrings for contracts. Keep them synchronized with code.
+- Use FLOW.md for cross-file execution and DECISIONS.md for design rationale;
+  comments should make the local implementation understandable without duplicating
+  those entire documents. Do not add noise to obvious statements.
+
 ## Meaningful commits
 
 - Commit regularly after a logically complete module, API, database change,

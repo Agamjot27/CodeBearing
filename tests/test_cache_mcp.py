@@ -24,7 +24,7 @@ class CacheConfigurationTests(unittest.TestCase):
 
     def test_generated_configuration_preserves_cache_choice_without_writes(self):
         for client in ("claude", "cursor"):
-            entry = json.loads(configuration(self.root, client, cache=True))["mcpServers"]["diffcontext_lab"]
+            entry = json.loads(configuration(self.root, client, cache=True))["mcpServers"]["codebearing"]
             self.assertEqual(entry["args"][-1], "--cache")
             self.assertEqual(entry["args"][-2], str(self.root.resolve()))
         codex = configuration(self.root, "codex", cache=True)

@@ -1,7 +1,8 @@
 """Install a wheel in a fresh environment and verify entry points outside the checkout.
 
 Requires pip >=22.3 in the invoking interpreter; dependency installation may use
-the network. No model calls, assistant settings writes, or package publication.
+the network. No model calls or package publication. Assistant settings are written only
+inside a disposable fixture project.
 """
 
 import argparse
@@ -49,8 +50,8 @@ def verify(wheel: Path, typescript: bool = False):
         fixture = "typescript-refunds" if typescript else "refunds"
         shutil.copytree(checkout / "examples" / fixture, repo,
                         ignore=shutil.ignore_patterns("__pycache__", ".diffcontext"))
-        launcher = bin_dir / ("diffcontext-lab-mcp.exe" if os.name == "nt" else "diffcontext-lab-mcp")
-        core = bin_dir / ("diffcontext-lab.exe" if os.name == "nt" else "diffcontext-lab")
+        launcher = bin_dir / ("codebearing-mcp.exe" if os.name == "nt" else "codebearing-mcp")
+        core = bin_dir / ("codebearing.exe" if os.name == "nt" else "codebearing")
         run([str(launcher), "--help"], scratch)
         indexed = json.loads(run([str(core), "--repo", str(repo), "index"], scratch))
         if not indexed.get("symbols"):
@@ -73,11 +74,11 @@ def verify(wheel: Path, typescript: bool = False):
             if client == "codex":
                 if sys.version_info >= (3, 11):
                     import tomllib
-                    entry = tomllib.loads(output)["mcp_servers"]["diffcontext_lab"]
+                    entry = tomllib.loads(output)["mcp_servers"]["codebearing"]
                 else:
                     continue
             else:
-                entry = json.loads(output)["mcpServers"]["diffcontext_lab"]
+                entry = json.loads(output)["mcpServers"]["codebearing"]
             if Path(entry["command"]).absolute() != python.absolute() or entry["args"][-1] != str(repo.resolve()):
                 raise ValueError("Configuration does not point to the clean installation/repository.")
             run([entry["command"], "-I", "-c", "import diffcontext.connect, mcp"], scratch)
@@ -86,6 +87,10 @@ def verify(wheel: Path, typescript: bool = False):
             raise ValueError("Installed MCP server failed discovery/search.")
         if (repo / ".diffcontext").exists():
             raise ValueError("Read-only check created repository state.")
+        setup = run([str(core), "setup", "--client", "cursor", "--repo", str(repo)], scratch)
+        settings = json.loads((repo / ".cursor/mcp.json").read_text())
+        if "CodeBearing" not in setup or "codebearing" not in settings["mcpServers"]:
+            raise ValueError("Installed CodeBearing setup failed.")
         cold = json.loads(run([str(core), "--repo", str(repo), "--cache", "index"], scratch))
         warm = json.loads(run([str(launcher), "--repo", str(repo), "--cache", "--check"], scratch))
         if cold["indexing"]["parsed_files"] < 1 or warm["indexing"]["parsed_files"] != 0 or warm["indexing"]["reused_files"] < 1:
@@ -93,7 +98,7 @@ def verify(wheel: Path, typescript: bool = False):
         if (repo / ".diffcontext" / "memory.sqlite3").exists():
             raise ValueError("Cache-enabled tools created engineering memory.")
         print(json.dumps({"wheel": wheel.name, "status": "passed", "tools": checked["tools"],
-                          "checks": ["clean install", "outside-checkout CLI and hybrid task", "client configs", "stdio discovery and search", "persistent cache reuse"]}, indent=2))
+                          "checks": ["clean install", "outside-checkout CLI and hybrid task", "client configs and project setup", "stdio discovery and search", "persistent cache reuse"]}, indent=2))
     finally:
         shutil.rmtree(scratch)
 

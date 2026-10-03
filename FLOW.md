@@ -1013,3 +1013,37 @@ Offline tests substitute the opener; no provider/account/model has been exercise
 **Output:** Checked edits envelope or classified unscored error with known usage;
 local preflight returns locally_configured, settings and network_calls=0, without
 proving API access. D-022, WI-013.
+
+
+## F-033 — CodeBearing install and project connection
+
+**Trigger:** Installed `codebearing setup --client cursor|claude|codex`, optionally
+`--repo` and `--cache`. Without --repo, use the current working directory.
+
+**Execution Path:** pyproject.toml entry point → diffcontext/onboarding.py:main()
+→ prepare_config() → diffcontext/connect.py:configuration() → JSON/TOML validation
+and merge → asyncio.wait_for(check_connection(), 45 seconds) → existing stdio
+launcher/server discovery and search check (F-025/F-026) → save_config() → project
+settings file. A later assistant launch follows connect.py:main() →
+mcp_server.py:create_server() → existing six RepositoryService tools (F-017).
+Advanced `codebearing` arguments delegate to diffcontext/cli.py:main().
+
+**Data Transformation:** Project path and client select `.mcp.json` (Claude),
+`.cursor/mcp.json` (Cursor), or `.codex/config.toml` (Codex). Generated configuration
+pins the installed Python interpreter and repository root. Merge preserves other
+servers/settings; conflicting CodeBearing entries and malformed data fail before
+writing. Identical entries preserve original bytes. save_config() checks that bytes
+have not changed during the protocol check and atomically replaces the file.
+
+**Database Interaction:** No configuration database. The protocol search reads
+repository symbols; optional --cache uses the existing parse cache (F-028).
+Existing lesson tables and core retrieval flows remain unchanged.
+
+**External Interaction:** Local filesystem and a child MCP stdio process, no LLM,
+provider network, HTTP API, worker or frontend. Installation may download packages.
+Assistant trust/approval is a separate host action, not performed by setup.
+
+**Output:** Plain settings path, verified tool count and first-task prompt; status 2
+on failure. Failed connection writes no assistant configuration. The six tools
+return existing structured context/impact/lesson/investigation results, not edits.
+D-023, WI-014. This slice changes public naming, onboarding and guides only.

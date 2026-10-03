@@ -24,12 +24,10 @@ def configuration(root: Path, client: str, python: str | None = None, *, cache: 
         # TOML rejects JSON's surrogate-pair escapes for non-BMP characters.
         # Emit Unicode scalars directly and escape DEL, forbidden in TOML strings.
         encode = lambda value: json.dumps(value, ensure_ascii=False).replace(chr(127), "\\u007f")
-        return ("[mcp_servers.diffcontext_lab]\ncommand = " + encode(command)
+        return ("[mcp_servers.codebearing]\ncommand = " + encode(command)
                 + "\nargs = " + encode(args) + "\n")
-    entry = {"command": command, "args": args}
-    if client == "claude":
-        entry["type"] = "stdio"
-    return json.dumps({"mcpServers": {"diffcontext_lab": entry}}, indent=2) + "\n"
+    entry = {"type": "stdio", "command": command, "args": args}
+    return json.dumps({"mcpServers": {"codebearing": entry}}, indent=2) + "\n"
 
 
 async def check_connection(root: Path, *, cache: bool = False) -> dict:
@@ -75,7 +73,7 @@ def main(argv=None) -> int:
         try:
             from .mcp_server import create_server
         except ImportError as exc:
-            raise RuntimeError('MCP dependencies unavailable. Install "diffcontext-lab[mcp]" '
+            raise RuntimeError('MCP dependencies unavailable. Install "codebearing[mcp]" '
                                'from your release wheel or Git source; see docs/MCP.md.') from exc
         if args.check:
             result = asyncio.run(asyncio.wait_for(check_connection(root, cache=args.cache), timeout=45))
@@ -84,14 +82,14 @@ def main(argv=None) -> int:
             create_server(root, cache=args.cache).run(transport="stdio")
         return 0
     except (ValueError, OSError, RuntimeError, TimeoutError) as exc:
-        print(f"diffcontext-lab-mcp: {exc}", file=sys.stderr)
+        print(f"codebearing-mcp: {exc}", file=sys.stderr)
         return 2
     except Exception as exc:
         if not args.check:
             raise
         # SDK subprocess failures may use exception groups. Keep doctor failures
         # off stdout and return a failing exit status instead of a success banner.
-        print(f"diffcontext-lab-mcp: Connection check failed ({type(exc).__name__}): {exc}", file=sys.stderr)
+        print(f"codebearing-mcp: Connection check failed ({type(exc).__name__}): {exc}", file=sys.stderr)
         return 2
 
 

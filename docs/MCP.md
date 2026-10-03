@@ -1,31 +1,44 @@
 # Connect your coding assistant
 
-DiffContext runs locally and gives your assistant six read-only context tools.
-Install it once, select a supported project, and copy the generated configuration
-into Claude Code, Cursor, or Codex. Your assistant starts the server automatically.
-DiffContext needs no model API key; your assistant keeps its own account/settings.
+CodeBearing runs locally and gives your assistant six read-only context tools.
+Install it once, run setup for your project, and open your assistant. Your
+assistant starts the server automatically.
+CodeBearing needs no model API key; your assistant keeps its own account/settings.
 
 ## 1. Install
 
-Requires Python 3.10+. **This project's 0.5.0 package is not published to PyPI yet.**
+Recommended isolated installation (requires uv and Git):
+
+```powershell
+uv tool install --python 3.11 "codebearing[mcp,typescript] @ git+https://github.com/Agamjot27/DiffContext.git"
+codebearing setup --client cursor --repo "C:/path/to/your-project"
+```
+
+Use claude/codex in place of cursor. Setup checks the MCP transport before writing
+project settings and preserves other entries. It refuses a conflicting CodeBearing
+entry; use --config for a manual update. Restart/enable/approve in the host.
+Automatic Codex TOML setup needs Python 3.11; core/manual generation supports 3.10.
+The remaining sections describe pip/manual setup and troubleshooting.
+
+Requires Python 3.10+. **This project's 0.6.0 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
-After this implementation is committed and pushed, install ours from GitHub
+Install ours from GitHub
 (Git must be installed):
 
 ```powershell
-python -m pip install "diffcontext-lab[mcp] @ git+https://github.com/Agamjot27/DiffContext.git"
+python -m pip install "codebearing[mcp] @ git+https://github.com/Agamjot27/DiffContext.git"
 ```
 
 Use a dedicated Python environment if another DiffContext package is installed:
-our distribution name is `diffcontext-lab`, but both projects use the import name
+our distribution name is `codebearing`, but the older similarly named project uses the import name
 `diffcontext`. On Windows, create and activate an environment before installing:
 
 ```powershell
-python -m venv .venv-diffcontext
-.\.venv-diffcontext\Scripts\Activate.ps1
+python -m venv .venv-codebearing
+.\.venv-codebearing\Scripts\Activate.ps1
 ```
 
-On macOS/Linux, activate with `source .venv-diffcontext/bin/activate`.
+On macOS/Linux, activate with `source .venv-codebearing/bin/activate`.
 If you already have this checkout, install from its root instead:
 
 ```powershell
@@ -33,7 +46,7 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/diffcontext_lab-0.5.0-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/codebearing-0.6.0-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
 Python-only core CLI installation requires no runtime dependencies.
 For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`
@@ -44,7 +57,7 @@ in the commands above; see [language support and limits](LANGUAGES.md).
 Replace the sample path with the project you want the assistant to analyze:
 
 ```powershell
-diffcontext-lab-mcp --repo "C:/path/to/your-project" --check
+codebearing-mcp --repo "C:/path/to/your-project" --check
 ```
 
 The check starts a separate MCP process, discovers all six tools, performs a
@@ -60,17 +73,17 @@ If the launch command is not on PATH, every example also works as
 ## 3. Generate your assistant's configuration
 
 Run the appropriate command below from the environment where you installed
-DiffContext. It prints configuration with absolute repository and Python paths.
+CodeBearing. It prints configuration with absolute repository and Python paths.
 The assistant therefore does not need your environment activated or its scripts
 directory on PATH. The environment must remain installed at that location.
 
 ### Claude Code
 
 ```powershell
-diffcontext-lab-mcp --repo "C:/path/to/your-project" --config claude
+codebearing-mcp --repo "C:/path/to/your-project" --config claude
 ```
 
-Copy the generated `mcpServers.diffcontext_lab` entry into `.mcp.json` at the
+Copy the generated `mcpServers.codebearing` entry into `.mcp.json` at the
 target project's root. If the file exists, merge the entry into its existing
 `mcpServers` object; preserve its other servers. The entry includes `type: stdio`.
 Open Claude Code for that project, approve the project MCP server when prompted,
@@ -80,7 +93,7 @@ and use `/mcp` to inspect its connection.
 ### Cursor
 
 ```powershell
-diffcontext-lab-mcp --repo "C:/path/to/your-project" --config cursor
+codebearing-mcp --repo "C:/path/to/your-project" --config cursor
 ```
 
 Copy the generated entry into the target project's `.cursor/mcp.json`, merging
@@ -91,16 +104,18 @@ server if needed.
 ### Codex
 
 ```powershell
-diffcontext-lab-mcp --repo "C:/path/to/your-project" --config codex
+codebearing-mcp --repo "C:/path/to/your-project" --config codex
 ```
 
-Merge the printed `[mcp_servers.diffcontext_lab]` TOML section into the target
+Merge the printed `[mcp_servers.codebearing]` TOML section into the target
 project's `.codex/config.toml`. Codex must trust the project to load project
 configuration. Preserve existing settings and avoid duplicate sections with the
 same name. Start a new session and inspect the MCP connection.
 [Official Codex MCP documentation](https://developers.openai.com/codex/mcp).
 
 Configuration generation only prints text. It never edits your assistant settings.
+The separate codebearing setup command writes project-only settings: .mcp.json,
+.cursor/mcp.json or .codex/config.toml. It does not write global host settings.
 It uses your local interpreter path, so do not commit a generated configuration
 as a portable setup for other developers. Other compatible hosts can use that
 same command/arguments in their local stdio settings; their configuration format
@@ -110,7 +125,7 @@ may differ. This is a local process, not a hosted URL or remote repository servi
 
 Ask:
 
-> Use DiffContext's investigate tool to find the code relevant to this task before
+> Use CodeBearing's investigate tool to find the code relevant to this task before
 > editing. Show the selected functions, confirmed lessons, warnings, and omissions.
 
 Give a concrete task or function name from your project. Tools become available
@@ -202,7 +217,7 @@ SDK references: [tools](https://py.sdk.modelcontextprotocol.io/servers/tools/),
 Add `--cache` when generating configuration to persist unchanged parse facts:
 
 ```powershell
-diffcontext-lab-mcp --repo "C:/path/to/your-project" --cache --config claude
+codebearing-mcp --repo "C:/path/to/your-project" --cache --config claude
 ```
 
 Use the corresponding client name for Cursor/Codex. Tools still read source and

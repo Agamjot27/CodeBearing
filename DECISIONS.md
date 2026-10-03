@@ -738,6 +738,9 @@ concurrency only after latency/cost measurements and reliable quota handling.
 
 ## D-016 — Ship a local MCP launcher with configuration and wheel checks
 
+Public naming and manual-only onboarding superseded by D-023. The read-only
+`--config` command and core launcher design remain supported.
+
 **Decision**
 
 Keep the fixed-repository stdio service. Add `diffcontext-lab-mcp` to launch it,
@@ -1124,3 +1127,55 @@ Use independent tasks and repeated paired samples before outcome or cost claims.
 **Implementation:** providers.py:OpenRouterRunner/_NoRedirect,
 experiments.py:response_usage()/validate_response()/run_experiment(),
 coding_bench.py:main(). **Flow:** F-032. **Work item:** WI-013.
+
+
+## D-023 — CodeBearing identity and verified project-scoped setup
+
+**Decision**
+
+Ship version 0.6.0 as CodeBearing, distribution `codebearing`, commands
+`codebearing` and `codebearing-mcp`, and assistant server key `codebearing`.
+Keep internal `diffcontext` imports, `.diffcontext` data and legacy command aliases.
+Recommend an isolated uv tool installation and add a project-only setup command.
+
+**Context**
+
+The user chose CodeBearing and asked to simplify using the existing engine.
+Manual configuration and development commands obscured the actual product.
+
+**Alternatives Considered**
+
+Rename every internal module and storage directory; retain manual copy/paste only;
+add a GUI; overwrite global assistant settings; add a TOML writer dependency.
+
+**Why This Approach**
+
+Public names establish the chosen identity without an unrelated storage migration.
+An isolated tool keeps dependencies separate and produces a stable executable.
+Setup merges only the chosen project's settings, checks the installed MCP server
+before writing, refuses conflicting entries and concurrent changes, and publishes
+atomically. Existing servers/settings survive and identical setup is repeatable.
+Codex TOML uses Python 3.11's standard parser and appends a validated table to
+preserve comments. Claude/Cursor JSON includes the explicit stdio transport.
+Official assistant documentation establishes the project paths. Preservation tests
+and a clean-wheel protocol/setup test provide measurable checks without model cost.
+
+**Trade-offs**
+
+Automatic Codex setup requires Python 3.11; manual configuration supports 3.10.
+Internal names and the GitHub URL retain DiffContext. No PyPI publication or name
+ownership has been established: installation currently uses Git or a built wheel.
+The installed environment must remain available. Hosts still require project trust
+and tool approval. A protocol check does not prove a host used the tools or fixed
+code successfully. JSON formatting is normalized when adding a new entry.
+
+**Future Reconsideration**
+
+Publish to PyPI once publisher credentials and package ownership are established.
+Change internal names only when their benefit justifies compatibility migration.
+Add onboarding UI only if observed user trials show the two commands insufficient.
+Measure an actual assistant task before claiming better coding outcomes.
+
+**Implementation:** onboarding.py:main()/prepare_config()/save_config(),
+connect.py:configuration()/check_connection(), pyproject.toml.
+**Flow:** F-033. **Work item:** WI-014.

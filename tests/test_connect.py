@@ -17,14 +17,14 @@ class ConnectionTests(unittest.TestCase):
         root = self.root / "project with spaces"
         root.mkdir()
         for client in ("claude", "cursor"):
-            entry = json.loads(configuration(root, client))["mcpServers"]["diffcontext_lab"]
+            entry = json.loads(configuration(root, client))["mcpServers"]["codebearing"]
             self.assertEqual(entry["command"], str(Path(sys.executable).absolute()))
             self.assertEqual(entry["args"], ["-m", "diffcontext.connect", "--repo", str(root)])
-            self.assertEqual(entry.get("type"), "stdio" if client == "claude" else None)
+            self.assertEqual(entry.get("type"), "stdio")
         # Parse TOML in the distribution check on Python 3.11+. Core still supports 3.10.
         if sys.version_info >= (3, 11):
             import tomllib
-            entry = tomllib.loads(configuration(root, "codex"))["mcp_servers"]["diffcontext_lab"]
+            entry = tomllib.loads(configuration(root, "codex"))["mcp_servers"]["codebearing"]
             self.assertEqual(entry["args"][-1], str(root))
             self.assertEqual(entry["command"], str(Path(sys.executable).absolute()))
 
@@ -34,14 +34,14 @@ class ConnectionTests(unittest.TestCase):
             interpreter.symlink_to(sys.executable)
         except OSError:
             self.skipTest("Creating symlinks is not permitted on this host")
-        entry = json.loads(configuration(self.root, "cursor", str(interpreter)))["mcpServers"]["diffcontext_lab"]
+        entry = json.loads(configuration(self.root, "cursor", str(interpreter)))["mcpServers"]["codebearing"]
         self.assertEqual(entry["command"], str(interpreter.absolute()))
 
     @unittest.skipIf(sys.version_info < (3, 11), "tomllib requires Python 3.11+")
     def test_codex_configuration_accepts_non_bmp_paths(self):
         import tomllib
         root = self.root / ("project-" + chr(0x1F600))
-        entry = tomllib.loads(configuration(root, "codex"))["mcp_servers"]["diffcontext_lab"]
+        entry = tomllib.loads(configuration(root, "codex"))["mcp_servers"]["codebearing"]
         self.assertEqual(entry["args"][-1], str(root.resolve()))
 
     def test_config_mode_does_not_create_host_settings_or_database(self):
@@ -49,7 +49,7 @@ class ConnectionTests(unittest.TestCase):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             self.assertEqual(main(["--repo", str(self.root), "--config", "claude"]), 0)
-        self.assertIn("diffcontext_lab", json.loads(output.getvalue())["mcpServers"])
+        self.assertIn("codebearing", json.loads(output.getvalue())["mcpServers"])
         self.assertEqual(before, sorted(p.relative_to(self.root) for p in self.root.rglob("*")))
 
     def test_missing_repository_has_no_success_output(self):
@@ -64,7 +64,7 @@ class ConnectionTests(unittest.TestCase):
         stderr = io.StringIO()
         with patch.dict(sys.modules, {"diffcontext.mcp_server": None}), contextlib.redirect_stderr(stderr):
             self.assertEqual(main(["--repo", str(self.root)]), 2)
-        self.assertIn('diffcontext-lab[mcp]', stderr.getvalue())
+        self.assertIn('codebearing[mcp]', stderr.getvalue())
 
 
 try:

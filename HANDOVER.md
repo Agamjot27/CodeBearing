@@ -47,14 +47,21 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-013 completed: [Live provider adapter](docs/work-items/WI-013-live-provider-adapter/FEATURE.md).
-Explicit --openrouter and local check-provider added; environment-only key, strict
-model/JSON checks, optional provider-only routing and paid-failure usage retention.
-Full suite passed 149 tests; final seven provider and nine legacy experiment
-checks passed after per-attempt accounting/usage-validation cleanup.
-D-022/F-032. No model/key selected, no network provider call. Independent benchmark
-requirements are documented in docs/INDEPENDENT_EVALS.md; dataset import/isolation
-remain unimplemented. Await user provider/model choice without inspecting secrets.
+WI-014 completed locally: CodeBearing is the selected public name, version 0.6.0.
+Distribution/commands are codebearing/codebearing-mcp; internal diffcontext imports,
+legacy aliases and stored data remain compatible. Project-scoped setup safely merges
+Claude/Cursor/Codex settings after a real MCP connection check. D-023/F-033.
+155 full-suite tests pass, plus seven connection tests after the Cursor stdio fix;
+clean-wheel install, project setup, six-tool discovery/search and cache reuse pass.
+README now leads with install/connect; docs/FIRST_TASK.md describes a manual trial.
+No actual assistant bug-fix session or PyPI publication has been performed.
+Next: choose an assistant, connect a project and observe a real task using its tools.
+Provider/held-out benchmark work is paused in favor of usability; make no quality
+improvement claims from synthetic calibration or protocol tests.
+
+WI-013 completed and pushed as 21d30db: explicit OpenRouter adapter and local
+preflight; D-022/F-032. No model/key selected and no real provider call made.
+Independent benchmark import/isolation remain unimplemented.
 
 WI-012 completed and pushed as 4a71cde: [Hybrid coding controls](docs/work-items/WI-012-hybrid-coding-controls/FEATURE.md).
 Opt-in seven-condition comparison implemented, four new tests pass. Final full
@@ -90,18 +97,13 @@ public PyPI release or live model outcomes. Check final Git synchronization afte
 
 ## Next planned slice
 
-Collect independent held-out tasks and observed prior corrections. Existing graph/
-memory conditions retain legacy; seven-condition hybrid comparison is opt-in.
-Windows bounded subprocess cleanup and explicit OpenRouter adapter are implemented.
-Next verify a selected model/account, add independent isolated benchmark execution
-and collect repeated paired trials. Dedicated graph storage needs
-measured workload justification; derived symbols/edges now persist in local SQLite.
-Public publication needs a selected distinct name/publisher identity, neither
-configured. CodeBearing was suggested, not selected or availability-checked.
-A real host integration and provider/model account remain unverified. Add genuine
-prior correction history and held-out tasks before claiming memory benefit.
-Model planning, autonomous edits, and a dashboard remain planned. See
-[docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
+Run one actual assistant task using CodeBearing and record which tools it calls,
+what context it receives and whether the project tests pass after its edit.
+The user selected CodeBearing; package ownership and PyPI publisher are still
+unconfigured. Git-source installation and an installed wheel are available.
+A real host integration and model outcome remain unverified. Return to independent
+held-out tasks and observed prior corrections after the usability trial; keep
+synthetic calibration distinct from evidence of coding improvement.
 
 ## Broken / blockers / limitations
 

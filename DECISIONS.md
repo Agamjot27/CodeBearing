@@ -399,3 +399,52 @@ allocation against coding outcomes, not just context size.
 
 **Implementation:** `changes.py:localize_changes()`, `changes_impact()`,
 `compile_changes()`; `cli.py:main()`. **Flows:** F-013–F-015. **Work item:** WI-002.
+
+## D-010 — Share repository orchestration and open agent memory read-only
+
+**Status:** Accepted on 2026-10-03.
+
+**Decision**
+
+Use `RepositoryService` for CLI/agent search, localization, impact, compilation,
+and confirmed lesson retrieval. Bind it to a directory at construction. Open
+existing memory using SQLite URI `mode=ro` and `PRAGMA query_only=ON` for reads.
+Developer lesson mutation remains on the existing CLI path.
+
+**Context**
+
+An MCP wrapper around copied CLI logic would create two implementations. Existing
+Memory initialization creates directories/schema and commits even on a read, so
+it cannot honestly back read-only tools. Agent-facing requests also need explicit
+input bounds and cannot choose arbitrary repository roots.
+
+**Alternatives Considered**
+
+Call the CLI as subprocesses; duplicate orchestration in tool handlers; use a
+write-capable database connection while relying on convention; expose all lessons.
+
+**Why This Approach**
+
+The service calls existing core functions, keeping algorithms authoritative while
+sharing validation/memory selection. SQLite enforces read-only access and absence
+of creation. Tests compare core output, reject raw SQL writes, verify unchanged
+database bytes, and exclude stale/unconfirmed advice. Missing memory returns empty
+results without creating storage. Confirmed lesson text is returned only for the
+requested current symbols; rejected entries expose metadata rather than advice.
+
+**Trade-offs**
+
+Fresh indexing still costs each request and expansion repeats before packing.
+Request bounds (20 symbols, 50 search matches, 32k estimated context budget) limit
+outputs but are not a whole-repository resource sandbox. SQLite reads still depend
+on compatible schema and filesystem permissions. CLI compile now shares the 32k
+upper bound; direct core compilation retains its original interface.
+
+**Future Reconsideration**
+
+Add snapshot caching, cancellation, and schema migrations when actual workloads
+require them. Introduce shared database infrastructure only when concurrency or
+multi-user needs warrant it.
+
+**Implementation:** `service.py:RepositoryService`, `memory.py:Memory.__init__()`.
+**Flows:** F-005, F-015, F-016. **Work item:** WI-003.

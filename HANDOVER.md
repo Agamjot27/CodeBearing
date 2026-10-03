@@ -30,18 +30,18 @@ current product is a local Python CLI, not the full planned web application.
 
 ## Current work / handoff
 
-Git-diff localization is complete in
-[WI-002](docs/work-items/WI-002-git-diff-localization/FEATURE.md). No application
-feature is currently in progress. Use the feature record's Git log for the final
-integration commit. Continuity docs are `c213c74`. Only the original `fa2dd36`
+Read-only MCP integration is in progress in
+[WI-003](docs/work-items/WI-003-mcp-integration/FEATURE.md). First share orchestration
+and introduce true read-only memory (complete, four service tests passed); next
+wrap the official SDK and test stdio. D-010/F-016 describe shared orchestration.
+Git-diff integration is committed as `bbed3ae`. Continuity docs are `c213c74`.
+Only the original `fa2dd36`
 baseline is known pushed; later commits remain local unless separately pushed.
 
 ## Next planned slice
 
-After Git-diff localization, expose read-only MCP tools: search, impact, context compilation,
-and lesson retrieval. Before implementing, create its FEATURE.md, document the
-actual SDK/interface choice in DECISIONS.md, and add implemented paths to FLOW.md.
-MCP is not implemented. See
+After MCP integration, exercise the tools with a coding assistant and establish
+controlled outcome evaluations before adding an investigation loop or dashboard. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 
 ## Broken / blockers / limitations

@@ -6,11 +6,10 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-002 shares parsing through `index.py:build_index_from_sources()` and adds
-`changes.py:localize_changes()`, `changes_impact()`, and `compile_changes()`.
-`cli.py:main()` routes revision selectors to these functions. F-001, F-002, F-004,
-F-005, F-012 are updated; F-013–F-015 describe new paths. See
-[its feature record](docs/work-items/WI-002-git-diff-localization/FEATURE.md)
+WI-003 shares CLI/agent orchestration through `service.py:RepositoryService`,
+introduces read-only `memory.py:Memory` access, and adds the MCP transport next.
+F-001, F-003–F-005, F-013–F-015 route through the service; F-016 documents it. See
+[its feature record](docs/work-items/WI-003-mcp-integration/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
 ## Session documentation path (development workflow)
@@ -55,11 +54,10 @@ roadmap as if they were callable code.
 
 **Execution Path:** `diffcontext/__main__.py` → `diffcontext/cli.py:main()`.
 The installed script maps directly to `cli:main` through `pyproject.toml`.
-`main()` parses arguments → for revision selectors calls
-`changes.py:localize_changes(args.repo, ref)`, otherwise
-`index.py:build_index(args.repo)` → dispatches
-to the requested function → `json.dumps()` → stdout. This rebuild occurs for
-**every command**, including memory list/status operations.
+`main()` parses arguments → constructs `service.py:RepositoryService(args.repo)`
+→ dispatches search/changes/impact/compile to service methods (F-016), or calls
+`index.py:build_index()` for index and developer memory commands → `json.dumps()`
+→ stdout. Requests still rebuild indexes; no persistent graph cache exists.
 
 **Data Transformation:** Arguments become a resolved repository `Path`, a fresh
 `Index`, and command-specific inputs. Results become indented JSON.
@@ -108,7 +106,8 @@ See D-001, D-002, and D-008.
 
 **Trigger:** `search "refund_total"` after shared indexing.
 
-**Execution Path:** `cli.py:main()` → `context.py:search(index, query)` → return
+**Execution Path:** `cli.py:main()` → `RepositoryService.search_symbols()` →
+`build_index()` → `context.py:search(index, query)` → return
 matches → `main()` adds index warnings and prints JSON.
 
 **Data Transformation:** Query, symbol names/paths, and source are lowercased and
@@ -128,7 +127,8 @@ does not automatically call `impact()` or an LLM.
 **Trigger:** `impact --symbol <id>` or a `compile_context()` call.
 Revision impact uses F-014, including old/current expansion.
 
-**Execution Path:** `cli.py:main()` → `context.py:impact()` →
+**Execution Path:** `cli.py:main()` → `RepositoryService.analyze_impact()` →
+`build_index()` → `context.py:impact()` →
 `index.py:select_symbol()` → construct reverse caller map → breadth-first traversal
 over callers and callees → sort candidates by distance, then ID.
 
@@ -150,8 +150,9 @@ found through call edges, not through a separate test-discovery service. D-002.
 **Trigger:** `compile --symbol <id> --max-tokens <budget>`.
 Revision compilation uses F-015; this section describes the explicit-symbol path.
 
-**Execution Path:** `cli.py:main()` → `index.py:build_index()` →
-`context.py:impact()` → if memory DB exists, `memory.py:Memory.__init__()` →
+**Execution Path:** `cli.py:main()` → `RepositoryService.compile_context()` →
+`index.py:build_index()` → `context.py:impact()` → `RepositoryService._lessons()`
+→ if memory DB exists, `memory.py:Memory.__init__(read_only=True)` →
 `Memory.list(candidate_ids)` → `Memory.close()` →
 `context.py:compile_context(index, seeds, budget, depth, lessons)` →
 `impact()` again → packing (F-006) → `main()` adds `excluded_lessons` → JSON.
@@ -162,9 +163,9 @@ estimated token count, and warnings. The CLI adds status/staleness for rejected
 lessons. Scope checks also exist in the compiler for direct library callers.
 Currently graph expansion runs twice on the CLI path; no cache removes that work.
 
-**Database Interaction:** If no memory file exists, none. Otherwise opens SQLite;
-`Memory.__init__()` performs `CREATE TABLE IF NOT EXISTS lessons` and a commit, then
-`list()` reads lessons. Compilation does not add or confirm lessons.
+**Database Interaction:** If no memory file exists, none. Otherwise opens SQLite
+with URI mode=ro and query_only enabled; `list()` reads existing rows without
+schema creation or commit. Compilation does not add or confirm lessons.
 
 **External Interaction:** Local source, optional SQLite file, stdout. No model call.
 The evidence label is not an enforced prompt-injection defense.
@@ -196,11 +197,13 @@ tokenizer, optimal subset solver, summarizer, or model-specific guarantee. D-003
 
 ## F-007 — Engineering-memory retrieval
 
-**Trigger:** `memory list`, compilation with an existing memory file, or direct use.
+**Trigger:** Developer `memory list`, compilation, or service lesson retrieval.
 
 **Execution Path:** `cli.py:main()` → `memory.py:Memory.__init__(root)` →
 `Memory.list(scopes=None or candidate_ids)` → F-010 freshness checks → return
 records → `Memory.close()`. Compilation then applies F-006 eligibility checks.
+Service reads use `Memory(read_only=True)`; developer list uses default writable
+initialization, so listing from the developer CLI can still create empty storage.
 
 **Data Transformation:** SQLite rows become dictionaries. Optional exact scope
 filtering is performed in Python after `SELECT * FROM lessons ORDER BY id`.
@@ -327,7 +330,8 @@ push, network, or change to the main checkout occurs during these fixtures.
 
 **Trigger:** `changes --ref HEAD` (HEAD default) or `impact/compile --ref <commit>`.
 
-**Execution Path:** `cli.py:main()` → `changes.py:localize_changes()` → `_git()`
+**Execution Path:** `cli.py:main()` → `RepositoryService.localize_changes()`
+(or revision impact/compile service method) → `changes.py:localize_changes()` → `_git()`
 root check and ref resolution → `git ls-tree -rlz` → `git cat-file blob` →
 `index.py:build_index_from_sources()` for historical code → `git ls-files --cached`
 → `build_index()` to capture disk bytes → `build_index_from_sources()` to restrict
@@ -360,7 +364,7 @@ an actionable CLI error. D-008, D-009.
 
 **Trigger:** `impact --ref <commit> --depth <0–5>`.
 
-**Execution Path:** `cli.py:main()` → F-013 →
+**Execution Path:** `cli.py:main()` → `RepositoryService.analyze_impact()` → F-013 →
 `changes.py:changes_impact()` → `context.py:impact()` independently for nonempty
 current and historical seed lists.
 
@@ -379,10 +383,11 @@ This is a conservative syntactic impact set, not proof of all semantic effects.
 
 **Trigger:** `compile --ref <commit> --max-tokens <budget> --depth <0–5>`.
 
-**Execution Path:** `cli.py:main()` → F-013 → current seed expansion with `impact()`
-→ if a lesson database exists, `Memory.list(current_candidate_ids)` / `close()` →
+**Execution Path:** `cli.py:main()` → `RepositoryService.compile_context()` → F-013
+→ current seed expansion with `impact()` → `_lessons()` → if a lesson database
+exists, `Memory(read_only=True)` → `Memory.list(current_candidate_ids)` / `close()` →
 `changes.py:compile_changes()` → `context.py:compile_context()` first for current,
-then historical seeds with remaining budget → CLI attaches `excluded_lessons`.
+then historical seeds with remaining budget → service attaches `excluded_lessons`.
 
 **Data Transformation:** A provenance header and per-version labels count against
 the shared estimated text budget. Existing whole-excerpt packing runs separately
@@ -403,3 +408,31 @@ local SQLite. No LLM or coding-agent execution.
 inclusions/omissions/missing seeds, memory metadata, completeness, and warnings.
 Total text accounting remains heuristic and metadata lies outside the budget.
 D-003, D-004, D-009.
+
+## F-016 — Shared repository request service
+
+**Trigger:** CLI search/changes/impact/compile; future MCP handlers use the same
+service. `RepositoryService(root)` fixes a resolved, existing directory once.
+
+**Execution Path:** `service.py:RepositoryService.search_symbols()` → `build_index()`
+→ `context.search()`; `localize_changes()` → `changes.localize_changes()`;
+`analyze_impact()` and `compile_context()` → `_validate()` → existing index/changes
+and context functions (F-004/F-005/F-014/F-015). `get_lessons(symbols)` → `_validate()`
+→ `build_index()` → `select_symbol()` → `_lessons()` → `Memory(read_only=True)` →
+`list()` → `close()` → confirmed/fresh filtering.
+
+**Data Transformation:** Exactly one symbols/ref selector; 1–20 nonempty symbols;
+depth 0–5; query/ref up to 2000 characters; search limit 1–50; context budget
+128–32000 estimated tokens. Core result structures are preserved. Lesson retrieval
+returns eligible text plus metadata for rejected records, never proposed advice.
+
+**Database Interaction:** Existing lesson SELECTs only in agent/context reads.
+`mode=ro` prevents database creation and query_only rejects SQL mutations. Missing
+memory returns empty results. Default developer Memory methods remain writable.
+
+**External Interaction:** Local parsing/hashing and optional read-only Git/SQLite.
+No SDK dependency, network, or LLM in this layer.
+
+**Output:** Core-compatible dictionaries or actionable validation/database errors.
+`tests/test_service.py:ServiceTests` checks parity, no creation, SQL/method write
+rejection, filtering/freshness, unchanged DB bytes, and request bounds. D-010.

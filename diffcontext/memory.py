@@ -9,17 +9,25 @@ from .index import Index, digest, safe_path
 
 
 class Memory:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, *, read_only: bool = False):
         self.root = root.resolve()
         directory = self.root / ".diffcontext"
         if directory.is_symlink():
             raise ValueError("Memory directory must not be a symbolic link.")
-        directory.mkdir(exist_ok=True)
+        if not read_only:
+            directory.mkdir(exist_ok=True)
         database = directory / "memory.sqlite3"
         if database.is_symlink():
             raise ValueError("Memory database must not be a symbolic link.")
-        self.connection = sqlite3.connect(database)
+        self.read_only = read_only
+        # mode=ro prevents accidental creation/schema changes, unlike merely
+        # promising that callers will not invoke add(). Never use immutable=1:
+        # a developer may update this live database between agent requests.
+        self.connection = sqlite3.connect(database.as_uri() + "?mode=ro", uri=True) if read_only else sqlite3.connect(database)
         self.connection.row_factory = sqlite3.Row
+        if read_only:
+            self.connection.execute("PRAGMA query_only=ON")
+            return
         self.connection.execute("""CREATE TABLE IF NOT EXISTS lessons (
             id INTEGER PRIMARY KEY, scope TEXT NOT NULL, lesson TEXT NOT NULL,
             evidence TEXT NOT NULL, evidence_hash TEXT NOT NULL, scope_hash TEXT NOT NULL,
@@ -31,6 +39,8 @@ class Memory:
         self.connection.close()
 
     def add(self, index: Index, scope: str, lesson: str, evidence: str) -> int:
+        if self.read_only:
+            raise ValueError("Read-only memory cannot add lessons.")
         if scope not in index.symbols:
             raise ValueError("Lesson scope must be an exact indexed symbol ID.")
         if not lesson.strip():
@@ -44,6 +54,8 @@ class Memory:
         return cursor.lastrowid
 
     def set_status(self, lesson_id: int, status: str):
+        if self.read_only:
+            raise ValueError("Read-only memory cannot change lesson status.")
         if status not in {"confirmed", "superseded", "disputed"}:
             raise ValueError("Status must be confirmed, superseded, or disputed.")
         if status == "confirmed":

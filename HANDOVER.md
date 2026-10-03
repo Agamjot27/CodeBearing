@@ -33,21 +33,19 @@ current product is a local Python CLI, not the full planned web application.
 
 ## Current work / handoff
 
-Read-only MCP integration is complete in
-[WI-003](docs/work-items/WI-003-mcp-integration/FEATURE.md). Official SDK 2.3.0 is
-installed in `.venv` with the editable project extra. All 37 tests pass with SDK;
-without SDK, 33 pass and four protocol tests skip. Real stdio tests and client demo
-pass. Host settings are not configured; assistant outcome evaluation remains next.
-Shared service/read-only memory is committed as `f52f667`; find the transport
-commit with `git log --oneline -- diffcontext/mcp_server.py`.
-Git-diff integration is committed as `bbed3ae`. Continuity docs are `c213c74`.
-Only the original `fa2dd36`
-baseline is known pushed; later commits remain local unless separately pushed.
+WI-004 is active: [bounded investigation](docs/work-items/WI-004-investigation/FEATURE.md).
+`investigation.py:run()` and `RepositoryService.investigate()` implement capture,
+lexical/explicit/revision localization, incremental depth, observable verification,
+limits and inline trace. Nine focused controller tests pass. CLI/MCP exposure and
+fixture evaluations are next; final regression checks still pending this cycle.
+MCP SDK 2.3.0 is installed in `.venv`; host settings are not configured.
+All commits through `98c7517` are verified pushed on main. Current changes are local.
 
 ## Next planned slice
 
-After MCP integration, exercise the tools with a coding assistant and establish
-controlled outcome evaluations before adding an investigation loop or dashboard. See
+User requested completion before using a real codebase. Finish local investigation
+and controlled fixtures now; then real assistant outcome evaluations. Model planning,
+autonomous edits, and a dashboard remain planned. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 
 ## Broken / blockers / limitations

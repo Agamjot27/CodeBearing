@@ -6,11 +6,10 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-003 shares CLI/agent orchestration through `service.py:RepositoryService`,
-introduces read-only `memory.py:Memory` access, and exposes five MCP tools.
-F-001, F-003–F-005, F-013–F-015 route through the service; F-016 documents it and
-F-017 documents transport/client execution. See
-[its feature record](docs/work-items/WI-003-mcp-integration/FEATURE.md)
+WI-004 adds `investigation.py:run()` and `RepositoryService.investigate()` for a
+bounded evidence-gathering loop (F-018). CLI/MCP exposure is the next part of this
+cycle; existing paths F-016/F-017 remain available. See
+[its feature record](docs/work-items/WI-004-investigation/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
 ## Session documentation path (development workflow)
@@ -39,7 +38,7 @@ for developers/agents, not an automatically executed application function.
 | Lesson confirmation | F-009 |
 | Lesson invalidation / stale detection | F-010: computed on reads |
 | MCP request | F-017: repository-bound read-only stdio tools |
-| Investigation loop | Not implemented |
+| Investigation loop | F-018: deterministic service controller; CLI/MCP exposure pending |
 | Evaluation execution | F-011 and F-012 |
 | Frontend Context Explorer | Not implemented |
 | Run Inspector / trace loading | Not implemented |
@@ -477,3 +476,43 @@ Compilation budgets only result `text`, not metadata/MCP overhead. Tests in
 `tests/test_mcp.py:MCPTests` exercise contracts/memory; `StdioTests` uses a real
 subprocess with historical/current Git evidence. Missing SDK skips these tests
 unless `DIFFCONTEXT_REQUIRE_MCP=1`, used by the separate MCP CI job. D-011/WI-003.
+
+## F-018 — Bounded context investigation
+
+**Trigger:** `service.py:RepositoryService.investigate(task|symbols|ref, limits)`.
+CLI/MCP entry points are pending at this milestone.
+
+**Execution Path:** `RepositoryService.investigate()` → `investigation.py:run()`
+→ validate exactly one selector/limits → `build_index()` or
+`changes.py:localize_changes()` once → `_identity()` for captured version(s) →
+service `_lessons(all_current_symbol_ids)` → compare lesson evidence/scope hashes
+with captured hashes → lexical `context.py:search()` OR `index.py:select_symbol()`
+OR localized old/current seeds → for each increasing depth: `context.py:impact()`
+for each nonempty version → relevant lessons → `context.py:compile_context()` or
+`changes.py:compile_changes()` → `_frontier()` → observable verification → expand
+or stop. Nested `event()`, `exhausted()` and `finish()` record the run and limits.
+
+**Data Transformation:** Captured source-byte digests become snapshot IDs. Task
+search records up to 50 matches and selects at most three tied top-scoring IDs;
+larger ties/no matches return needs_input. Exact seeds are normalized once.
+Graph sets become versioned unexplored frontiers; packages expose missing seeds,
+omissions, unresolved changes, excluded untracked files and source warnings.
+Budget omissions stop immediately; other source gaps remain visible while known
+edges expand within limits. Empty revision seeds return no_changes only when no
+unresolved/untracked gaps exist. A ready result means selected static graph coverage,
+not semantic correctness. Steps count capture/search/compile operations; trace
+events are not extra calls. Each depth is attempted at most once.
+
+**Database Interaction:** Existing lessons SELECT once through read-only F-016.
+No writes, proposal, confirmation, or new run tables. Lesson validity is checked
+against captured current hashes in addition to live-file freshness.
+
+**External Interaction:** Local filesystem and optional read-only Git/SQLite only.
+No model, network, worker, code edits, or source/test execution. Monotonic deadline
+checks occur between operations and after compile; they cannot interrupt work.
+
+**Output:** Inline JSON-ready report with run_id, selectors, limits, usage,
+snapshot IDs, search matches, versioned seeds, latest context, verification and
+ordered trace. Status is ready/partial/needs_input/no_changes; stop_reason identifies
+graph coverage, budget/depth/step/time limits, localization gaps or missing input.
+Invalid requests/core failures raise normal service errors. D-012/WI-004.

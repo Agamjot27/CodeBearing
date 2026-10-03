@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from . import changes
+from . import investigation
 from .context import compile_context, impact, search
 from .index import build_index, select_symbol
 from .memory import Memory
@@ -79,3 +80,11 @@ class RepositoryService:
             "excluded_lessons": [{"id": r["id"], "status": r["status"], "stale": r["stale"]} for r in records if r["status"] != "confirmed" or r["stale"]],
             "warnings": index.warnings,
         }
+
+    def investigate(self, task: str | None = None, symbols: list[str] | None = None,
+                    ref: str | None = None, max_tokens: int = 4000, max_depth: int = 3,
+                    max_steps: int = 7, max_seconds: float = 30) -> dict:
+        return investigation.run(self.root, task=task, symbols=symbols, ref=ref,
+                                 max_tokens=max_tokens, max_depth=max_depth,
+                                 max_steps=max_steps, max_seconds=max_seconds,
+                                 lesson_reader=self._lessons)

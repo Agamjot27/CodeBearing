@@ -503,3 +503,60 @@ branch, `examples/mcp_client.py:demonstrate()`. **Flow:** F-017. **Work item:** 
 Sources: [SDK tools](https://py.sdk.modelcontextprotocol.io/servers/tools/),
 [running servers](https://py.sdk.modelcontextprotocol.io/run/),
 [clients](https://py.sdk.modelcontextprotocol.io/client/).
+
+## D-012 — Deterministic investigation with captured evidence and observable checks
+
+**Status:** Accepted on 2026-10-03.
+
+**Decision**
+
+Add a local evidence-gathering controller using existing search, graph expansion,
+packing, and read-only memory. Capture code once per run, start at depth zero, and
+increase depth only while a static caller/callee frontier remains. Return an inline
+trace and explicit termination reason. No model provider or agent framework yet.
+
+**Context**
+
+The user wants the investigation workflow completed before trying a real codebase.
+One-shot compilation requires the caller to choose seeds/depth. Repeated service
+calls rebuild indexes and can mix source versions. We need reproducible traversal,
+visible gaps, and termination without external quotas or unverifiable self-reflection.
+
+**Alternatives Considered**
+
+An LLM planner/verifier; an agent framework; repeated MCP calls with fresh indexes;
+always expanding to depth five; a persisted run database; claiming timeout cancels
+in-flight filesystem/Git operations.
+
+**Why This Approach**
+
+Static frontier, seed inclusion, omissions, parsing warnings and unresolved diff
+changes are observable. The controller can check them without paying for model
+calls or introducing a provider-dependent baseline. One capture avoids mid-loop
+source changes; hashes identify actual bytes, including unparseable files. Memory
+is read once and rechecked against captured evidence/scope hashes to avoid mixing
+versions. Whole excerpts and current/historical packing reuse the existing core.
+Steps/depth/budget bounds prevent indefinite expansion. Cooperative monotonic-time
+checks honestly stop between operations. Tests measure unique depths, one capture,
+both graphs, budget/deadline handling, ambiguous localization and memory consistency.
+
+**Trade-offs**
+
+This is a deterministic context investigator, not an LLM planner or autonomous
+editor. Task localization uses the existing lexical score; up to three tied best
+seeds are selected, while larger ties request explicit input. Even graph closure
+does not prove task relevance or semantic completeness. Static graph components
+can grow until a limit stops them. Source capture and lesson reads are not atomic.
+Elapsed-time limits cannot cancel an in-flight operation; Git retains its existing
+per-call timeout. The budget applies to the final context text, not trace metadata
+or cumulative round work. Traces are inline, not a persistent run registry.
+
+**Future Reconsideration**
+
+Measure controlled coding outcomes before adding LLM localization/verifying or a
+provider abstraction. Add cancellable workers if strict wall-clock bounds become
+required. Reconsider top-score seed selection with labeled localization cases.
+Persist traces only when browsing/history requirements justify storage.
+
+**Implementation:** `investigation.py:run()`, `_frontier()`, `_identity()`,
+`service.py:RepositoryService.investigate()`. **Flow:** F-018. **Work item:** WI-004.

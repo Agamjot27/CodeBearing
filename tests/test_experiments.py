@@ -136,9 +136,13 @@ class ExperimentTests(unittest.TestCase):
         request = {"model": "test", "request_hash": "hash", "max_output_tokens": 128}
         runner = CommandRunner([sys.executable, "-c", code])
         self.assertEqual(validate_response(request, runner(request))["input_tokens"], None)
-        for code, expected in [("print('not json')", "invalid_response"), ("raise SystemExit(1)", "provider_error"), ("import time; time.sleep(2)", "runner_timeout")]:
+        # Response classification needs enough time to start Python on loaded
+        # Windows machines; only the sleeping candidate tests a short deadline.
+        for code, expected, timeout in [("print('not json')", "invalid_response", 5),
+                                        ("raise SystemExit(1)", "provider_error", 5),
+                                        ("import time; time.sleep(2)", "runner_timeout", 0.2)]:
             with self.assertRaises(RunnerError) as caught:
-                CommandRunner([sys.executable, "-c", code], timeout=0.2)(request)
+                CommandRunner([sys.executable, "-c", code], timeout=timeout)(request)
             self.assertEqual(caught.exception.outcome, expected)
         with self.assertRaises(ValueError):
             CommandRunner("python adapter.py")

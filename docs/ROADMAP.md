@@ -12,13 +12,16 @@ Python AST index → explicit seed → bounded caller/callee expansion → whole
 packing → JSON context package. SQLite lessons require confirmation and record
 evidence/source hashes for conservative freshness checks. CLI, a refund example,
 regression tests, and a synthetic evaluation fixture make the slice runnable.
+Git revision localization now maps tracked old/current line changes into both
+graphs, retains deleted evidence, and compiles labeled packages under one budget.
+Imports/constants/non-Python changes remain explicit unresolved gaps.
 
 ## 2. Agent integration and change localization — next
 
 - Read-only MCP tools: search symbols, inspect impact, compile context, retrieve
   lessons. Keep lesson confirmation in the developer-controlled interface.
-- Git-diff seeds with old/new coordinates, explicit deleted-symbol handling, and
-  fallback for changes to imports, constants, and configuration.
+- Extend implemented Git-diff seeds with complete module/class evidence and
+  configuration dependencies; current fallback seeds symbols and reports gaps.
 - Proper lexical ranking and source-root configuration; incremental indexing.
 - Structured trace events with run IDs, candidates, selection reasons, budget,
   index version, timing, and errors. Make traces inspectable before adding a UI.

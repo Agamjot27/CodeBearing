@@ -6,9 +6,10 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-002 changes `index.py:build_index()` to share parsing with an in-memory source
-entry point, then adds Git-diff localization to impact/compilation. F-002, F-004,
-and F-005 are affected. See
+WI-002 shares parsing through `index.py:build_index_from_sources()` and adds
+`changes.py:localize_changes()`, `changes_impact()`, and `compile_changes()`.
+`cli.py:main()` routes revision selectors to these functions. F-001, F-002, F-004,
+F-005, F-012 are updated; F-013–F-015 describe new paths. See
 [its feature record](docs/work-items/WI-002-git-diff-localization/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
@@ -29,9 +30,9 @@ for developers/agents, not an automatically executed application function.
 | Repository indexing | F-002: full in-memory rebuild |
 | Incremental re-indexing | Not implemented |
 | Natural-language task → localization | F-003: lexical candidates only; no automatic seed selection or semantic planner |
-| Git diff → affected symbols | Not implemented |
-| Dependency graph expansion | F-004 |
-| Context compilation | F-005 |
+| Git diff → affected symbols | F-013: base commit to tracked working tree, both code versions |
+| Dependency graph expansion | F-004 (explicit symbols), F-014 (revision) |
+| Context compilation | F-005 (explicit symbols), F-015 (revision) |
 | Token-budget selection | F-006 |
 | Engineering-memory retrieval | F-007 |
 | Lesson proposal | F-008: manual input |
@@ -54,7 +55,9 @@ roadmap as if they were callable code.
 
 **Execution Path:** `diffcontext/__main__.py` → `diffcontext/cli.py:main()`.
 The installed script maps directly to `cli:main` through `pyproject.toml`.
-`main()` parses arguments → calls `index.py:build_index(args.repo)` → dispatches
+`main()` parses arguments → for revision selectors calls
+`changes.py:localize_changes(args.repo, ref)`, otherwise
+`index.py:build_index(args.repo)` → dispatches
 to the requested function → `json.dumps()` → stdout. This rebuild occurs for
 **every command**, including memory list/status operations.
 
@@ -63,7 +66,8 @@ to the requested function → `json.dumps()` → stdout. This rebuild occurs for
 
 **Database Interaction:** None in the shared path. Memory branches are below.
 
-**External Interaction:** Local source filesystem and console. `ValueError`,
+**External Interaction:** Local source filesystem and console; revision paths also
+read Git (F-013). `ValueError`,
 `OSError`, and `sqlite3.Error` are printed to stderr with exit code 2. Argument
 errors are handled by argparse; successful commands return 0.
 
@@ -122,6 +126,7 @@ does not automatically call `impact()` or an LLM.
 ## F-004 — Dependency expansion
 
 **Trigger:** `impact --symbol <id>` or a `compile_context()` call.
+Revision impact uses F-014, including old/current expansion.
 
 **Execution Path:** `cli.py:main()` → `context.py:impact()` →
 `index.py:select_symbol()` → construct reverse caller map → breadth-first traversal
@@ -143,6 +148,7 @@ found through call edges, not through a separate test-discovery service. D-002.
 ## F-005 — Context compilation with memory
 
 **Trigger:** `compile --symbol <id> --max-tokens <budget>`.
+Revision compilation uses F-015; this section describes the explicit-symbol path.
 
 **Execution Path:** `cli.py:main()` → `index.py:build_index()` →
 `context.py:impact()` → if memory DB exists, `memory.py:Memory.__init__()` →
@@ -309,3 +315,91 @@ its action/runtime dependencies; the Python checks require no model/network call
 
 **Output:** Test report and process exit status. These checks establish prototype
 behavior, not general agent success or security guarantees. D-005.
+
+Snapshot checks in `tests/test_snapshots.py:SnapshotTests` cover disk/snapshot parity
+and source byte behavior. Revision checks in `tests/test_changes.py:ChangesTests`
+create local Git fixtures under verified UUID paths, stage/commit baseline files,
+call the new service/CLI, and clean up. `cleanup()` clears read-only flags only
+within its verified fixture when Windows refuses Git-object deletion. No remote
+push, network, or change to the main checkout occurs during these fixtures.
+
+## F-013 — Git revision to changed symbols
+
+**Trigger:** `changes --ref HEAD` (HEAD default) or `impact/compile --ref <commit>`.
+
+**Execution Path:** `cli.py:main()` → `changes.py:localize_changes()` → `_git()`
+root check and ref resolution → `git ls-tree -rlz` → `git cat-file blob` →
+`index.py:build_index_from_sources()` for historical code → `git ls-files --cached`
+→ `build_index()` to capture disk bytes → `build_index_from_sources()` to restrict
+current code to tracked files → Git name/status diff and untracked list →
+`difflib.SequenceMatcher.get_opcodes()` per changed Python file → `_mapped()` on
+old/new nonempty ranges → old-callers recovery → `Changes`.
+
+**Data Transformation:** A ref becomes an immutable commit hash. NUL-delimited
+paths/statuses avoid quoting ambiguity. Source lines become 1-based hunk starts
+and line counts (zero counts mean no actual lines). Overlaps yield seed IDs.
+Out-of-symbol lines seed all symbols in that version's file and add an unresolved
+warning. Old touched IDs that survive, and their surviving direct old callers,
+also become current seeds. Removed IDs remain historical. Parse/skipped source
+and non-Python changes are unresolved. Non-content changes get a note.
+
+**Database Interaction:** None; two in-memory indexes and a report.
+
+**External Interaction:** Read-only Git subprocesses with argument arrays, disabled
+fsmonitor hooks, no external diff/text conversion, and 30-second call timeouts.
+No checkout, remote access, model calls, or execution of source. Current capture
+is not atomic. Untracked files are reported but excluded; staged deletions with
+leftover disk files do not resurrect them. Renames are explicit deletion/addition.
+
+**Output:** `Changes(current, historical, report)`; `changes` CLI prints the report
+with commit identity, file hunks, seeds, removed symbols, unresolved changes,
+untracked exclusions, and warnings. Root mismatch/invalid ref/Git failure gives
+an actionable CLI error. D-008, D-009.
+
+## F-014 — Impact from a revision
+
+**Trigger:** `impact --ref <commit> --depth <0–5>`.
+
+**Execution Path:** `cli.py:main()` → F-013 →
+`changes.py:changes_impact()` → `context.py:impact()` independently for nonempty
+current and historical seed lists.
+
+**Data Transformation:** Old-caller recovery from localization supplies current
+seeds even when the callee was removed. Each graph expands at the requested depth.
+Empty seed sets produce empty results, not unknown-symbol errors.
+
+**Database Interaction:** None.
+
+**External Interaction:** Git/filesystem in F-013; expansion is in memory.
+
+**Output:** Changes report plus separate current/historical candidates and reasons.
+This is a conservative syntactic impact set, not proof of all semantic effects.
+
+## F-015 — Compile revision context and current memory
+
+**Trigger:** `compile --ref <commit> --max-tokens <budget> --depth <0–5>`.
+
+**Execution Path:** `cli.py:main()` → F-013 → current seed expansion with `impact()`
+→ if a lesson database exists, `Memory.list(current_candidate_ids)` / `close()` →
+`changes.py:compile_changes()` → `context.py:compile_context()` first for current,
+then historical seeds with remaining budget → CLI attaches `excluded_lessons`.
+
+**Data Transformation:** A provenance header and per-version labels count against
+the shared estimated text budget. Existing whole-excerpt packing runs separately
+against each graph. Historical headers include the immutable base commit. Lessons
+are supplied only to the current compiler. A remaining budget below 128 explicitly
+omits that version's seeds. Nested package metadata excludes duplicate text.
+`complete` requires no packing omissions and no unresolved localization changes;
+it still does not prove semantic sufficiency. An unchanged comparison is valid
+and returns no symbol evidence.
+
+**Database Interaction:** Reads existing current lessons through F-007/F-010;
+does not confirm or update lessons. No historical memory database is opened.
+
+**External Interaction:** Read-only Git and files during localization; optional
+local SQLite. No LLM or coding-agent execution.
+
+**Output:** One context `text`, estimated usage/budget, changes report, per-version
+inclusions/omissions/missing seeds, memory metadata, completeness, and warnings.
+Total text accounting remains heuristic and metadata lies outside the budget.
+D-003, D-004, D-009.

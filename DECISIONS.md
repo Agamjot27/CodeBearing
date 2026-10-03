@@ -346,3 +346,56 @@ lazy source retrieval when necessary, retaining provenance and parser parity.
 
 **Implementation:** `index.py:build_index()`, `build_index_from_sources()`.
 **Flows:** F-002. **Work item:** WI-002.
+
+## D-009 — Compare tracked working-tree files with immutable Git blobs
+
+**Status:** Accepted on 2026-10-03.
+
+**Decision**
+
+Resolve the base ref once to a commit; read historical Python blobs through Git;
+use captured tracked current sources and SequenceMatcher line ranges to localize
+changes in both indexes. Seed surviving old callers in the current graph. Keep
+current/historical context separately labeled under one shared estimated budget.
+
+**Context**
+
+Users need automatic seeds from their changes. Deleted functions vanish from the
+current graph, and zero-width deletion coordinates can point at unrelated code.
+Imports/constants/class-level edits cannot be represented as a function-body edit.
+
+**Alternatives Considered**
+
+Parse unified Git patches; use GitPython; check out historical code; localize only
+current lines; infer semantic renames; ignore out-of-function changes.
+
+**Why This Approach**
+
+Git provides immutable blobs and NUL-delimited path/status output, avoiding quoted
+patch path parsing and another runtime dependency. One analyzer handles both
+versions. Comparing actual source lines gives old/new ranges without deletion
+anchor guesses. Tests demonstrate deleted-caller recovery, staged/unstaged
+semantics, paths with spaces, and accurate disclosures. Whole-file symbol fallback
+plus unresolved warnings prevents implying imports/constants were fully covered.
+The compiler reuses existing packing and current memory eligibility, never applying
+current lessons to historical code.
+
+**Trade-offs**
+
+Only tracked changes against the working tree are analyzed; stage new files first.
+Renames appear as delete/add. Only the Git root is accepted. Historical indexing
+reads every eligible Python blob with separate Git calls and may be costly on large
+repositories. SequenceMatcher is syntactic, not a semantic diff. Working-tree reads
+are not atomic, so concurrent edits can affect a run. Out-of-function evidence is
+flagged but complete module/class excerpts are not yet compiled. Current context
+gets budget priority and can crowd out old context; all omissions are reported.
+
+**Future Reconsideration**
+
+Measure startup/memory cost before batch blob reading or snapshot caching. Add
+stable working-tree capture, source roots, module/class evidence, or semantic rename
+matching when actual use requires them. Evaluate alternate old/current budget
+allocation against coding outcomes, not just context size.
+
+**Implementation:** `changes.py:localize_changes()`, `changes_impact()`,
+`compile_changes()`; `cli.py:main()`. **Flows:** F-013–F-015. **Work item:** WI-002.

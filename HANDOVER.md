@@ -16,21 +16,25 @@ current product is a local Python CLI, not the full planned web application.
   `diffcontext/context.py`. Token counts are estimates, not exact tokenizer counts.
 - SQLite lesson proposal/review, exact-scope retrieval, evidence/source hash
   freshness checks: `diffcontext/memory.py`.
-- CLI: `diffcontext/cli.py`; refund example; 9 regression tests; 2 synthetic
+- CLI: `diffcontext/cli.py`; refund example; 29 regression tests; 2 synthetic
   retrieval smoke cases; GitHub Actions check configuration.
 - Baseline committed and pushed: `fa2dd36` on `main`, remote
   `https://github.com/Agamjot27/DiffContext.git`.
 - Engineering decisions D-001–D-006 and execution flows F-001–F-012 documented.
 - Continuity workflow: handover, work-item templates, session-start instructions,
   and non-obvious comment requirements. D-007 records this addition.
+- Captured-source index adapter: `f09d471`, documented by D-008.
+- Git revision localization: `changes.py` maps tracked modifications, additions,
+  and deletions in old/current graphs; restores surviving old callers; labels old
+  context; flags out-of-function and unsupported changes. D-009, F-013–F-015.
 
 ## Current work / handoff
 
-Git-diff localization is in progress in
-[WI-002](docs/work-items/WI-002-git-diff-localization/FEATURE.md). First expose the
-indexer for in-memory historical sources (complete, 13 tests passed); next map tracked changes and connect
-impact/context commands. Existing runtime paths F-002, F-004, F-005 are affected.
-Continuity docs were committed locally as `c213c74`; push status is not assumed.
+Git-diff localization is complete in
+[WI-002](docs/work-items/WI-002-git-diff-localization/FEATURE.md). No application
+feature is currently in progress. Use the feature record's Git log for the final
+integration commit. Continuity docs are `c213c74`. Only the original `fa2dd36`
+baseline is known pushed; later commits remain local unless separately pushed.
 
 ## Next planned slice
 
@@ -42,13 +46,17 @@ MCP is not implemented. See
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. The 9 tests and 2 smoke
-  cases last passed in the baseline-documentation cycle; this documentation-only
-  cycle did not rerun them or claim new runtime verification.
+- No failing application check is currently recorded. 29 tests and 2 smoke cases
+  passed in WI-002. The first revision test run failed during Windows Git-object
+  cleanup; contained read-only cleanup retry resolved it. Details are in WI-002.
 - Static analysis misses dynamic dispatch, inheritance, re-exports, nested
   functions, configuration, and some binding behavior. Missing edges do not prove
   independence. Method excerpts do not reconstruct class context.
 - Every command rebuilds the index. The compile CLI expands the graph twice.
+- Git analysis requires the repository root, excludes untracked files, represents
+  renames as deletion/addition, and reads historical blobs separately. Working-tree
+  capture is not atomic. Out-of-function/non-Python changes remain unresolved even
+  with conservative symbol fallback. See `changes.unresolved` before trusting output.
 - Memory uses whole-file hashes, over-invalidates unrelated edits, and does not
   check all dependencies. Code-first packing can leave no budget for lessons.
 - Full API, frontend, MCP, worker, tracing, model loop, incremental indexing, and
@@ -67,6 +75,8 @@ git status --short
 python -m unittest discover -s tests -v
 python evals/run.py
 python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
+python -m diffcontext --repo . changes --ref HEAD
+python -m diffcontext --repo . compile --ref HEAD --max-tokens 4000
 ```
 
 ## Avoid

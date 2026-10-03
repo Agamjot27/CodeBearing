@@ -10,6 +10,8 @@ other project's `diffcontext` package is installed.
 
 - Parse Python modules into functions, methods, and statically resolved call edges.
 - Find seed functions through basic lexical search.
+- Automatically localize tracked Git changes against a base commit using old and
+  current code, retaining deleted symbols and recovering their surviving callers.
 - Follow callers and callees with an explicit depth limit and explain inclusion.
 - Compile complete source excerpts, imports, citations, and file hashes under an
   **estimated** token budget. Return omissions and missing seeds explicitly.
@@ -40,6 +42,30 @@ JSON wrapper or the agent's own instructions. Check `missing_seeds`, `omitted`, 
 Multiple `--symbol` flags are supported. Ambiguous short names fail and list the
 exact IDs rather than picking an arbitrary function.
 
+## Analyze your Git changes
+
+From the root of a Git repository containing Python code:
+
+```powershell
+python -m diffcontext --repo . changes --ref HEAD
+python -m diffcontext --repo . impact --ref HEAD --depth 2
+python -m diffcontext --repo . compile --ref HEAD --max-tokens 4000
+```
+
+`--ref` compares the selected commit with the tracked working tree, including both
+staged and unstaged changes. Stage new files to include them; untracked files are
+listed as excluded. `--symbol` and `--ref` are alternative selectors. `changes`
+defaults to HEAD. Run this against the actual Git root, not a subdirectory.
+
+The compiler labels current and historical excerpts separately, and uses one
+shared estimated text budget. Deleted functions retain historical evidence and
+their surviving callers can be retrieved from current code. Applicable confirmed
+lessons are attached only to current evidence. Inspect `changes.unresolved` and
+the per-version `missing_seeds`/`omitted` fields. Imports, constants, and other
+changes outside functions seed the whole file conservatively and are flagged
+because complete module/class evidence is not yet compiled. Renames appear as
+deletion plus addition. An unchanged comparison returns no symbol evidence.
+
 ## Record and review a correction
 
 ```powershell
@@ -63,16 +89,21 @@ python evals/run.py
 ```
 
 Tests cover graph resolution, import aliases, relative imports, shadowed names,
-budget omissions, memory confirmation and invalidation, scope filtering, and CLI
-behavior. The evaluation is a **two-case synthetic smoke fixture**, not a held-out
+budget omissions, memory confirmation and invalidation, snapshot parity, Git
+modifications/additions/deletions, staged and untracked behavior, renames, fallback
+warnings, old/current budget sharing, and CLI behavior. Git must be installed to
+run revision tests. The evaluation is a **two-case synthetic smoke fixture**, not a held-out
 benchmark. Its lexical baseline is a simple term-overlap search, not BM25, and the
 comparison is not budget matched. No model task-success claim follows from it.
 GitHub Actions runs both commands on pushes and pull requests once hosted.
 
 ## Current limits
 
-- Python only. Seeds are explicit symbols; Git-diff localization is planned.
+- Python only. Explicit seeds and tracked Git revision localization are supported;
+  non-Python changes are reported as unresolved.
 - Fresh indexing on every command; no persistent graph cache yet.
+- Revision analysis indexes historical Python blobs as well as captured current
+  tracked sources. Large repositories may be slow; working-tree reads are not atomic.
 - Top-level functions and direct class methods only. Dynamic dispatch, inheritance,
   re-exports, conditional/local imports, nested functions, decorators' behavior,
   module globals, and configuration may be missed. A missing edge is not proof of

@@ -9,6 +9,7 @@ from pathlib import Path
 from .context import compile_context, impact, search
 from .index import build_index
 from .memory import Memory
+from .changes import localize_changes, changes_impact, compile_changes
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -16,11 +17,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("index", help="Parse symbols and resolved call relationships")
+    changes = commands.add_parser("changes", help="Localize tracked changes against a Git commit")
+    changes.add_argument("--ref", default="HEAD")
     finder = commands.add_parser("search", help="Find candidate seeds with lexical search")
     finder.add_argument("query")
     for command in ["impact", "compile"]:
         sub = commands.add_parser(command)
-        sub.add_argument("--symbol", action="append", required=True)
+        selector = sub.add_mutually_exclusive_group(required=True)
+        selector.add_argument("--symbol", action="append")
+        selector.add_argument("--ref", help="Compare this commit with the tracked working tree")
         sub.add_argument("--depth", type=int, default=2)
         if command == "compile":
             sub.add_argument("--max-tokens", type=int, default=4000)
@@ -36,15 +41,20 @@ def main(argv: list[str] | None = None) -> int:
     status.add_argument("status", choices=["confirmed", "superseded", "disputed"])
     args = parser.parse_args(argv)
     try:
-        index = build_index(args.repo)
+        revision = getattr(args, "ref", None)
+        changed = localize_changes(args.repo, revision) if revision is not None else None
+        index = changed.current if changed is not None else build_index(args.repo)
         if args.command == "index":
             result = index.describe()
         elif args.command == "search":
             result = {"matches": search(index, args.query), "warnings": index.warnings}
+        elif args.command == "changes":
+            result = changed.report
         elif args.command == "impact":
-            result = impact(index, args.symbol, args.depth)
+            result = changes_impact(changed, args.depth) if changed is not None else impact(index, args.symbol, args.depth)
         elif args.command == "compile":
-            candidates = impact(index, args.symbol, args.depth)
+            seeds = changed.report["current_seeds"] if changed is not None else args.symbol
+            candidates = impact(index, seeds, args.depth) if seeds else {"candidates": []}
             lessons = []
             if (index.root / ".diffcontext" / "memory.sqlite3").exists():
                 store = Memory(index.root)
@@ -52,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
                     lessons = store.list({r["id"] for r in candidates["candidates"]})
                 finally:
                     store.close()
-            result = compile_context(index, args.symbol, args.max_tokens, args.depth, lessons)
+            result = compile_changes(changed, args.max_tokens, args.depth, lessons) if changed is not None else compile_context(index, seeds, args.max_tokens, args.depth, lessons)
             result["excluded_lessons"] = [{"id": r["id"], "status": r["status"], "stale": r["stale"]} for r in lessons if r["status"] != "confirmed" or r["stale"]]
         else:
             store = Memory(index.root)

@@ -61,6 +61,9 @@ when connecting a real coding agent, reusing rather than duplicating the core.
 
 **Status:** Accepted; baseline behavior, rationale adopted explicitly now.
 
+**Scope update:** Superseded by D-018 for cache-enabled parsing/persistence;
+the original uncached mode remains available. The baseline rationale below is preserved.
+
 **Decision**
 
 Continue with an in-memory `Index` and bounded caller/callee traversal for this
@@ -101,6 +104,9 @@ Evaluate graph storage against measured traversal workloads, not terminology.
 ## D-003 — Pack whole excerpts with explicit estimated-budget omissions
 
 **Status:** Accepted; baseline record.
+
+**Scope update:** Superseded by D-019 for task-selected candidate order and lesson
+reservation. Whole-excerpt/estimated-budget rules and explicit/ref packing remain.
 
 **Decision**
 
@@ -896,3 +902,65 @@ users. Use retrieval and live coding evaluations to establish product benefit.
 `typescript.py:_parse_unit()`, `index_store.py:IndexStore.load()/publish()`,
 `build_cached_sources()`; `service.py:_index()/_changes()` and launcher `--cache`.
 **Flows:** F-028, extending F-002/F-013/F-016/F-018/F-019/F-025-F-027. **Work item:** WI-008.
+
+## D-019 — Blend lexical, graph and reviewed-memory signals without embeddings
+
+**Decision**
+
+Default task search/investigation to dependency-free weighted per-field BM25,
+code-identifier splitting, bounded graph candidate ranking and capped fresh-memory
+signals. Keep `legacy` selectable and existing coding-harness treatments pinned
+to it. Reserve up to 20% of task context for eligible advice, preserving seed code
+and requiring included scoped code. Explicit/ref compilation remains unchanged.
+
+**Context**
+
+Original term overlap misses plain-English words inside camelCase/snake_case;
+graph BFS orders candidates by distance/ID rather than task evidence. Confirmed
+corrections can identify opaque code but code-first packing can exhaust their
+space. The user wants improved retrieval and measurable benefit, not more services.
+
+**Alternatives Considered**
+
+Keep overlap/BFS only; identifier splitting alone; hosted/local embeddings and a
+vector database; model-driven seed selection; graph-popularity boosts; always
+include memory first; replace existing evaluation treatments implicitly.
+
+**Why This Approach**
+
+BM25 adds document frequency, length normalization and term-frequency saturation
+without a dependency, model cost or new database. Per-field name/path/body weights
+make intent inspectable; exact names preserve ambiguity rather than hiding it.
+Memory can point at a reviewed scope only after captured hash/status validation;
+its score is bounded, and repeated lessons use the strongest signal. Relinking
+and bounded graph expansion already exist, so candidate ordering reuses them.
+Seeds lead and graph candidates cannot escape the selected bounded pool. A small
+reserve gives reviewed advice a chance while whole excerpts/budget checks retain
+observable trade-offs. Ranking diagnostics stay outside the model evidence text
+to avoid consuming source budget on verbose token-match explanations.
+Actual benefit is checked with identifier, freshness, scope, packing, API and
+matched-budget authored cases. No weight tuning or live coding improvement was
+performed. Legacy selection preserves comparison and avoids relabeling old trials.
+
+**Trade-offs**
+
+This combines lexical/graph/memory signals; it does not supply semantic embeddings
+or language understanding. Suffix heuristics and source comments can mislead
+ranking. Broad queries can choose distractors, and graph neighbors can reduce
+precision. We score the in-memory corpus again for each round; memory evidence
+reading adds latency. The reserve can omit code to retain advice. Initial weights
+and fraction are heuristics, not calibrated optima. Authored development cases
+are not representative held-out coding tasks. Exact tokenizer accounting and
+stronger injection defenses remain absent.
+
+**Future Reconsideration**
+
+Run held-out paired coding trials with explicit hybrid conditions, same model and
+budgets. Measure task success, misses, advice utility, latency and cost. Add
+embeddings only for demonstrated vocabulary/semantic misses; evaluate incremental
+search statistics and candidate caps for large corpora. Revisit weights/reserve
+on development data while keeping a separate held-out suite.
+
+**Implementation:** `retrieval.py:lexical_search()`, `eligible_lessons()`,
+`hybrid_search()`, `rank_candidates()`; `investigation.py:run()`, compiler options
+in `context.py:compile_context()`, CLI/MCP policy selection. **Flow:** F-029. **Work item:** WI-009.

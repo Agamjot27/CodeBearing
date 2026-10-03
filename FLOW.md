@@ -6,11 +6,11 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-008 adds persistent per-file parse reuse and current-graph publication (F-028),
-extending indexing F-002/F-027, tracked revision capture F-013, service/investigation
-F-016/F-018, summary F-019 and launcher/distribution F-025/F-026. MCP tools retain
-their existing names and schemas. See
-[its feature record](docs/work-items/WI-008-incremental-indexing/FEATURE.md)
+WI-009 adds code-aware lexical/graph/reviewed-memory retrieval and task lesson
+reservation (F-029), extending service/investigation F-016/F-018, packing F-006,
+summary F-019 and MCP F-017. The six tool names remain; search/investigate gain
+a hybrid/legacy policy argument. See
+[its feature record](docs/work-items/WI-009-hybrid-retrieval/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
 ## Session documentation path (development workflow)
@@ -29,7 +29,7 @@ for developers/agents, not an automatically executed application function.
 | Repository registration | Not implemented; `--repo` is a directory argument, not a persistent registration |
 | Repository indexing | F-002/F-027; opt-in persistence F-028 |
 | Incremental re-indexing | F-028: content-validated parse reuse; full graph relinking |
-| Natural-language task → localization | F-003: lexical candidates only; no automatic seed selection or semantic planner |
+| Natural-language task → localization | F-029: hybrid ranking and bounded seed selection; F-003 legacy; no semantic planner |
 | Git diff → affected symbols | F-013: base commit to tracked working tree, both code versions |
 | Dependency graph expansion | F-004 (explicit symbols), F-014 (revision) |
 | Context compilation | F-005 (explicit symbols), F-015 (revision) |
@@ -106,7 +106,9 @@ There is no Git integration or atomic source snapshot.
 **Output:** `Index` to library callers; its JSON description for the index command.
 See D-001, D-002, and D-008.
 
-## F-003 — Lexical seed search
+## F-003 — Legacy lexical seed search
+
+Selected by `retrieval="legacy"`; default search/task investigation now uses F-029.
 
 **Trigger:** `search "refund_total"` after shared indexing.
 
@@ -416,6 +418,9 @@ D-003, D-004, D-009.
 
 ## F-016 — Shared repository request service
 
+Default search now follows F-029, including read-only reviewed-memory ranking;
+the lexical call below describes retrieval="legacy". Other service paths remain.
+
 **Trigger:** CLI search/changes/impact/compile and MCP handlers use the same
 service. `RepositoryService(root)` fixes a resolved, existing directory once.
 
@@ -483,6 +488,9 @@ subprocess with historical/current Git evidence. Missing SDK skips these tests
 unless `DIFFCONTEXT_REQUIRE_MCP=1`, used by the separate MCP CI job. D-011/WI-003.
 
 ## F-018 — Bounded context investigation
+
+For hybrid task selectors, replace the lexical search and BFS packing portions
+below with F-029. Explicit symbols/ref and retrieval="legacy" retain this path.
 
 **Trigger:** `service.py:RepositoryService.investigate(task|symbols|ref, limits)`.
 From `cli.py:main()` investigate branch or `mcp_server.py:create_server():investigate()`
@@ -853,3 +861,51 @@ revision tools. No network, LLM, target-code execution or host-settings changes.
 `evals/indexing.py:main()` → authored workload → `measured()` → full/cold/warm/edit
 builds → `same_graph()` and parse-count gates → timing JSON. Clean wheel F-026 also
 checks cache persistence between installed CLI indexing and MCP search. D-018/WI-008.
+
+## F-029 — Hybrid task localization, graph ranking and scoped lesson packing
+
+**Trigger:** CLI search/investigate or MCP search_symbols/investigate; default
+`retrieval="hybrid"`. Selecting `legacy` runs the original overlap/packing path.
+
+**Execution Path:** `cli.py:main()` or `mcp_server.py:create_server()` handler →
+`service.py:RepositoryService.search_symbols()` → `_index()` (F-028 if enabled)
+→ `_lessons(set(index.symbols))` → `retrieval.py:hybrid_search()` → `_lexical_rows()`
+→ `_tokens()`/`_bm25()` weighted name/path/body scores → `_memory_signals()` →
+`eligible_lessons()` checks captured hashes/status → normalized/capped blend →
+ranked match response. No graph traversal is performed by the search tool itself.
+
+Investigation: `RepositoryService.investigate()` → `investigation.py:run()` →
+one source/index capture and lesson snapshot → `hybrid_search()` → best-score ties
+up to three seeds (otherwise needs_input) → for each bounded depth,
+`retrieval.py:rank_candidates()` → `context.py:impact()` pool → lexical/graph/memory
+candidate scores, seed-first order → eligible scoped lessons/query-match priority
+→ `compile_context(candidates=..., lesson_budget=max_tokens//5,
+require_lesson_scope=True)` → verify frontier/omissions/gaps → expand or return.
+Detailed candidates/signals appear in context.retrieval and search_matches;
+`runs.py:summarize()` preserves policy metadata. Existing step/time limits apply.
+Explicit symbol/Git selectors keep F-018's prior packing path. `experiments.py:
+make_request()` explicitly uses legacy for existing graph/memory treatments.
+
+**Data Transformation:** Task text → full/split identifier tokens and conservative
+suffix variants → per-field BM25 → exact-name priority and capped scoped memory
+signals → seeds → bounded static graph → ranked whole excerpts. Compiler validates
+the ranked pool matches impact; detailed lexical explanations remain outside text.
+Eligible lesson sections reserve at most 20% of budget, but optional advice never
+hides a seed that fits the full budget. Lessons whose scoped code is omitted are
+omitted too. Every final section still passes the estimated whole-text budget.
+Scores are heuristics; no-match/large exact ties remain requests for input.
+
+**Database Interaction:** Existing lessons SQLite is opened read-only, if present;
+no lesson confirmation or search-state writes. Optional derived parse storage
+follows F-028. Query ranks are not cached; no vector/embedding database or new table.
+
+**External Interaction:** Local source/SQLite/optional parsers; Git only for the
+unchanged revision selector path. No provider, model, target execution, HTTP or
+worker. Search may reread evidence for freshness before captured-byte validation.
+
+**Output:** Ranked IDs/reasons/signals and optional indexing counters; task run
+context plus policy, scored candidates, omissions, lessons and trace. Six tool
+names unchanged; search/investigate gain a retrieval enum. `evals/hybrid.py:main()`
+→ authored fixtures → same captured Index/lessons per pair → legacy/hybrid search
+and compilation → recall/precision/MRR/budget/eligibility/abstention/latency JSON.
+This is a development retrieval comparison, not live coding outcomes. D-019/WI-009.

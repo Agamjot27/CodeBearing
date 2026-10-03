@@ -12,6 +12,7 @@ jobs:
       - run: python evals/run.py
       - run: python evals/investigate.py
       - run: python evals/indexing.py
+      - run: python evals/hybrid.py
       - run: python evals/coding_bench.py self-check
   mcp:
     strategy:
@@ -30,4 +31,4 @@ jobs:
           DIFFCONTEXT_REQUIRE_TYPESCRIPT: '1'
       - run: python evals/typescript.py
       - run: python -m pip wheel . --no-deps --wheel-dir dist
-      - run: python scripts/check_wheel.py dist/diffcontext_lab-0.4.0-py3-none-any.whl --typescript
+      - run: python scripts/check_wheel.py dist/diffcontext_lab-0.5.0-py3-none-any.whl --typescript

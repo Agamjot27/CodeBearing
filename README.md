@@ -12,7 +12,9 @@ other project's `diffcontext` package is installed.
 - Optionally parse TypeScript/JavaScript functions and methods, with conservative
   relative ESM import and call edges. TSX/JSX syntax is supported; component
   relationships and type-checker resolution are not. See [language support](docs/LANGUAGES.md).
-- Find seed functions through basic lexical search.
+- Find seed functions through code-aware lexical ranking and fresh, confirmed memory.
+  Task investigation ranks graph candidates and reserves space for applicable lessons;
+  `--retrieval legacy` retains the earlier baseline. See [retrieval](docs/RETRIEVAL.md).
 - Automatically localize tracked Git changes against a base commit using old and
   current code, retaining deleted symbols and recovering their surviving callers.
 - Follow callers and callees with an explicit depth limit and explain inclusion.
@@ -83,7 +85,8 @@ python -m diffcontext --repo examples/refunds investigate --symbol billing.py:ro
 
 The investigator locates once, gathers reviewed memory, and expands static
 dependencies while checking gaps and limits. It returns `ready`, `partial`,
-`needs_input`, or `no_changes` with a trace. Task selection is lexical and `ready`
+`needs_input`, or `no_changes` with a trace. Task selection combines lexical and
+reviewed-memory signals; it has no semantic model. `ready`
 means selected static graph coverage, not semantic correctness. This local workflow
 does not edit code or call a model. See [the investigation guide](docs/INVESTIGATION.md)
 for Git runs, limits, status handling and saving/inspecting results.

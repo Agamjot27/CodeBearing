@@ -26,12 +26,14 @@ Imports/constants/unsupported-language changes remain explicit unresolved gaps.
   configuration dependencies; current fallback seeds symbols and reports gaps.
 - Implemented: optional TS/JS parsing and persistent incremental parse reuse
   with full current-graph relinking; see [INDEXING.md](INDEXING.md).
-- Next: proper lexical/hybrid ranking and source-root configuration; compare
-  retrieval under matched budgets before adding new infrastructure.
+- Implemented: code-aware lexical/graph/confirmed-memory ranking and bounded
+  lesson reservation; [authored matched-budget comparison](RETRIEVAL.md).
+  Next: held-out tasks, real coding trials and source-root configuration.
 - Implemented for investigation: inline run IDs, captured-byte snapshot identities,
   candidates, verification, limits, timing and stop reasons; explicit saved-JSON
   CLI inspection. Persistent history and traces for unexpected errors remain planned.
-- Exact tokenizer adapter and separate reserved budget for applicable lessons.
+- Implemented for hybrid tasks: reserved budget for applicable lessons. Next:
+  exact tokenizer adapter; explicit symbol/ref packing retains the prior policy.
 
 Acceptance: a real coding agent can consume our tools in a small repository, with
 reproducible context and visible omissions. Integration contracts are tested.

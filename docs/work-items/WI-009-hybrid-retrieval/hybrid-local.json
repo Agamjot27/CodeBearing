@@ -1,0 +1,345 @@
+{
+  "label": "Seven authored development cases, same captured index/task/budget/depth per pair; no held-out, embedding or model-quality claim",
+  "metric_scope": "Recall/precision apply to compiled code IDs; MRR to localization rank over five nonempty relevance sets. Empty relevance sets have no reciprocal rank and are checked for abstention separately. Latency is one local retrieval call, excluding index/memory capture; fixed legacy-first order, no repeats",
+  "aggregate": {
+    "cases": 7,
+    "ranked_cases": 5,
+    "recall_regressions": [],
+    "legacy_mrr": 0.2,
+    "hybrid_mrr": 0.9
+  },
+  "results": [
+    {
+      "case": "identifier-snake",
+      "task": "refund total",
+      "budget": 1500,
+      "depth": 1,
+      "expected": [
+        "billing.py:refund_total",
+        "billing.py:round_line",
+        "checkout.py:cancel_order"
+      ],
+      "legacy": {
+        "recall": 0.0,
+        "precision": 0.0,
+        "reciprocal_rank": 0,
+        "included": [
+          "a_noise.py:refund_documentation"
+        ],
+        "missing": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "unexpected": [
+          "a_noise.py:refund_documentation"
+        ],
+        "latency_ms": 0.339,
+        "estimated_tokens": 98,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "reciprocal_rank": 1.0,
+        "included": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 1.272,
+        "estimated_tokens": 240,
+        "budget_respected": true,
+        "included_lessons": [
+          1
+        ],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    },
+    {
+      "case": "identifier-camel",
+      "task": "reconcile balance",
+      "budget": 1000,
+      "depth": 1,
+      "expected": [
+        "ledger.py:reconcileBalance"
+      ],
+      "legacy": {
+        "recall": 0.0,
+        "precision": null,
+        "reciprocal_rank": 0,
+        "included": [],
+        "missing": [
+          "ledger.py:reconcileBalance"
+        ],
+        "unexpected": [],
+        "latency_ms": 0.081,
+        "estimated_tokens": 0,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "reciprocal_rank": 1.0,
+        "included": [
+          "ledger.py:reconcileBalance"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 1.112,
+        "estimated_tokens": 76,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    },
+    {
+      "case": "legacy-exact-with-distractor",
+      "task": "refund_total",
+      "budget": 1500,
+      "depth": 1,
+      "expected": [
+        "billing.py:refund_total",
+        "billing.py:round_line",
+        "checkout.py:cancel_order"
+      ],
+      "legacy": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "reciprocal_rank": 1.0,
+        "included": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 0.145,
+        "estimated_tokens": 240,
+        "budget_respected": true,
+        "included_lessons": [
+          1
+        ],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "reciprocal_rank": 1.0,
+        "included": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 1.245,
+        "estimated_tokens": 240,
+        "budget_respected": true,
+        "included_lessons": [
+          1
+        ],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    },
+    {
+      "case": "distractor-tight-budget",
+      "task": "refund",
+      "budget": 250,
+      "depth": 1,
+      "expected": [
+        "billing.py:refund_total",
+        "billing.py:round_line",
+        "checkout.py:cancel_order"
+      ],
+      "legacy": {
+        "recall": 0.0,
+        "precision": 0.0,
+        "reciprocal_rank": 0,
+        "included": [
+          "a_noise.py:refund_documentation"
+        ],
+        "missing": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "unexpected": [
+          "a_noise.py:refund_documentation"
+        ],
+        "latency_ms": 0.12,
+        "estimated_tokens": 98,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": 0.0,
+        "precision": 0.0,
+        "reciprocal_rank": 0.5,
+        "included": [
+          "a_noise.py:refund_documentation"
+        ],
+        "missing": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "unexpected": [
+          "a_noise.py:refund_documentation"
+        ],
+        "latency_ms": 1.066,
+        "estimated_tokens": 98,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    },
+    {
+      "case": "no-match",
+      "task": "xyzzynonexistent",
+      "budget": 1000,
+      "depth": 1,
+      "expected": [],
+      "legacy": {
+        "recall": null,
+        "precision": null,
+        "reciprocal_rank": null,
+        "included": [],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 0.069,
+        "estimated_tokens": 0,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": null,
+        "precision": null,
+        "reciprocal_rank": null,
+        "included": [],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 0.481,
+        "estimated_tokens": 0,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    },
+    {
+      "case": "memory-fresh",
+      "task": "chargeback settlement",
+      "budget": 1000,
+      "depth": 1,
+      "expected": [
+        "billing.py:refund_total"
+      ],
+      "legacy": {
+        "recall": 0.0,
+        "precision": null,
+        "reciprocal_rank": 0,
+        "included": [],
+        "missing": [
+          "billing.py:refund_total"
+        ],
+        "unexpected": [],
+        "latency_ms": 0.095,
+        "estimated_tokens": 0,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": 1.0,
+        "precision": 0.3333333333333333,
+        "reciprocal_rank": 1.0,
+        "included": [
+          "billing.py:refund_total",
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "missing": [],
+        "unexpected": [
+          "billing.py:round_line",
+          "checkout.py:cancel_order"
+        ],
+        "latency_ms": 1.023,
+        "estimated_tokens": 240,
+        "budget_respected": true,
+        "included_lessons": [
+          1
+        ],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    },
+    {
+      "case": "memory-stale",
+      "task": "chargeback settlement",
+      "budget": 1000,
+      "depth": 1,
+      "expected": [],
+      "legacy": {
+        "recall": null,
+        "precision": null,
+        "reciprocal_rank": null,
+        "included": [],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 0.062,
+        "estimated_tokens": 0,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "hybrid": {
+        "recall": null,
+        "precision": null,
+        "reciprocal_rank": null,
+        "included": [],
+        "missing": [],
+        "unexpected": [],
+        "latency_ms": 0.422,
+        "estimated_tokens": 0,
+        "budget_respected": true,
+        "included_lessons": [],
+        "eligible_memory_only": true,
+        "lesson_scope_present": true
+      },
+      "recall_regression": false,
+      "memory_fixture_id": 1
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from . import investigation
 from .context import compile_context, impact, search
 from .index import build_index, select_symbol
 from .memory import Memory
+from .retrieval import hybrid_search
 
 
 class RepositoryService:
@@ -44,13 +45,16 @@ class RepositoryService:
         finally:
             store.close()
 
-    def search_symbols(self, query: str, limit: int = 10) -> dict:
+    def search_symbols(self, query: str, limit: int = 10, retrieval: str = "hybrid") -> dict:
         if not query.strip() or len(query) > 2000:
             raise ValueError("Query must be nonempty and at most 2000 characters.")
         if not 1 <= limit <= 50:
             raise ValueError("Limit must be between 1 and 50.")
+        if retrieval not in {"legacy", "hybrid"}:
+            raise ValueError("Retrieval must be legacy or hybrid.")
         index = self._index()
-        return {"matches": search(index, query, limit), "warnings": index.warnings,
+        matches = hybrid_search(index, query, limit, self._lessons(set(index.symbols))) if retrieval == "hybrid" else search(index, query, limit)
+        return {"matches": matches, "warnings": index.warnings, "retrieval": retrieval,
                 **({"indexing": index.indexing} if index.indexing else {})}
 
     def localize_changes(self, ref: str = "HEAD") -> dict:
@@ -98,9 +102,10 @@ class RepositoryService:
 
     def investigate(self, task: str | None = None, symbols: list[str] | None = None,
                     ref: str | None = None, max_tokens: int = 4000, max_depth: int = 3,
-                    max_steps: int = 7, max_seconds: float = 30) -> dict:
+                    max_steps: int = 7, max_seconds: float = 30, retrieval: str = "hybrid") -> dict:
         return investigation.run(self.root, task=task, symbols=symbols, ref=ref,
                                  max_tokens=max_tokens, max_depth=max_depth,
                                  max_steps=max_steps, max_seconds=max_seconds,
                                  cache=self.cache,
+                                 retrieval=retrieval,
                                  lesson_reader=self._lessons)

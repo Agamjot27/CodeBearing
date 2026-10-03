@@ -86,7 +86,10 @@ def make_request(task: CodingTask, root: Path, condition: str, model: str,
                 omitted.append(path)
         diagnostics = {"included_files": included, "omitted_files": omitted, "included_lessons": [], "warnings": index.warnings}
     else:
-        run = RepositoryService(root).investigate(task=task.query, max_tokens=remaining)
+        # Existing graph/memory conditions retain the original retrieval policy.
+        # Changing a default must not silently turn an old experiment into a new
+        # hybrid treatment or invalidate its baseline interpretation.
+        run = RepositoryService(root).investigate(task=task.query, max_tokens=remaining, retrieval="legacy")
         package = run["context"]
         text = package["text"] if package else ""
         diagnostics = {"status": run["status"], "stop_reason": run["stop_reason"],

@@ -47,27 +47,33 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-008 implemented: [Persistent incremental indexing](docs/work-items/WI-008-incremental-indexing/FEATURE.md).
-Optional --cache stores JSON parse facts and current symbols/edges in local SQLite;
-unchanged files skip parsing, all call facts relink against current exports.
-Version 0.4.0; generated assistant configuration propagates cache choice.
-Final full suite passed 108 tests; two subsequently added CLI/Git tests passed
-separately (110 covered total). Core-only cache tests pass with TS skipped.
-Saved authored 120-file/960-function local measurement: full 105.255ms, warm
-30.950ms, empty-cache 276.860ms, full/cached edit 99.242/69.762ms. Exact parity
-passed; no production/competitor/coding-benefit claim. Cache storage errors fall
-back to current evidence. Clean wheel 0.4.0 with both extras passed installed compilation, configs,
-MCP discovery/search and cross-process persistent-cache reuse.
-WI-007 pushed as 53dd799; WI-006 pushed as 8bfe195. MCP SDK/parsers are installed
-in .venv; source installation is editable; version metadata is refreshed for 0.4.0. No assistant-host settings configured,
+WI-009 completed:
+[Hybrid retrieval](docs/work-items/WI-009-hybrid-retrieval/FEATURE.md).
+Version 0.5.0: default search/task investigation combines code-aware lexical
+ranking, bounded graph candidates and fresh developer-confirmed memory. Explicit
+symbol/ref packing remains unchanged; --retrieval legacy preserves the baseline.
+Hybrid tasks reserve up to 20% for whole scoped lessons, with seed priority.
+D-019/F-029 and docs/RETRIEVAL.md document weights, paths and limits.
+Saved seven authored matched-budget cases: MRR 0.20/0.90 over five nonempty tasks;
+both policies fail the broad refund task, and hybrid fresh-memory precision is 1/3.
+These are development results, not held-out or live coding outcomes.
+Final full suite passed all 135 tests with MCP and TS extras. Six investigation,
+two original smoke and TS budget fixtures pass; seven hybrid cases pass their
+contract gates. Clean 0.5.0 wheel passed outside-checkout hybrid task retrieval,
+generated client configs, six-tool MCP transport and cross-process cache reuse.
+Editable installation metadata refreshed to 0.5.0. WI-010 startup-sensitive test
+fix committed as a514b20; runtime timeout behavior was not changed.
+WI-008 pushed as 7de87ec; optional --cache reuses parse facts and relinks current
+graphs (D-018/F-028). WI-007 pushed as 53dd799; WI-006 as 8bfe195.
+MCP SDK/parsers are installed in .venv. No assistant-host settings configured,
 public PyPI release or live model outcomes. Check final Git synchronization after push.
 
 ## Next planned slice
 
-Implement and evaluate hybrid retrieval: improve lexical ranking, combine task
-search with graph expansion and reviewed memory, compare against current retrieval
-under identical budgets. Use the existing coding harness for paired live trials
-once a model/provider is selected and configured. Dedicated graph storage needs
+Add explicitly named hybrid coding-harness treatments and held-out tasks; existing
+graph/memory conditions deliberately retain legacy retrieval for comparability.
+Harden Windows subprocess timeout cleanup before provider adapters, then run
+paired trials once a model/provider is selected and configured. Dedicated graph storage needs
 measured workload justification; derived symbols/edges now persist in local SQLite.
 Public publication needs a selected distinct name/publisher identity, neither
 configured. CodeBearing was suggested, not selected or availability-checked.
@@ -78,9 +84,11 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. Full suite passed 108 tests
-  plus two separate CLI/Git cache tests. MCP pipes need approved sandbox access.
-  CI was updated for Linux/Windows; hosted CI results are not yet verified here.
+- Final WI-009 full suite passed 135 tests. Earlier attempts had a transient Git
+  timeout, restricted MCP pipe errors, and a startup-sensitive assertion fixed in
+  WI-010. Restricted MCP pipes require approved access.
+  An earlier suite stalled at a grading timeout and was stopped; inspect Windows
+  descendant pipe/timeout cleanup before live harness trials. Hosted CI unverified.
 - Coding trials are synthetic single-response edits; lessons are authored pre-task
   data, not real historical corrections. Declared model/settings/usage depend on the
   external adapter. Missing costs stay unknown across retried attempts. Grading
@@ -96,8 +104,8 @@ Model planning, autonomous edits, and a dashboard remain planned. See
   capture is not atomic. Out-of-function/unsupported-language changes remain unresolved even
   with conservative symbol fallback. See `changes.unresolved` before trusting output.
 - Memory uses whole-file hashes, over-invalidates unrelated edits, and does not
-  check all dependencies. Code-first packing can leave no budget for lessons.
-- Investigation task selection is lexical. ready means selected static graph
+  check all dependencies. Explicit/ref code-first packing may leave no lesson budget.
+- Investigation task selection uses lexical/memory heuristics. ready means selected static graph
   coverage, not semantic task correctness. Deadline is cooperative; ongoing work
   can overrun before returning. Trace/JSON overhead is outside the text budget.
 - HTTP API, frontend, worker, persistent tracing, model loop, and
@@ -116,6 +124,7 @@ git status --short
 python -m unittest discover -s tests -v
 python evals/run.py
 python evals/investigate.py
+python evals/hybrid.py
 python evals/coding_bench.py self-check
 python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
 python -m diffcontext --repo . changes --ref HEAD

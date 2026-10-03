@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import sqlite3
+from typing import Literal
 from typing import Annotated, Any
 
 from mcp.server import MCPServer
@@ -45,9 +46,14 @@ def create_server(root: Path, *, cache: bool = False) -> MCPServer:
     def search_symbols(
         query: Annotated[str, Field(min_length=1, max_length=2000)],
         limit: Annotated[int, Field(ge=1, le=50)] = 10,
+        retrieval: Literal["hybrid", "legacy"] = "hybrid",
     ) -> dict[str, Any]:
-        """Find indexed symbol IDs by lexical search; choose seeds from results."""
-        return _call(service.search_symbols, query, limit)
+        """Rank symbols by code-aware lexical search and fresh reviewed memory.
+
+        Hybrid is the default; legacy keeps the original token-overlap baseline.
+        Inspect disclosed signals and reasons before selecting seeds.
+        """
+        return _call(service.search_symbols, query, limit, retrieval)
 
     @server.tool(annotations=readonly)
     def localize_changes(ref: Annotated[str, Field(min_length=1, max_length=2000)] = "HEAD") -> dict[str, Any]:
@@ -79,13 +85,15 @@ def create_server(root: Path, *, cache: bool = False) -> MCPServer:
         symbols: Symbols = None, ref: Ref = None, max_tokens: Budget = 4000,
         max_depth: Depth = 3, max_steps: Annotated[int, Field(ge=2, le=10)] = 7,
         max_seconds: Annotated[float, Field(ge=0.1, le=120)] = 30,
+        retrieval: Literal["hybrid", "legacy"] = "hybrid",
     ) -> dict[str, Any]:
         """Gather evidence automatically; select exactly one task/symbols/ref.
 
         Returns context, observable gaps, stop reason and trace. Task localization
-        is lexical. ready means selected static graph covered, not task correctness.
+        uses lexical, graph and confirmed-memory signals; legacy is available.
+        ready means selected static graph covered, not task correctness.
         Time limits are cooperative; metadata is outside the estimated text budget.
         """
-        return _call(service.investigate, task, symbols, ref, max_tokens, max_depth, max_steps, max_seconds)
+        return _call(service.investigate, task, symbols, ref, max_tokens, max_depth, max_steps, max_seconds, retrieval)
 
     return server

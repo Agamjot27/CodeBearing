@@ -61,6 +61,13 @@ def verify(wheel: Path, typescript: bool = False):
         compiled = json.loads(run([str(core), "--repo", str(repo), "compile", "--symbol", seed], scratch))
         if seed not in {s["id"] for s in compiled["included"]}:
             raise ValueError("Installed compiler omitted the fixture seed.")
+        # Exercise task retrieval outside the checkout, so missing wheel modules
+        # cannot be hidden by source imports during development.
+        task = json.loads(run([str(core), "--repo", str(repo), "investigate",
+                              "--task", "refund total", "--retrieval", "hybrid"], scratch))
+        expected_name = "refundTotal" if typescript else "refund_total"
+        if not any(identifier.endswith(":" + expected_name) for identifier in task["seeds"]["current"]):
+            raise ValueError("Installed hybrid task retrieval missed the fixture seed.")
         for client in ("claude", "cursor", "codex"):
             output = run([str(launcher), "--repo", str(repo), "--config", client], scratch)
             if client == "codex":
@@ -86,7 +93,7 @@ def verify(wheel: Path, typescript: bool = False):
         if (repo / ".diffcontext" / "memory.sqlite3").exists():
             raise ValueError("Cache-enabled tools created engineering memory.")
         print(json.dumps({"wheel": wheel.name, "status": "passed", "tools": checked["tools"],
-                          "checks": ["clean install", "outside-checkout CLI", "client configs", "stdio discovery and search", "persistent cache reuse"]}, indent=2))
+                          "checks": ["clean install", "outside-checkout CLI and hybrid task", "client configs", "stdio discovery and search", "persistent cache reuse"]}, indent=2))
     finally:
         shutil.rmtree(scratch)
 

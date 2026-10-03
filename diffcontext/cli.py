@@ -23,6 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     changes.add_argument("--ref", default="HEAD")
     finder = commands.add_parser("search", help="Find candidate seeds with lexical search")
     finder.add_argument("query")
+    finder.add_argument("--retrieval", choices=["hybrid", "legacy"], default="hybrid", help="Task ranking policy; legacy preserves the original overlap baseline")
     investigator = commands.add_parser("investigate", help="Gather context with bounded expansion and a run trace")
     selector = investigator.add_mutually_exclusive_group(required=True)
     selector.add_argument("--task", help="Lexical task description; inspect the selected seeds")
@@ -33,6 +34,7 @@ def main(argv: list[str] | None = None) -> int:
     investigator.add_argument("--max-steps", type=int, default=7)
     investigator.add_argument("--max-seconds", type=float, default=30)
     investigator.add_argument("--summary", action="store_true", help="Show decisions/citations without source text")
+    investigator.add_argument("--retrieval", choices=["hybrid", "legacy"], default="hybrid")
     inspector = commands.add_parser("inspect", help="Summarize a full investigation JSON saved by the caller")
     inspector.add_argument("run_file", type=Path)
     for command in ["impact", "compile"]:
@@ -71,7 +73,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "index":
             result = build_index(args.repo, cache=args.cache).describe()
         elif args.command == "search":
-            result = service.search_symbols(args.query)
+            result = service.search_symbols(args.query, retrieval=args.retrieval)
         elif args.command == "changes":
             result = service.localize_changes(args.ref)
         elif args.command == "impact":
@@ -80,7 +82,9 @@ def main(argv: list[str] | None = None) -> int:
             result = service.compile_context(args.symbol, args.ref, args.max_tokens, args.depth)
         elif args.command == "investigate":
             result = service.investigate(args.task, args.symbol, args.ref, args.max_tokens,
-                                         args.max_depth, args.max_steps, args.max_seconds)
+                                         args.max_depth, args.max_steps, args.max_seconds, args.retrieval)
+            # Policy only affects task localization/packing; explicit and Git
+            # selectors preserve their original context behavior.
             if args.summary:
                 result = summarize(result)
         else:

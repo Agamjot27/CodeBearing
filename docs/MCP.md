@@ -7,7 +7,7 @@ DiffContext needs no model API key; your assistant keeps its own account/setting
 
 ## 1. Install
 
-Requires Python 3.10+. **This project's 0.4.0 package is not published to PyPI yet.**
+Requires Python 3.10+. **This project's 0.5.0 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
 After this implementation is committed and pushed, install ours from GitHub
 (Git must be installed):
@@ -33,7 +33,7 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/diffcontext_lab-0.4.0-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/diffcontext_lab-0.5.0-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
 Python-only core CLI installation requires no runtime dependencies.
 For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`
@@ -140,12 +140,12 @@ the host: the host starts its own process.
 
 | Tool | Arguments | Result |
 | --- | --- | --- |
-| `search_symbols` | `query`, `limit=10` | Lexical matches with IDs and warnings |
+| `search_symbols` | `query`, `limit=10`, `retrieval="hybrid"` | Ranked matches with IDs, lexical/memory signals and warnings |
 | `localize_changes` | `ref="HEAD"` | Old/current changed seeds, removed symbols, unresolved changes |
 | `analyze_impact` | `symbols` or `ref`, `depth=2` | Bounded callers/callees; separate versions for a ref |
 | `compile_context` | `symbols` or `ref`, `max_tokens=4000`, `depth=2` | Cited text, eligible lessons, omissions and metadata |
 | `get_lessons` | `symbols` | Confirmed fresh lessons for those current symbols; excluded metadata |
-| `investigate` | `task` or `symbols` or `ref`, `max_tokens=4000`, `max_depth=3`, `max_steps=7`, `max_seconds=30` | Bounded gather/verify/expand loop, context and inline trace |
+| `investigate` | `task` or `symbols` or `ref`, `max_tokens=4000`, `max_depth=3`, `max_steps=7`, `max_seconds=30`, `retrieval="hybrid"` | Bounded gather/verify/expand loop, context and inline trace |
 
 Select exactly one of `symbols` or `ref` for impact/compilation. Supply 1–20
 nonempty symbol names/IDs of at most 2000 characters each. Queries/refs have the

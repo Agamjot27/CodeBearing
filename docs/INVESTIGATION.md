@@ -20,8 +20,12 @@ The second returns full JSON with `context.text` and the trace. The investigator
 captures source once per run. The example gathers the helper, refund implementation,
 consumer and tests as needed to close the selected static graph.
 
-Task localization is lexical, not semantic planning. Use task wording containing
-identifiers or searchable source terms. It selects up to three tied best candidates;
+Task localization defaults to code-aware lexical ranking plus fresh, confirmed
+memory. It splits snake_case/camelCase identifiers and ranks graph candidates with
+visible signals. Up to 20% of the text budget is reserved for whole applicable
+lessons, subject to seed priority and inclusion of the lesson's scoped code.
+Use `--retrieval legacy` for the original baseline. See [retrieval](RETRIEVAL.md).
+There is no semantic planner. It selects up to three tied best candidates;
 larger ties/no matches request more input. Inspect `search_matches` and `seeds`;
 switch to exact `--symbol` IDs if the task selected the wrong code.
 

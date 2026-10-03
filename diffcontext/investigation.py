@@ -13,6 +13,7 @@ from typing import Callable
 from .changes import compile_changes, localize_changes
 from .context import compile_context, impact, search
 from .index import Index, build_index, select_symbol
+from .retrieval import eligible_lessons, hybrid_search, rank_candidates
 
 
 def _identity(index: Index) -> str:
@@ -36,6 +37,7 @@ def run(
     lesson_reader: Callable[[set[str]], list[dict]] | None = None,
     clock: Callable[[], float] = time.monotonic,
     cache: bool = False,
+    retrieval: str = "hybrid",
 ) -> dict:
     """Locate once, widen depth while observable graph evidence is missing, then stop.
 
@@ -44,6 +46,8 @@ def run(
     """
     if sum(value is not None for value in (task, symbols, ref)) != 1:
         raise ValueError("Supply exactly one of task, symbols or ref.")
+    if retrieval not in {"legacy", "hybrid"}:
+        raise ValueError("Retrieval must be legacy or hybrid.")
     if task is not None and (not task.strip() or len(task) > 2000):
         raise ValueError("Task must be nonempty and at most 2000 characters.")
     if ref is not None and (not ref.strip() or len(ref) > 2000):
@@ -109,10 +113,11 @@ def run(
         return finish("partial", reason)
 
     if task is not None:
-        matches = search(current, task, limit=50)
+        matches = hybrid_search(current, task, limit=50, lessons=lessons) if retrieval == "hybrid" else search(current, task, limit=50)
         operations += 1
         report["search_matches"] = matches
-        event("locate", method="lexical", matches=matches)
+        report["retrieval"] = {"policy": retrieval, "scope": "Lexical, static graph and reviewed memory; no embeddings or semantic correctness guarantee."}
+        event("locate", method=retrieval, matches=matches)
         reason = exhausted()
         if reason:
             return finish("partial", reason)
@@ -145,9 +150,24 @@ def run(
             graphs["historical"] = (historical, report["seeds"]["historical"])
         candidates = {version: impact(index, seeds, depth)["candidates"] if seeds else []
                       for version, (index, seeds) in graphs.items()}
+        hybrid = task is not None and retrieval == "hybrid"
+        if hybrid:
+            candidates["current"] = rank_candidates(current, task, report["seeds"]["current"], depth, lessons=lessons)
         scopes = {row["id"] for row in candidates["current"]}
         relevant = [record for record in lessons if record["scope"] in scopes]
-        package = compile_changes(changed, max_tokens, depth, relevant) if changed else compile_context(current, report["seeds"]["current"], max_tokens, depth, relevant)
+        if hybrid:
+            valid = eligible_lessons(current, relevant)
+            lesson_ids = [lesson_id for row in candidates["current"] for lesson_id in row.get("lesson_ids", [])]
+            # Query-matched advice receives first chance at the bounded reserve;
+            # remaining fresh scoped lessons may use ordinary leftover space.
+            valid.sort(key=lambda r: (r["id"] not in lesson_ids, r["id"]))
+            package = compile_context(current, report["seeds"]["current"], max_tokens, depth, valid,
+                                      candidates=candidates["current"], lesson_budget=max_tokens // 5,
+                                      require_lesson_scope=True)
+            package["retrieval"] = {"policy": "hybrid", "lesson_reserve_limit": max_tokens // 5,
+                                    "candidates": candidates["current"]}
+        else:
+            package = compile_changes(changed, max_tokens, depth, relevant) if changed else compile_context(current, report["seeds"]["current"], max_tokens, depth, relevant)
         package["excluded_lessons"] = [{"id": r["id"], "status": r["status"], "stale": r["stale"]}
                                       for r in relevant if r["status"] != "confirmed" or r["stale"]]
         report["context"] = package

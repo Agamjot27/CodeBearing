@@ -1,0 +1,1 @@
+{"paging.py": "def slice_page(items, page, size):\n    if page < 1 or size < 1:\n        raise ValueError(\"page and size must be positive\")\n    start = (page - 1) * size\n    return items[start:start + size]\n"}

@@ -611,3 +611,54 @@ and executable coding outcomes before making broader performance claims.
 **Implementation:** `runs.py:summarize()`, `load_summary()`, `cli.py:main()`,
 `mcp_server.py:create_server():investigate()`, `evals/investigate.py:main()`.
 **Flows:** F-017–F-020. **Work item:** WI-004.
+
+## D-014 — Separate coding-task inputs from trusted executable grading
+
+**Status:** Accepted on 2026-10-04.
+
+**Decision**
+
+Store three synthetic buggy repository fixtures under `evals/coding_tasks/*/repo`.
+Keep acceptance checks and reference fixes outside each retrieval root. Use fresh
+UUID workspace copies, allowlisted whole-file edits and timed Python subprocess
+grading. Calibrate untouched failures and reference successes before model trials.
+
+**Context**
+
+Retrieval recall alone cannot establish correct fixes. A harness needs executable
+task outcomes without exposing future fixes or acceptance tests to context selection.
+Candidates must not edit tests through the harness or contaminate the next trial.
+
+**Alternatives Considered**
+
+Score with an LLM judge; place all evaluation assets inside indexed repositories;
+run candidate imports in the harness process; grade changes in the working checkout;
+introduce Docker/VM infrastructure before a runnable local grading baseline.
+
+**Why This Approach**
+
+Executable public/acceptance tests directly check refund rounding, pagination and
+retry exhaustion. Separate assets make accidental retrieval leakage testable.
+Fresh copies prevent sequential contamination. Batch validation rejects edits
+outside declared source paths before any write. Python -I/-B subprocesses isolate
+imports and enforce a per-grader timeout with no new dependencies. Reference fixes
+only calibrate grading, never count as model successes. Tests verify failure/pass
+transitions, excluded assets, rejected edits, syntax failures, timeout and fresh copies.
+
+**Trade-offs**
+
+Fixtures and lessons are synthetic development material, not independent benchmarks.
+Whole-file responses differ from full interactive coding agents. Process isolation
+is not OS security isolation: executed candidate code retains the caller's filesystem
+and network permissions. This harness is for trusted local experiments; hostile
+candidates need an actual sandbox. Output capture is not an adversarial resource
+limiter. Allowlisted edit application does not restrict what executed code can do.
+
+**Future Reconsideration**
+
+Add containers/VMs before hostile or untrusted task execution. Expand independent
+tasks and held-out splits after baseline calibration. Introduce patch-format support
+only if whole-file responses materially distort measured coding outcomes.
+
+**Implementation:** `coding.py:load_suite()`, `trial_workspace()`, `apply_edits()`,
+`grade()`, `calibrate()`. **Flow:** F-021. **Work item:** WI-005.

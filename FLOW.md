@@ -6,10 +6,10 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-004 adds `investigation.py:run()` and `RepositoryService.investigate()` for a
-bounded evidence-gathering loop (F-018). CLI/MCP exposure, explicit saved-run
-inspection (F-019), and development fixtures (F-020) complete this local workflow. See
-[its feature record](docs/work-items/WI-004-investigation/FEATURE.md)
+WI-005 adds trusted coding fixtures and executable grading (F-021). Paired context
+packets, runners and checkpointed reports are next in this cycle. Investigation
+F-018 and saved-report F-019 remain unchanged. See
+[its feature record](docs/work-items/WI-005-coding-evaluation/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
 ## Session documentation path (development workflow)
@@ -570,3 +570,35 @@ network, worker, or repository test execution. This is retrieval/controller chec
 chosen seeds and maximum text budget equal, not actual output token usage. These
 development fixtures are not independent coding outcomes or model-cost evidence.
 D-013/WI-004. Earlier two-case smoke evaluation remains unchanged at F-011/F-012.
+
+## F-021 — Coding-fixture calibration, source application and grading
+
+**Trigger:** `coding.py:calibrate(load_suite(manifest), scratch)` or per-trial grade.
+Experiment driver is not implemented at this milestone.
+
+**Execution Path:** `coding.py:load_suite()` → read suite manifest and validate IDs,
+asset containment/source allowlists → `calibrate()` → `trial_workspace()` creates
+UUID child under scratch and copies only repo/*.py (recursively) → `grade()` →
+Python subprocess `-I -B -c GRADER` → public unittest discovery → external trusted
+`checks.py` loaded with runpy → combined test suite → CHECK_RESULT JSON/exit status →
+`apply_edits(reference)` → repeat grade → contained workspace cleanup.
+
+**Data Transformation:** Suite rows become immutable CodingTask records. Candidate
+full-file text is validated for source allowlist, string content, containment and
+200 KB total size before any write. Snapshot source hashes identify inputs/output.
+Test records, exit status, elapsed time and diagnostic tails become grade outcomes:
+passed/test_failed/timeout/grader_error. Missing/malformed result output does not pass.
+Calibration requires the untouched fixture to actually run tests and fail, and
+the reference to pass. Syntax errors are failed candidates, not model/provider errors.
+
+**Database Interaction:** None in fixture calibration.
+
+**External Interaction:** Explicit fixture filesystem copies/edits/cleanup and local
+Python test subprocesses with timeout. No Git/model/network calls. Subprocess code
+has ordinary caller permissions: this is not a security sandbox. The fixture root
+contains no checks/reference files; grading material is loaded only after context
+preparation/candidate application. Repositories/checks are trusted local assets.
+
+**Output:** Calibration report labeled reference-fix checking, not model outcomes.
+Four regression tests cover calibrated tasks, asset separation/atomic edit rejection,
+syntax errors, timeout and fresh trials. D-014/WI-005.

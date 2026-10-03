@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "label": "Three synthetic development coding tasks, not held-out benchmarks",
+  "tasks": [
+    {"id": "refund-rounding", "directory": "refund-rounding", "query": "refund_total",
+     "task": "Fix refund_total so a refund matches the per-line rounding of the original invoice. Preserve Decimal arithmetic and the refund_preview response shape, including empty refunds.",
+     "editable": ["refunds.py"], "scope": "refunds.py:refund_total", "evidence": "test_public.py",
+     "lesson": "A previous synthetic invoice correction showed that rounding a combined amount loses the invoice's per-line rounding. Keep Decimal values and sum rounded lines; do not switch to floats."},
+    {"id": "pagination-offset", "directory": "pagination-offset", "query": "slice_page",
+     "task": "Fix slice_page: page numbers start at one; each page contains at most size items. Reject page or size below one with ValueError and preserve list_page's items/total response.",
+     "editable": ["paging.py"], "scope": "paging.py:slice_page", "evidence": "test_public.py",
+     "lesson": "A previous synthetic pagination correction distinguished the one-based page number from the zero-based slice offset. Validate positive page and size before slicing."},
+    {"id": "retry-exhaustion", "directory": "retry-exhaustion", "query": "run_with_retry",
+     "task": "Fix run_with_retry so max_attempts is the total number of calls. Return on success; re-raise the original TransientError when all attempts fail; do not retry other exceptions. Reject max_attempts below one with ValueError.",
+     "editable": ["retrying.py"], "scope": "retrying.py:run_with_retry", "evidence": "test_public.py",
+     "lesson": "A previous synthetic retry correction found that zero-based loop indices never equal max_attempts. Exhaustion must preserve the last original exception instead of silently returning None."}
+  ]
+}

@@ -1,0 +1,1 @@
+{"refunds.py": "from decimal import Decimal\nfrom invoice import round_line\n\n\ndef refund_total(amounts):\n    return sum((round_line(amount) for amount in amounts), Decimal(\"0\"))\n"}

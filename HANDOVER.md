@@ -1,6 +1,6 @@
 # Current handover
 
-Updated: 2026-10-03 (Asia/Calcutta). Read this at each session start, after AGENTS.md.
+Updated: 2026-10-04 (Asia/Calcutta). Read this at each session start, after AGENTS.md.
 This is a current-state snapshot; detailed history belongs in Git and work items.
 
 ## Objective
@@ -37,19 +37,20 @@ current product is a local Python CLI, not the full planned web application.
 
 ## Current work / handoff
 
-WI-004 is complete: [bounded investigation](docs/work-items/WI-004-investigation/FEATURE.md).
-Full MCP-enabled suite passed 50/50, including actual stdio investigation; both
-existing smoke cases and all six new development fixtures pass. Latest summary
-changes also pass all 12 focused controller/CLI/inspector checks. Controller commit:
-`4d81d95`; find exposure/inspection/eval commit with `git log --oneline -- diffcontext/runs.py`.
+WI-005 is active: [controlled coding evaluation](docs/work-items/WI-005-coding-evaluation/FEATURE.md).
+Three fixture bugs and references calibrated through `coding.py` subprocess checks;
+four focused tests pass. Paired packets, runners, checkpointing and reporting are next.
+All prior investigation/core work is complete and passed 50 checks.
 MCP SDK 2.3.0 is installed in `.venv`; host settings are not configured.
-All commits through `98c7517` are verified pushed on main. Current changes are local.
+All commits through `11ec359` are verified pushed on main. Current changes are local.
 
 ## Next planned slice
 
-Local context-investigation workflow is ready for a small Python-codebase trial.
-Next gather held-out localization and executable coding-outcome evidence with a
-real assistant; improve module/class evidence and memory capture based on failures.
+Finish controlled coding harness before live model trials: paired conditions with
+equal declared budgets, explicit pre-task synthetic lessons, runner/replay contract,
+quota/provider classification, fingerprints, checkpoints and reports. No live model
+provider or credentials are assumed. Then measure real coding outcomes and improve
+module/class evidence and memory capture based on failures.
 Model planning, autonomous edits, and a dashboard remain planned. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 

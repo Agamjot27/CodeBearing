@@ -9,6 +9,7 @@ from pathlib import Path
 from .index import build_index
 from .memory import Memory
 from .service import RepositoryService
+from .runs import load_summary, summarize
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -21,6 +22,18 @@ def main(argv: list[str] | None = None) -> int:
     changes.add_argument("--ref", default="HEAD")
     finder = commands.add_parser("search", help="Find candidate seeds with lexical search")
     finder.add_argument("query")
+    investigator = commands.add_parser("investigate", help="Gather context with bounded expansion and a run trace")
+    selector = investigator.add_mutually_exclusive_group(required=True)
+    selector.add_argument("--task", help="Lexical task description; inspect the selected seeds")
+    selector.add_argument("--symbol", action="append")
+    selector.add_argument("--ref")
+    investigator.add_argument("--max-tokens", type=int, default=4000)
+    investigator.add_argument("--max-depth", type=int, default=3)
+    investigator.add_argument("--max-steps", type=int, default=7)
+    investigator.add_argument("--max-seconds", type=float, default=30)
+    investigator.add_argument("--summary", action="store_true", help="Show decisions/citations without source text")
+    inspector = commands.add_parser("inspect", help="Summarize a full investigation JSON saved by the caller")
+    inspector.add_argument("run_file", type=Path)
     for command in ["impact", "compile"]:
         sub = commands.add_parser(command)
         selector = sub.add_mutually_exclusive_group(required=True)
@@ -50,6 +63,9 @@ def main(argv: list[str] | None = None) -> int:
                 raise ValueError('MCP dependencies are missing; install with: python -m pip install -e ".[mcp]"') from exc
             create_server(args.repo).run(transport="stdio")
             return 0
+        if args.command == "inspect":
+            print(json.dumps(load_summary(args.run_file), indent=2, ensure_ascii=True))
+            return 0
         service = RepositoryService(args.repo)
         if args.command == "index":
             result = build_index(args.repo).describe()
@@ -61,6 +77,11 @@ def main(argv: list[str] | None = None) -> int:
             result = service.analyze_impact(args.symbol, args.ref, args.depth)
         elif args.command == "compile":
             result = service.compile_context(args.symbol, args.ref, args.max_tokens, args.depth)
+        elif args.command == "investigate":
+            result = service.investigate(args.task, args.symbol, args.ref, args.max_tokens,
+                                         args.max_depth, args.max_steps, args.max_seconds)
+            if args.summary:
+                result = summarize(result)
         else:
             index = build_index(args.repo)
             store = Memory(index.root)

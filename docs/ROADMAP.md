@@ -18,27 +18,30 @@ Imports/constants/non-Python changes remain explicit unresolved gaps.
 
 ## 2. Agent integration and change localization — partially implemented
 
-- Implemented: five read-only MCP tools for search, change localization, impact,
-  compilation, and lessons. SDK/stdin-stdout tests exercise contracts and error
+- Implemented: six read-only MCP tools for search, change localization, impact,
+  compilation, lessons and investigation. SDK/stdin-stdout tests exercise contracts and error
   recovery. Lesson confirmation stays in the developer CLI. Next: demonstrate
   usage in a real coding-assistant session; transport checks do not prove outcomes.
 - Extend implemented Git-diff seeds with complete module/class evidence and
   configuration dependencies; current fallback seeds symbols and reports gaps.
 - Proper lexical ranking and source-root configuration; incremental indexing.
-- Structured trace events with run IDs, candidates, selection reasons, budget,
-  index version, timing, and errors. Make traces inspectable before adding a UI.
+- Implemented for investigation: inline run IDs, captured-byte snapshot identities,
+  candidates, verification, limits, timing and stop reasons; explicit saved-JSON
+  CLI inspection. Persistent history and traces for unexpected errors remain planned.
 - Exact tokenizer adapter and separate reserved budget for applicable lessons.
 
 Acceptance: a real coding agent can consume our tools in a small repository, with
 reproducible context and visible omissions. Integration contracts are tested.
 
-## 3. Bounded investigation loop
+## 3. Bounded investigation loop — local controller implemented
 
-Locate → retrieve → check missing evidence → expand or finish. The verifier uses
-observable evidence, not a claim to inspect private model reasoning. Budget tool
-calls, elapsed time, and tokens; stop repeated searches; report unresolved gaps.
-Start with one coordinator. Add independent agents only for work that benefits
-from parallel execution and measure the added cost.
+Locate → retrieve → check static frontier/omissions/source gaps → expand or finish
+now runs through `investigate` in CLI/MCP. One controller uses one code capture,
+checked memory, unique depths, operation limits, estimated final-text budget and a
+cooperative elapsed-time limit. No model planner/editor is included. Six development
+fixtures check behavior and budget-matched seed-only retrieval. Next measure held-out
+localization and real coding outcomes before adding model-based planning. Add
+independent agents only when parallel execution shows measurable benefit.
 
 ## 4. Correction memory and reliability
 

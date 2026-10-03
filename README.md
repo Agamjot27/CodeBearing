@@ -19,8 +19,10 @@ other project's `diffcontext` package is installed.
   an explicit developer confirmation before retrieval can include them.
 - Flag a lesson as stale if its evidence file or scoped source file changes or
   disappears. Stale, disputed, superseded, and unrelated lessons are not injected.
-- Expose five read-only MCP tools through a local stdio server, using the same
+- Expose six read-only MCP tools through a local stdio server, using the same
   service as the CLI. Agent requests cannot confirm lessons or switch repositories.
+- Gather evidence automatically with a bounded task/symbol/revision investigator,
+  visible gaps, snapshot IDs, stop reasons and an inspectable trace.
 
 The core CLI needs no API keys or runtime dependencies. Python 3.10+ is required.
 MCP support uses an optional SDK extra; see [connection instructions](docs/MCP.md).
@@ -44,6 +46,20 @@ JSON wrapper or the agent's own instructions. Check `missing_seeds`, `omitted`, 
 
 Multiple `--symbol` flags are supported. Ambiguous short names fail and list the
 exact IDs rather than picking an arbitrary function.
+
+## Investigate automatically
+
+```powershell
+python -m diffcontext --repo examples/refunds investigate --task refund_total --summary
+python -m diffcontext --repo examples/refunds investigate --symbol billing.py:round_line --max-tokens 2000
+```
+
+The investigator locates once, gathers reviewed memory, and expands static
+dependencies while checking gaps and limits. It returns `ready`, `partial`,
+`needs_input`, or `no_changes` with a trace. Task selection is lexical and `ready`
+means selected static graph coverage, not semantic correctness. This local workflow
+does not edit code or call a model. See [the investigation guide](docs/INVESTIGATION.md)
+for Git runs, limits, status handling and saving/inspecting results.
 
 ## Analyze your Git changes
 
@@ -89,6 +105,7 @@ record can be marked `superseded`. Storage lives in `.diffcontext/memory.sqlite3
 ```powershell
 python -m unittest discover -s tests -v
 python evals/run.py
+python evals/investigate.py
 ```
 
 Tests cover graph resolution, import aliases, relative imports, shadowed names,
@@ -101,6 +118,8 @@ comparison is not budget matched. No model task-success claim follows from it.
 GitHub Actions runs both commands on pushes and pull requests once hosted.
 An additional job installs the MCP extra and requires protocol tests to run.
 For a model-free client demonstration, follow [docs/MCP.md](docs/MCP.md).
+The new investigation evaluation uses six development fixtures and a seed-only
+comparison at the same maximum text budget; it is not a held-out coding benchmark.
 
 ## Current limits
 
@@ -125,7 +144,8 @@ For a model-free client demonstration, follow [docs/MCP.md](docs/MCP.md).
   correction diffs, and test-run artifacts will come later.
 - The untrusted-data label is an integration boundary, not a proven prompt-injection
   defense. MCP transport is tested; real coding-assistant task success has not been
-  evaluated. Model calls, orchestration, tracing, and adversarial evals are planned.
+  evaluated. Local bounded orchestration and inline traces work; model planning,
+  persistent run history, a web dashboard and adversarial evals remain planned.
 
 See [the build roadmap](docs/ROADMAP.md) for the progression to the full system.
 

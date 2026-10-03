@@ -16,8 +16,8 @@ current product is a local Python CLI, not the full planned web application.
   `diffcontext/context.py`. Token counts are estimates, not exact tokenizer counts.
 - SQLite lesson proposal/review, exact-scope retrieval, evidence/source hash
   freshness checks: `diffcontext/memory.py`.
-- CLI: `diffcontext/cli.py`; refund example; 37 regression/protocol tests; 2 synthetic
-  retrieval smoke cases; GitHub Actions check configuration.
+- CLI: `diffcontext/cli.py`; refund example; 50 regression/protocol tests; 2 existing
+  retrieval smoke cases and 6 investigation development fixtures; CI configuration.
 - Baseline committed and pushed: `fa2dd36` on `main`, remote
   `https://github.com/Agamjot27/DiffContext.git`.
 - Engineering decisions D-001–D-006 and execution flows F-001–F-012 documented.
@@ -27,32 +27,36 @@ current product is a local Python CLI, not the full planned web application.
 - Git revision localization: `changes.py` maps tracked modifications, additions,
   and deletions in old/current graphs; restores surviving old callers; labels old
   context; flags out-of-function and unsupported changes. D-009, F-013–F-015.
-- Shared `RepositoryService`, SQLite read-only retrieval, and five optional MCP
+- Shared `RepositoryService`, SQLite read-only retrieval, and six optional MCP
   stdio tools; client demo and connection instructions in `docs/MCP.md`.
   D-010/D-011 and F-016/F-017 document the paths and boundaries.
+- Bounded local investigator through CLI/MCP: task/symbol/ref localization, one
+  captured code snapshot, checked lessons, observable verification, limits and trace.
+- Versioned full JSON reports, `--summary`, explicit saved-file `inspect`, and
+  budget-matched seed-only development comparison. D-012/D-013, F-018–F-020.
 
 ## Current work / handoff
 
-WI-004 is active: [bounded investigation](docs/work-items/WI-004-investigation/FEATURE.md).
-`investigation.py:run()` and `RepositoryService.investigate()` implement capture,
-lexical/explicit/revision localization, incremental depth, observable verification,
-limits and inline trace. Nine focused controller tests pass. CLI/MCP exposure and
-fixture evaluations are next; final regression checks still pending this cycle.
+WI-004 is complete: [bounded investigation](docs/work-items/WI-004-investigation/FEATURE.md).
+Full MCP-enabled suite passed 50/50, including actual stdio investigation; both
+existing smoke cases and all six new development fixtures pass. Latest summary
+changes also pass all 12 focused controller/CLI/inspector checks. Controller commit:
+`4d81d95`; find exposure/inspection/eval commit with `git log --oneline -- diffcontext/runs.py`.
 MCP SDK 2.3.0 is installed in `.venv`; host settings are not configured.
 All commits through `98c7517` are verified pushed on main. Current changes are local.
 
 ## Next planned slice
 
-User requested completion before using a real codebase. Finish local investigation
-and controlled fixtures now; then real assistant outcome evaluations. Model planning,
-autonomous edits, and a dashboard remain planned. See
+Local context-investigation workflow is ready for a small Python-codebase trial.
+Next gather held-out localization and executable coding-outcome evidence with a
+real assistant; improve module/class evidence and memory capture based on failures.
+Model planning, autonomous edits, and a dashboard remain planned. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. 37 tests and 2 smoke cases
-  passed in WI-003. The Windows sandbox blocked MCP subprocess pipe creation;
-  the same test passed with approved pipe access. Details are in WI-003.
+- No failing application check is currently recorded. 50 tests and 8 development
+  fixture cases pass. Windows MCP pipe tests need approved sandbox access.
 - Static analysis misses dynamic dispatch, inheritance, re-exports, nested
   functions, configuration, and some binding behavior. Missing edges do not prove
   independence. Method excerpts do not reconstruct class context.
@@ -63,7 +67,10 @@ autonomous edits, and a dashboard remain planned. See
   with conservative symbol fallback. See `changes.unresolved` before trusting output.
 - Memory uses whole-file hashes, over-invalidates unrelated edits, and does not
   check all dependencies. Code-first packing can leave no budget for lessons.
-- HTTP API, frontend, worker, tracing, model loop, incremental indexing, and
+- Investigation task selection is lexical. ready means selected static graph
+  coverage, not semantic task correctness. Deadline is cooperative; ongoing work
+  can overrun before returning. Trace/JSON overhead is outside the text budget.
+- HTTP API, frontend, worker, persistent tracing, model loop, incremental indexing, and
   independent end-to-end benchmarks are not implemented.
 - Restricted shell execution requires approved escalation for Git writes/network
   operations. Prior approved pushes succeeded. Some `.test-tmp/tmp*` directories
@@ -78,10 +85,12 @@ Run from the repository root:
 git status --short
 python -m unittest discover -s tests -v
 python evals/run.py
+python evals/investigate.py
 python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
 python -m diffcontext --repo . changes --ref HEAD
 python -m diffcontext --repo . compile --ref HEAD --max-tokens 4000
 .\.venv\Scripts\python.exe examples/mcp_client.py --repo examples/refunds
+python -m diffcontext --repo examples/refunds investigate --task refund_total --summary
 ```
 
 ## Avoid

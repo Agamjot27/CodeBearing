@@ -1,6 +1,6 @@
 # Connect through MCP
 
-DiffContext offers five read-only tools through a local stdio process. The host
+DiffContext offers six read-only tools through a local stdio process. The host
 chooses one repository when launching it; tool arguments cannot change that root.
 No model or API key is needed to run the server or test its transport.
 
@@ -58,11 +58,16 @@ The server reserves stdout for MCP protocol messages; diagnostics go to stderr.
 | `analyze_impact` | `symbols` or `ref`, `depth=2` | Bounded callers/callees; separate versions for a ref |
 | `compile_context` | `symbols` or `ref`, `max_tokens=4000`, `depth=2` | Cited text, eligible lessons, omissions and metadata |
 | `get_lessons` | `symbols` | Confirmed fresh lessons for those current symbols; excluded metadata |
+| `investigate` | `task` or `symbols` or `ref`, `max_tokens=4000`, `max_depth=3`, `max_steps=7`, `max_seconds=30` | Bounded gather/verify/expand loop, context and inline trace |
 
 Select exactly one of `symbols` or `ref` for impact/compilation. Supply 1–20
 nonempty symbol names/IDs of at most 2000 characters each. Queries/refs have the
 same character limit. Depth is 0–5, search limit 1–50, estimated budget 128–32000.
 Use exact IDs returned by search when short names are ambiguous.
+`investigate` requires exactly one of task/symbols/ref. Its steps are 2–10 and
+seconds 0.1–120 with a cooperative deadline; see [investigation guide](INVESTIGATION.md)
+for status meanings and inspectable traces. A `ready` run means selected static
+graph coverage, not proof that the coding task can be solved from that evidence.
 
 Only the compiled `text` field is budgeted, using a byte heuristic. JSON metadata,
 MCP envelopes, host instructions and other tool calls cost extra context. Inspect
@@ -83,10 +88,11 @@ $env:DIFFCONTEXT_REQUIRE_MCP = '1'
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Without the extra, the four MCP tests skip and core checks still run. The MCP CI
+Without the extra, the five MCP tests skip and core checks still run. The MCP CI
 job installs the extra and makes a missing SDK a failure. Coverage includes tool
 discovery, structured output, request errors/recovery, memory filtering, unchanged
-database bytes, and actual stdio Git revision compilation. Windows sandboxed
+database bytes, investigation limits, and actual stdio Git revision compilation
+and investigation. Windows sandboxed
 environments may need permission to open subprocess pipes.
 
 SDK references: [tools](https://py.sdk.modelcontextprotocol.io/servers/tools/),

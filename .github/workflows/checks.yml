@@ -10,6 +10,7 @@ jobs:
           python-version: '3.11'
       - run: python -m unittest discover -s tests -v
       - run: python evals/run.py
+      - run: python evals/investigate.py
   mcp:
     runs-on: ubuntu-latest
     steps:

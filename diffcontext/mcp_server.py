@@ -73,4 +73,19 @@ def create_server(root: Path) -> MCPServer:
         """Retrieve confirmed fresh lessons for current symbols; rejected advice is excluded."""
         return _call(service.get_lessons, symbols)
 
+    @server.tool(annotations=readonly)
+    def investigate(
+        task: Annotated[str | None, Field(min_length=1, max_length=2000)] = None,
+        symbols: Symbols = None, ref: Ref = None, max_tokens: Budget = 4000,
+        max_depth: Depth = 3, max_steps: Annotated[int, Field(ge=2, le=10)] = 7,
+        max_seconds: Annotated[float, Field(ge=0.1, le=120)] = 30,
+    ) -> dict[str, Any]:
+        """Gather evidence automatically; select exactly one task/symbols/ref.
+
+        Returns context, observable gaps, stop reason and trace. Task localization
+        is lexical. ready means selected static graph covered, not task correctness.
+        Time limits are cooperative; metadata is outside the estimated text budget.
+        """
+        return _call(service.investigate, task, symbols, ref, max_tokens, max_depth, max_steps, max_seconds)
+
     return server

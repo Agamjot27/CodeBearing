@@ -57,7 +57,8 @@ def run(
     started = clock()
     operations = 0
     report = {
-        "run_id": uuid.uuid4().hex, "selector": {"task": task, "symbols": symbols, "ref": ref},
+        "schema_version": 1, "run_id": uuid.uuid4().hex,
+        "selector": {"task": task, "symbols": symbols, "ref": ref},
         "limits": {"max_tokens": max_tokens, "max_depth": max_depth,
                    "max_steps": max_steps, "max_seconds": max_seconds, "deadline": "cooperative"},
         "snapshot": {}, "seeds": {"current": [], "historical": []},

@@ -1,3 +1,6 @@
+import json
+import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -8,6 +11,7 @@ from diffcontext.context import estimate_tokens
 from diffcontext.index import build_index
 from diffcontext.memory import Memory
 from diffcontext.service import RepositoryService
+from diffcontext.runs import load_summary, summarize
 
 
 class InvestigationTests(unittest.TestCase):
@@ -104,6 +108,57 @@ class InvestigationTests(unittest.TestCase):
                 service.investigate(**kwargs)
         self.write("broken.py", "def nope(:\n")
         self.assertEqual(service.investigate(symbols=["round_line"])["stop_reason"], "index_warnings")
+
+    def test_cli_saved_run_and_inspection(self):
+        command = [sys.executable, "-m", "diffcontext", "--repo", str(self.root)]
+        result = subprocess.run([*command, "investigate", "--task", "refund_total"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["status"], "ready")
+        path = self.root / "run.json"
+        path.write_text(result.stdout, encoding="utf-8-sig")
+        # Inspection works on saved evidence even after the target disappears.
+        inspected = subprocess.run([sys.executable, "-m", "diffcontext", "--repo", str(self.root / "missing"),
+                                    "inspect", str(path)], capture_output=True, text=True)
+        self.assertEqual(inspected.returncode, 0, inspected.stderr)
+        view = json.loads(inspected.stdout)
+        self.assertEqual(view["run_id"], report["run_id"])
+        self.assertNotIn("text", view)
+        self.assertEqual(view["trace"][-1]["stage"], "stop")
+        self.assertTrue(view["evidence"]["current"])
+        compact = subprocess.run([*command, "investigate", "--symbol", "round_line", "--summary"], capture_output=True, text=True)
+        self.assertEqual(compact.returncode, 0, compact.stderr)
+        self.assertEqual(json.loads(compact.stdout)["status"], "ready")
+
+    def test_inspection_rejects_malformed_saved_reports(self):
+        path = self.root / "run.json"
+        for data in ['not json', '{"schema_version": 2}', '{"schema_version": 1, "status": "ready"}']:
+            path.write_text(data, encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_summary(path)
+        path.write_bytes(b"\xff\xfe")
+        with self.assertRaises(ValueError):
+            load_summary(path)
+        with self.assertRaises(ValueError):
+            summarize({"schema_version": 1, "status": "invented"})
+        with patch("diffcontext.runs.MAX_RUN_BYTES", 1):
+            with self.assertRaisesRegex(ValueError, "limit"):
+                load_summary(path)
+        failed = subprocess.run([sys.executable, "-m", "diffcontext", "inspect", str(path)], capture_output=True, text=True)
+        self.assertEqual(failed.returncode, 2)
+        self.assertIn("UTF-8", failed.stderr)
+
+    def test_time_limit_after_compile_preserves_partial_evidence(self):
+        now = [0.0]
+        original = investigation.compile_context
+        def slow_compile(*args):
+            package = original(*args)
+            now[0] = 1.0
+            return package
+        with patch.object(investigation, "compile_context", side_effect=slow_compile):
+            result = investigation.run(self.root, symbols=["round_line"], max_seconds=0.1, clock=lambda: now[0])
+        self.assertEqual(result["stop_reason"], "time_limit")
+        self.assertIsNotNone(result["context"])
 
 
 class RevisionInvestigationTests(unittest.TestCase):

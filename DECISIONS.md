@@ -560,3 +560,54 @@ Persist traces only when browsing/history requirements justify storage.
 
 **Implementation:** `investigation.py:run()`, `_frontier()`, `_identity()`,
 `service.py:RepositoryService.investigate()`. **Flow:** F-018. **Work item:** WI-004.
+
+## D-013 — Versioned inline runs with explicit saved-file inspection
+
+**Status:** Accepted on 2026-10-03.
+
+**Decision**
+
+Return investigation schema_version 1 through CLI/MCP. Provide `--summary` and
+`inspect <full-run.json>` as metadata/citation views. Users explicitly save full
+UTF-8 JSON; the read-only server does not persist runs. Cap inspector reads at 10 MB.
+
+**Context**
+
+Users need to understand why a run expanded/stopped and inspect a past result
+without recreating its repository. A database or frontend is not needed to review
+the current local workflow. MCP tool claims must remain read-only.
+
+**Alternatives Considered**
+
+Automatic SQLite run persistence; a dashboard and HTTP API immediately; unversioned
+JSON dumps; source-heavy console output only; re-running the original investigation
+when inspecting a saved result.
+
+**Why This Approach**
+
+Inline results carry exact evidence and decisions without implicit writes. A schema
+version makes unsupported formats explicit. Summary views omit source bodies while
+retaining candidate matches, citations, warnings, gaps and trace decisions. Inspector
+does no re-indexing and accepts UTF-8 BOM produced by Windows PowerShell. Bounded
+reads and clear malformed-file errors are tested alongside the CLI round trip.
+Six development fixtures compare expansion to seed-only retrieval at the same
+chosen seeds/maximum text budget, avoiding misleading claims from unequal budgets.
+
+**Trade-offs**
+
+Users manage saved files; reports can contain source text. No automatic history,
+authentication or frontend exists. Summary output is a view, not a reloadable full
+report. The reader validates needed fields, not every historical schema property.
+Ten megabytes may reject unusually large metadata-heavy runs. Fixtures are development
+examples, not held-out evidence of coding success or model cost improvement.
+
+**Future Reconsideration**
+
+Add migration/full schema validation when public format evolution requires it.
+Introduce optional persistence/trace browsing after history requirements and
+retention/access boundaries are concrete. Expand evaluations with independent tasks
+and executable coding outcomes before making broader performance claims.
+
+**Implementation:** `runs.py:summarize()`, `load_summary()`, `cli.py:main()`,
+`mcp_server.py:create_server():investigate()`, `evals/investigate.py:main()`.
+**Flows:** F-017–F-020. **Work item:** WI-004.

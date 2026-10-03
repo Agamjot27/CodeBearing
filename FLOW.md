@@ -7,8 +7,8 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 ## Current modification scope
 
 WI-004 adds `investigation.py:run()` and `RepositoryService.investigate()` for a
-bounded evidence-gathering loop (F-018). CLI/MCP exposure is the next part of this
-cycle; existing paths F-016/F-017 remain available. See
+bounded evidence-gathering loop (F-018). CLI/MCP exposure, explicit saved-run
+inspection (F-019), and development fixtures (F-020) complete this local workflow. See
 [its feature record](docs/work-items/WI-004-investigation/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
@@ -38,10 +38,10 @@ for developers/agents, not an automatically executed application function.
 | Lesson confirmation | F-009 |
 | Lesson invalidation / stale detection | F-010: computed on reads |
 | MCP request | F-017: repository-bound read-only stdio tools |
-| Investigation loop | F-018: deterministic service controller; CLI/MCP exposure pending |
+| Investigation loop | F-018: deterministic controller via CLI/MCP |
 | Evaluation execution | F-011 and F-012 |
 | Frontend Context Explorer | Not implemented |
-| Run Inspector / trace loading | Not implemented |
+| Run Inspector / trace loading | F-019: CLI saved-JSON inspector; web UI/persistent registry not implemented |
 
 There are no HTTP routes, frontend components, controller services, workers, model
 calls, remote database, or persisted run traces. Do not use proposed names from the
@@ -447,7 +447,7 @@ rejection, filtering/freshness, unchanged DB bytes, and request bounds. D-010.
 `MCPServer.run(transport="stdio")`. Client initialization/discovery is handled by
 the SDK. A tool call invokes the corresponding nested function in `create_server()`:
 `search_symbols()`, `localize_changes()`, `analyze_impact()`, `compile_context()`,
-or `get_lessons()` → `_call()` → same-named `service.py:RepositoryService` method
+`get_lessons()`, or `investigate()` → `_call()` → same-named `service.py:RepositoryService` method
 → F-016 and its relevant core flows → SDK response to the client. Synchronous
 handlers use the SDK worker threads; there is no application job queue/worker.
 
@@ -471,7 +471,7 @@ described in core flows. stdout is reserved for protocol, stderr for diagnostics
 No HTTP API, frontend, remote provider, model call, source/test execution, or network
 interaction in the tools. The optional dependency is imported only for `serve`.
 
-**Output:** Five discoverable tools, structured results and recoverable errors.
+**Output:** Six discoverable tools, structured results and recoverable errors.
 Compilation budgets only result `text`, not metadata/MCP overhead. Tests in
 `tests/test_mcp.py:MCPTests` exercise contracts/memory; `StdioTests` uses a real
 subprocess with historical/current Git evidence. Missing SDK skips these tests
@@ -480,7 +480,8 @@ unless `DIFFCONTEXT_REQUIRE_MCP=1`, used by the separate MCP CI job. D-011/WI-00
 ## F-018 — Bounded context investigation
 
 **Trigger:** `service.py:RepositoryService.investigate(task|symbols|ref, limits)`.
-CLI/MCP entry points are pending at this milestone.
+From `cli.py:main()` investigate branch or `mcp_server.py:create_server():investigate()`
+via `_call()`. The CLI can apply `runs.py:summarize()` after the run.
 
 **Execution Path:** `RepositoryService.investigate()` → `investigation.py:run()`
 → validate exactly one selector/limits → `build_index()` or
@@ -511,8 +512,61 @@ against captured current hashes in addition to live-file freshness.
 No model, network, worker, code edits, or source/test execution. Monotonic deadline
 checks occur between operations and after compile; they cannot interrupt work.
 
-**Output:** Inline JSON-ready report with run_id, selectors, limits, usage,
+**Output:** Schema_version 1 inline JSON-ready report with run_id, selectors, limits, usage,
 snapshot IDs, search matches, versioned seeds, latest context, verification and
 ordered trace. Status is ready/partial/needs_input/no_changes; stop_reason identifies
 graph coverage, budget/depth/step/time limits, localization gaps or missing input.
 Invalid requests/core failures raise normal service errors. D-012/WI-004.
+
+## F-019 — Summary and saved-run inspection
+
+**Trigger:** `investigate --summary` or `inspect <full-run.json>`.
+
+**Execution Path:** `cli.py:main()` investigate branch → F-018 →
+`runs.py:summarize(report)` → JSON. For saved input, `cli.py:main()` inspect branch
+before RepositoryService creation → `runs.py:load_summary(path)` → bounded binary
+read → UTF-8-sig decode → `json.loads()` → `summarize()` → JSON.
+
+**Data Transformation:** Check schema_version 1 and needed field shapes. Full
+context source text becomes versioned citation/lesson metadata. Keep search matches,
+selectors, limits, usage, snapshot IDs, verification, warnings and compact trace
+decisions. Unsupported/malformed encoding/JSON/format or oversized input raises an
+actionable error. Full results are saved only by explicit user redirection, not by
+the application. Summary output is not a reloadable report.
+
+**Database Interaction:** None in inspection. Summary after a new investigation
+inherits the read-only lesson interactions of F-018.
+
+**External Interaction:** Saved file read capped at 10 MB; no repository re-index,
+Git/model/network/worker execution. The original repository need not exist.
+
+**Output:** Compact JSON without source bodies. Inspection failure exits two through
+CLI error handling; successful partial/needs_input run delivery still exits zero.
+`tests/test_investigation.py` verifies CLI save/load, BOM, absent repository,
+malformed/oversized input and summary behavior. D-013/WI-004.
+
+## F-020 — Investigation development fixtures
+
+**Trigger:** `python evals/investigate.py`, including the core CI job.
+
+**Execution Path:** `evals/investigate.py:main()` → read
+`evals/investigation_cases.json` → `build_index(examples/refunds)` for baseline →
+`RepositoryService.investigate(**request)` per case (F-018) →
+`context.py:compile_context(same_selected_seeds, same_max_budget, depth=0)` →
+compare expected IDs/status/stop_reason, estimated text budget and operation limit.
+
+**Data Transformation:** Six labeled development requests become inclusion recall,
+termination results, estimated text usage, operation counts and explicit pass/fail.
+Cases cover task and helper expansion, no match, and budget/depth/step limits.
+No expected answers enter task localization; labels are used only for scoring.
+
+**Database Interaction:** Existing memory would be read-only; the committed example
+has no database, and evaluation does not create one.
+
+**External Interaction:** Local JSON/source files only. No Git, model/provider,
+network, worker, or repository test execution. This is retrieval/controller checking.
+
+**Output:** JSON results and exit zero only when every case passes. Comparison holds
+chosen seeds and maximum text budget equal, not actual output token usage. These
+development fixtures are not independent coding outcomes or model-cost evidence.
+D-013/WI-004. Earlier two-case smoke evaluation remains unchanged at F-011/F-012.

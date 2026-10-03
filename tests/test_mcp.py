@@ -26,7 +26,7 @@ class MCPTests(unittest.IsolatedAsyncioTestCase):
         async with Client(create_server(self.root)) as client:
             listing = await client.list_tools()
             names = {tool.name for tool in listing.tools}
-            self.assertEqual(names, {"search_symbols", "localize_changes", "analyze_impact", "compile_context", "get_lessons"})
+            self.assertEqual(names, {"search_symbols", "localize_changes", "analyze_impact", "compile_context", "get_lessons", "investigate"})
             for tool in listing.tools:
                 self.assertTrue(tool.annotations.read_only_hint)
                 self.assertNotIn("repo", tool.input_schema["properties"])
@@ -73,6 +73,21 @@ class MCPTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(result.structured_content["lessons"], [])
         self.assertEqual(db.read_bytes(), before)
 
+    async def test_investigation_contract_and_limits(self):
+        async with Client(create_server(self.root)) as client:
+            result = await client.call_tool("investigate", {"task": "refund_total"})
+            self.assertFalse(result.is_error)
+            self.assertEqual(result.structured_content["status"], "ready")
+            self.assertEqual(result.structured_content["trace"][-1]["stage"], "stop")
+            for args in [{}, {"task": "refund", "ref": "HEAD"},
+                         {"symbols": ["round_line"], "max_steps": 1}]:
+                invalid = await client.call_tool("investigate", args)
+                self.assertTrue(invalid.is_error)
+            limited = await client.call_tool("investigate", {"symbols": ["round_line"], "max_depth": 0})
+            self.assertFalse(limited.is_error)
+            self.assertEqual(limited.structured_content["stop_reason"], "depth_limit")
+        self.assertFalse((self.root / ".diffcontext").exists())
+
 
 @unittest.skipUnless(HAS_MCP, "optional MCP SDK is not installed")
 class StdioTests(unittest.IsolatedAsyncioTestCase):
@@ -91,7 +106,7 @@ class StdioTests(unittest.IsolatedAsyncioTestCase):
         )
         async with Client(parameters, read_timeout_seconds=30) as client:
             listing = await client.list_tools()
-            self.assertEqual(len(listing.tools), 5)
+            self.assertEqual(len(listing.tools), 6)
             located = await client.call_tool("localize_changes", {"ref": "HEAD"})
             self.assertIn("billing.py:refund", located.structured_content["removed_symbols"])
             result = await client.call_tool("compile_context", {"ref": "HEAD", "max_tokens": 4000})
@@ -102,4 +117,8 @@ class StdioTests(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(failed.is_error)
             recovered = await client.call_tool("search_symbols", {"query": "checkout"})
             self.assertFalse(recovered.is_error)
+            investigation = await client.call_tool("investigate", {"ref": "HEAD"})
+            self.assertFalse(investigation.is_error)
+            self.assertEqual(investigation.structured_content["status"], "partial")
+            self.assertIn("HISTORICAL EVIDENCE", investigation.structured_content["context"]["text"])
         self.assertFalse((self.root / ".diffcontext").exists())

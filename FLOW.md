@@ -6,11 +6,11 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-001 adds development documentation continuity only. No runtime file/function
-or F-001–F-012 execution path changes in this cycle. See
-[its feature record](docs/work-items/WI-001-documentation-continuity/FEATURE.md)
+WI-002 changes `index.py:build_index()` to share parsing with an in-memory source
+entry point, then adds Git-diff localization to impact/compilation. F-002, F-004,
+and F-005 are affected. See
+[its feature record](docs/work-items/WI-002-git-diff-localization/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
-Future cycles must identify the exact flows/functions they modify here.
 
 ## Session documentation path (development workflow)
 
@@ -74,7 +74,8 @@ errors are handled by argparse; successful commands return 0.
 **Trigger:** Any CLI command, or direct `build_index(root)` call.
 
 **Execution Path:** `cli.py:main()` → `index.py:build_index()` → `os.walk()` →
-`tokenize.open()` → `ast.parse()` → `digest()` → create `Symbol` records →
+`Path.read_bytes()` → `build_index_from_sources()` → `tokenize.detect_encoding()`
+→ decode → `ast.parse()` → SHA-256 of captured bytes → create `Symbol` records →
 resolve calls via `_body_walk()` and import/qualified-name maps → return `Index`.
 For the `index` command, `main()` then calls `Index.describe()`.
 
@@ -82,7 +83,10 @@ For the `index` command, `main()` then calls `Index.describe()`.
 functions and direct class methods become IDs of the form `path.py:Class.method`.
 Module-level imports resolve aliases and relative module paths. Calls become
 `edges[caller_id] = {callee_ids}`. SHA-256 file hashes, imports, source ranges,
-excerpts, and warnings are attached. Shadowed names are conservatively skipped
+excerpts, captured source bytes, and warnings are attached. Sources that fail
+parsing remain in `Index.sources` for diff diagnostics but not `Index.hashes`.
+Historical callers can invoke `build_index_from_sources()` without disk reads.
+Shadowed names are conservatively skipped
 for the local bindings recognized by the current analyzer.
 
 **Database Interaction:** None. `Index.symbols`, `edges`, `warnings`, and `hashes`
@@ -94,7 +98,7 @@ symlinks and files over 1 MB. Recorded parse/read failures become warnings.
 There is no Git integration or atomic source snapshot.
 
 **Output:** `Index` to library callers; its JSON description for the index command.
-See D-001 and D-002.
+See D-001, D-002, and D-008.
 
 ## F-003 — Lexical seed search
 

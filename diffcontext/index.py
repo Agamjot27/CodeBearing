@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import io
 import tokenize
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 EXCLUDED = {".git", ".venv", "venv", "env", "node_modules", "__pycache__", "build", "dist", ".diffcontext", "site-packages"}
@@ -32,6 +33,7 @@ class Index:
     edges: dict[str, set[str]]
     warnings: list[str]
     hashes: dict[str, str]
+    sources: dict[str, bytes] = field(default_factory=dict)
 
     def describe(self) -> dict:
         return {
@@ -72,17 +74,13 @@ def _body_walk(node: ast.AST):
 
 
 def build_index(root: Path) -> Index:
+    """Read current files once, then use the same parser as historical snapshots."""
     root = root.resolve()
     if not root.is_dir():
         raise ValueError(f"Repository directory does not exist: {root}")
-    symbols: dict[str, Symbol] = {}
-    nodes = {}
-    imports = {}
-    qualified = {}
-    warnings = []
-    hashes = {}
-    # Path.walk is not available on Python 3.10; os.walk prunes ignored trees.
     import os
+    sources = {}
+    warnings = []
     for directory, dirs, files in os.walk(root, followlinks=False):
         dirs[:] = sorted(d for d in dirs if d not in EXCLUDED and not (Path(directory) / d).is_symlink() and not d.startswith("."))
         for filename in sorted(files):
@@ -97,49 +95,81 @@ def build_index(root: Path) -> Index:
                 if path.stat().st_size > MAX_FILE_BYTES:
                     warnings.append(f"Skipped file larger than {MAX_FILE_BYTES} bytes: {relative}")
                     continue
-                with tokenize.open(path) as handle:
-                    source = handle.read()
-                tree = ast.parse(source, filename=relative)
-                hashes[relative] = digest(path)
-            except (OSError, SyntaxError, UnicodeError) as exc:
-                warnings.append(f"Cannot parse {relative}: {type(exc).__name__}")
-                continue
-            module = relative[:-3].replace("/", ".")
-            if module.endswith(".__init__"):
-                module = module[:-9]
-            package = module if filename == "__init__.py" else module.rpartition(".")[0]
-            aliases = {}
-            lines = source.splitlines()
-            preamble = []
-            for statement in tree.body:
-                if isinstance(statement, (ast.Import, ast.ImportFrom)):
-                    preamble.append("\n".join(lines[statement.lineno - 1:statement.end_lineno]))
-                if isinstance(statement, ast.Import):
-                    for alias in statement.names:
-                        aliases[alias.asname or alias.name.split(".")[0]] = alias.name if alias.asname else alias.name.split(".")[0]
-                elif isinstance(statement, ast.ImportFrom):
-                    base = statement.module or ""
-                    if statement.level:
-                        parents = package.split(".") if package else []
-                        keep = len(parents) - statement.level + 1
-                        base = ".".join(parents[:max(0, keep)] + ([base] if base else []))
-                    for alias in statement.names:
-                        if alias.name != "*":
-                            aliases[alias.asname or alias.name] = ".".join(filter(None, [base, alias.name]))
-            imports[module] = aliases
-            definitions = []
-            for statement in tree.body:
-                if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    definitions.append((statement, None))
-                elif isinstance(statement, ast.ClassDef):
-                    definitions.extend((method, statement.name) for method in statement.body if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef)))
-            for node, owner in definitions:
-                name = f"{owner}.{node.name}" if owner else node.name
-                symbol_id = f"{relative}:{name}"
-                start = min([node.lineno, *(d.lineno for d in node.decorator_list)])
-                symbols[symbol_id] = Symbol(symbol_id, relative, name, module, owner, start, node.end_lineno, "\n".join(lines[start - 1:node.end_lineno]), "\n".join(preamble))
-                nodes[symbol_id] = node
-                qualified[f"{module}.{name}"] = symbol_id
+                sources[relative] = path.read_bytes()
+            except OSError as exc:
+                warnings.append(f"Cannot read {relative}: {type(exc).__name__}")
+    return build_index_from_sources(root, sources, warnings)
+
+
+def build_index_from_sources(root: Path, sources: dict[str, bytes], warnings: list[str] | None = None) -> Index:
+    """Index byte snapshots without checking out or executing historical code.
+
+    Retain source bytes even on parse failure so diff localization can disclose
+    changes in invalid files. Source and hash share one read, avoiding mismatches.
+    """
+    root = root.resolve()
+    symbols: dict[str, Symbol] = {}
+    nodes = {}
+    imports = {}
+    qualified = {}
+    warnings = list(warnings or [])
+    hashes = {}
+    captured = {}
+    for relative, raw in sorted(sources.items()):
+        parts = relative.split("/")
+        if (not relative.endswith(".py") or any(p in EXCLUDED or p.startswith(".") for p in parts)
+                or Path(relative).is_absolute() or ".." in parts or "\\" in relative):
+            warnings.append(f"Skipped unsupported source path: {relative}")
+            continue
+        if len(raw) > MAX_FILE_BYTES:
+            warnings.append(f"Skipped file larger than {MAX_FILE_BYTES} bytes: {relative}")
+            continue
+        captured[relative] = raw
+        filename = parts[-1]
+        try:
+            encoding, _ = tokenize.detect_encoding(io.BytesIO(raw).readline)
+            source = raw.decode(encoding)
+            tree = ast.parse(source, filename=relative)
+            hashes[relative] = hashlib.sha256(raw).hexdigest()
+        except (SyntaxError, UnicodeError, LookupError, ValueError) as exc:
+            warnings.append(f"Cannot parse {relative}: {type(exc).__name__}")
+            continue
+        module = relative[:-3].replace("/", ".")
+        if module.endswith(".__init__"):
+            module = module[:-9]
+        package = module if filename == "__init__.py" else module.rpartition(".")[0]
+        aliases = {}
+        lines = source.splitlines()
+        preamble = []
+        for statement in tree.body:
+            if isinstance(statement, (ast.Import, ast.ImportFrom)):
+                preamble.append("\n".join(lines[statement.lineno - 1:statement.end_lineno]))
+            if isinstance(statement, ast.Import):
+                for alias in statement.names:
+                    aliases[alias.asname or alias.name.split(".")[0]] = alias.name if alias.asname else alias.name.split(".")[0]
+            elif isinstance(statement, ast.ImportFrom):
+                base = statement.module or ""
+                if statement.level:
+                    parents = package.split(".") if package else []
+                    keep = len(parents) - statement.level + 1
+                    base = ".".join(parents[:max(0, keep)] + ([base] if base else []))
+                for alias in statement.names:
+                    if alias.name != "*":
+                        aliases[alias.asname or alias.name] = ".".join(filter(None, [base, alias.name]))
+        imports[module] = aliases
+        definitions = []
+        for statement in tree.body:
+            if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                definitions.append((statement, None))
+            elif isinstance(statement, ast.ClassDef):
+                definitions.extend((method, statement.name) for method in statement.body if isinstance(method, (ast.FunctionDef, ast.AsyncFunctionDef)))
+        for node, owner in definitions:
+            name = f"{owner}.{node.name}" if owner else node.name
+            symbol_id = f"{relative}:{name}"
+            start = min([node.lineno, *(d.lineno for d in node.decorator_list)])
+            symbols[symbol_id] = Symbol(symbol_id, relative, name, module, owner, start, node.end_lineno, "\n".join(lines[start - 1:node.end_lineno]), "\n".join(preamble))
+            nodes[symbol_id] = node
+            qualified[f"{module}.{name}"] = symbol_id
     edges = {key: set() for key in symbols}
     for key, node in nodes.items():
         symbol = symbols[key]
@@ -169,7 +199,7 @@ def build_index(root: Path) -> Index:
                 candidate = ".".join([symbol.module, *parts])
             if candidate in qualified:
                 edges[key].add(qualified[candidate])
-    return Index(root, symbols, edges, warnings, hashes)
+    return Index(root, symbols, edges, warnings, hashes, captured)
 
 
 def select_symbol(index: Index, value: str) -> str:

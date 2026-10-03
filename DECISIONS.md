@@ -304,3 +304,45 @@ Keep the current-state snapshot concise and preserve stable historical records.
 
 **Implementation:** `AGENTS.md`, `HANDOVER.md`, `docs/templates/`,
 `docs/work-items/WI-001-documentation-continuity/FEATURE.md`.
+
+## D-008 — Reuse the analyzer for captured source bytes
+
+**Status:** Accepted on 2026-10-03.
+
+**Decision**
+
+Extract `build_index_from_sources(root, sources, warnings)` and have disk indexing
+delegate to it. Retain captured bytes, including parse failures, for localization.
+
+**Context**
+
+Deleted symbols require historical code and call relationships. The indexer could
+previously only read the working tree. Reading source and hash separately also
+allowed mismatched evidence if a file changed between those reads.
+
+**Alternatives Considered**
+
+Check out the base revision into a temporary directory; duplicate the parser in a
+diff module; analyze deleted function names without historical call relationships.
+
+**Why This Approach**
+
+The same parser preserves analyzer behavior across revisions, without changing the
+user's checkout, creating executable historical files, or adding dependencies.
+Hashes derive from the bytes actually parsed. Disk/snapshot parity and encoding
+tests validate the shared entry point. Keeping invalid source allows later diff
+mapping to report unresolved changes instead of dropping them.
+
+**Trade-offs**
+
+Source bytes occupy memory alongside excerpts and AST parsing data. Capturing each
+file consistently is not an atomic snapshot of the whole working tree. Historical
+indexing still shares the analyzer's static-resolution limitations.
+
+**Future Reconsideration**
+
+Measure memory and indexing cost on large repositories; use snapshot caching or
+lazy source retrieval when necessary, retaining provenance and parser parity.
+
+**Implementation:** `index.py:build_index()`, `build_index_from_sources()`.
+**Flows:** F-002. **Work item:** WI-002.

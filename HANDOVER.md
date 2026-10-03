@@ -26,17 +26,18 @@ current product is a local Python CLI, not the full planned web application.
 
 ## Current work / handoff
 
-No application feature is in progress. The current documentation work is recorded
-in [WI-001](docs/work-items/WI-001-documentation-continuity/FEATURE.md).
-Read its verification and use `git log --oneline -- <record-path>` for its commit.
-Push status of this documentation change is not assumed; check Git when needed.
+Git-diff localization is in progress in
+[WI-002](docs/work-items/WI-002-git-diff-localization/FEATURE.md). First expose the
+indexer for in-memory historical sources (complete, 13 tests passed); next map tracked changes and connect
+impact/context commands. Existing runtime paths F-002, F-004, F-005 are affected.
+Continuity docs were committed locally as `c213c74`; push status is not assumed.
 
 ## Next planned slice
 
-Expose the core through read-only MCP tools: search, impact, context compilation,
+After Git-diff localization, expose read-only MCP tools: search, impact, context compilation,
 and lesson retrieval. Before implementing, create its FEATURE.md, document the
 actual SDK/interface choice in DECISIONS.md, and add implemented paths to FLOW.md.
-Git-diff localization is also planned; neither capability exists yet. See
+MCP is not implemented. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 
 ## Broken / blockers / limitations

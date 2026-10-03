@@ -19,8 +19,11 @@ other project's `diffcontext` package is installed.
   an explicit developer confirmation before retrieval can include them.
 - Flag a lesson as stale if its evidence file or scoped source file changes or
   disappears. Stale, disputed, superseded, and unrelated lessons are not injected.
+- Expose five read-only MCP tools through a local stdio server, using the same
+  service as the CLI. Agent requests cannot confirm lessons or switch repositories.
 
-No API keys or runtime dependencies are needed. Python 3.10+ is required.
+The core CLI needs no API keys or runtime dependencies. Python 3.10+ is required.
+MCP support uses an optional SDK extra; see [connection instructions](docs/MCP.md).
 The tool parses source; it never imports or executes the target repository.
 
 ## Try the included example
@@ -96,6 +99,8 @@ run revision tests. The evaluation is a **two-case synthetic smoke fixture**, no
 benchmark. Its lexical baseline is a simple term-overlap search, not BM25, and the
 comparison is not budget matched. No model task-success claim follows from it.
 GitHub Actions runs both commands on pushes and pull requests once hosted.
+An additional job installs the MCP extra and requires protocol tests to run.
+For a model-free client demonstration, follow [docs/MCP.md](docs/MCP.md).
 
 ## Current limits
 
@@ -119,8 +124,8 @@ GitHub Actions runs both commands on pushes and pull requests once hosted.
 - Memory evidence currently must be an indexed Python file. Commits, line ranges,
   correction diffs, and test-run artifacts will come later.
 - The untrusted-data label is an integration boundary, not a proven prompt-injection
-  defense. MCP, model calls, agent orchestration, tracing, and adversarial evals are
-  planned, not shipped.
+  defense. MCP transport is tested; real coding-assistant task success has not been
+  evaluated. Model calls, orchestration, tracing, and adversarial evals are planned.
 
 See [the build roadmap](docs/ROADMAP.md) for the progression to the full system.
 

@@ -448,3 +448,58 @@ multi-user needs warrant it.
 
 **Implementation:** `service.py:RepositoryService`, `memory.py:Memory.__init__()`.
 **Flows:** F-005, F-015, F-016. **Work item:** WI-003.
+
+## D-011 — Optional official MCP SDK with local stdio transport
+
+**Status:** Accepted on 2026-10-03.
+
+**Decision**
+
+Expose five read-only service methods using official Python MCP SDK 2.3.0, pinned
+in the optional `mcp` extra. Start a single repository-bound stdio server with
+`serve`. Keep the core dependency-free and developer memory writes outside MCP.
+
+**Context**
+
+Coding assistants need discoverable tool contracts and structured context without
+copying CLI output by hand. Local operation requires no hosted API, authentication
+service, or model provider. Protocol behavior must be verified across a real process.
+
+**Alternatives Considered**
+
+Hand-write JSON-RPC/MCP; wrap CLI subprocess output only; use the SDK v1 maintenance
+line; introduce HTTP transport; make the SDK mandatory; expose writable memory tools.
+
+**Why This Approach**
+
+Official SDK handles initialization, schema generation, validation, serialization,
+and lifecycle. Its current v2 docs and package availability were checked before
+selecting 2.3.0. stdio fits local host-launched tools without a new deployment surface.
+Optional installation preserves the simpler CLI. Shared service avoids competing
+retrieval implementations. Read-only SQLite provides enforcement beyond annotations;
+developer review remains explicit. Tests measure schema/discovery, parity, filtering,
+error recovery, and separate-process revision compilation. Expected domain failures
+become SDK ToolError responses so clients receive the reason and can retry.
+
+**Trade-offs**
+
+The extra adds several transitive packages and only the direct SDK is pinned.
+The adapter imports the SDK's ToolError module, so SDK upgrades require contract
+tests. stdio suits local processes, not multi-user remote access. Each call rebuilds
+indexes; no cancellation policy or atomic snapshot is implemented. Protocol/JSON
+overhead is outside the compiler budget. Annotations and untrusted-data instructions
+are not an OS sandbox or an evaluated prompt-injection defense. Transport tests do
+not establish real coding-agent task success.
+
+**Future Reconsideration**
+
+Upgrade with protocol regression checks. Lock transitive versions if deployment
+reproducibility becomes necessary. Add authenticated HTTP only for a demonstrated
+remote-host requirement. Measure latency before caching; collect actual assistant
+outcomes before expanding the tool surface or adding an investigation loop.
+
+**Implementation:** `mcp_server.py:create_server()`, `_call()`, `cli.py:main()` serve
+branch, `examples/mcp_client.py:demonstrate()`. **Flow:** F-017. **Work item:** WI-003.
+Sources: [SDK tools](https://py.sdk.modelcontextprotocol.io/servers/tools/),
+[running servers](https://py.sdk.modelcontextprotocol.io/run/),
+[clients](https://py.sdk.modelcontextprotocol.io/client/).

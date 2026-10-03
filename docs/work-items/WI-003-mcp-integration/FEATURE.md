@@ -1,6 +1,6 @@
 # WI-003 — Read-only MCP integration
 
-Status: in progress
+Status: complete
 Opened / updated: 2026-10-03 (Asia/Calcutta)
 
 ## Request and scope
@@ -40,19 +40,40 @@ MCP remains an optional extra so the local core needs no SDK dependencies.
    fixture setup without inheriting/importing test classes into discovery.
 4. All four focused service checks pass. The earlier full run's existing checks
    passed; the final full suite will be rerun with transport coverage.
+5. Added the optional SDK extra, `serve`, five annotated tools, and protocol tests.
+   In-memory checks passed, but expected domain errors produced unexpected-error
+   tracebacks. Converted ValueError/OSError/SQLite failures into SDK ToolError;
+   errors now retain actionable messages and subsequent valid calls succeed.
+6. The first real stdio test failed at Windows asyncio pipe creation with WinError
+   5 inside the sandbox. Reran unchanged transport with approved pipe access:
+   all four protocol tests passed, including deleted-symbol context and recovery.
+7. Installed the editable project extra in `.venv`. Added connection instructions,
+   a separate CI job requiring MCP, and `examples/mcp_client.py`. Its real subprocess
+   demonstration discovered tools, selected refund_total, and compiled cited code.
+   Launching the installed module outside the project directory also succeeded.
+8. Final full suite: 37/37 passed with SDK (24.010s); dependency-free environment:
+   33 passed, four MCP skips (20.031s). Both existing synthetic smoke cases passed.
 
 ## Verification
 
 Passed: 4 service checks for core parity, read-only SQL/method rejection, absent DB
 non-creation, confirmed/fresh filtering, unchanged DB bytes, and bounds.
-Pending: SDK tool discovery/calls, bounds/errors, stdio transport,
-revision context and absence of writes. No real coding-agent outcome claim yet.
+Passed: SDK tool discovery/calls, bounds/actionable errors/recovery, stdio transport,
+revision context, fresh/confirmed filtering, unchanged database bytes, client demo,
+and outside-project module launch. Local Python version is 3.13.9 on Windows;
+configured Linux/Python 3.11 CI has not been observed remotely. No real coding-agent
+outcome claim or independent benchmark yet.
 
 ## Handoff / completion
 
-Service/read-only memory complete; next the MCP adapter/client test.
-Update F-005/F-007/F-015 and add the actual new request flows as they are completed.
+Service/read-only memory and MCP adapter complete. D-010/D-011, F-016/F-017 and
+related existing CLI flows are synchronized; HANDOVER/README/ROADMAP updated.
+Next: a real assistant session and controlled outcome evaluation. Keep memory
+review developer-controlled, inspect omitted/unresolved evidence, and do not claim
+the transport demonstration proves coding-task success or injection resistance.
 
 ## Git trace
 
-`git log --oneline -- docs/work-items/WI-003-mcp-integration/FEATURE.md`.
+Shared service/read-only prerequisite: `f52f667`.
+Transport: `git log --oneline -- diffcontext/mcp_server.py`.
+Full record: `git log --oneline -- docs/work-items/WI-003-mcp-integration/FEATURE.md`.

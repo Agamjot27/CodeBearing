@@ -9,6 +9,9 @@ description = "Change-aware code context and evidence-backed engineering memory"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+mcp = ["mcp==2.3.0"]
+
 [project.scripts]
 diffcontext = "diffcontext.cli:main"
 

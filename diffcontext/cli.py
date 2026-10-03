@@ -16,6 +16,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("index", help="Parse symbols and resolved call relationships")
+    commands.add_parser("serve", help="Run read-only MCP tools over stdio (requires the mcp extra)")
     changes = commands.add_parser("changes", help="Localize tracked changes against a Git commit")
     changes.add_argument("--ref", default="HEAD")
     finder = commands.add_parser("search", help="Find candidate seeds with lexical search")
@@ -40,6 +41,15 @@ def main(argv: list[str] | None = None) -> int:
     status.add_argument("status", choices=["confirmed", "superseded", "disputed"])
     args = parser.parse_args(argv)
     try:
+        if args.command == "serve":
+            # Import only at the transport boundary: all ordinary CLI commands
+            # must keep working when the optional SDK is not installed.
+            try:
+                from .mcp_server import create_server
+            except ImportError as exc:
+                raise ValueError('MCP dependencies are missing; install with: python -m pip install -e ".[mcp]"') from exc
+            create_server(args.repo).run(transport="stdio")
+            return 0
         service = RepositoryService(args.repo)
         if args.command == "index":
             result = build_index(args.repo).describe()

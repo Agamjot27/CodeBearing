@@ -16,7 +16,7 @@ current product is a local Python CLI, not the full planned web application.
   `diffcontext/context.py`. Token counts are estimates, not exact tokenizer counts.
 - SQLite lesson proposal/review, exact-scope retrieval, evidence/source hash
   freshness checks: `diffcontext/memory.py`.
-- CLI: `diffcontext/cli.py`; refund example; 29 regression tests; 2 synthetic
+- CLI: `diffcontext/cli.py`; refund example; 37 regression/protocol tests; 2 synthetic
   retrieval smoke cases; GitHub Actions check configuration.
 - Baseline committed and pushed: `fa2dd36` on `main`, remote
   `https://github.com/Agamjot27/DiffContext.git`.
@@ -27,13 +27,19 @@ current product is a local Python CLI, not the full planned web application.
 - Git revision localization: `changes.py` maps tracked modifications, additions,
   and deletions in old/current graphs; restores surviving old callers; labels old
   context; flags out-of-function and unsupported changes. D-009, F-013–F-015.
+- Shared `RepositoryService`, SQLite read-only retrieval, and five optional MCP
+  stdio tools; client demo and connection instructions in `docs/MCP.md`.
+  D-010/D-011 and F-016/F-017 document the paths and boundaries.
 
 ## Current work / handoff
 
-Read-only MCP integration is in progress in
-[WI-003](docs/work-items/WI-003-mcp-integration/FEATURE.md). First share orchestration
-and introduce true read-only memory (complete, four service tests passed); next
-wrap the official SDK and test stdio. D-010/F-016 describe shared orchestration.
+Read-only MCP integration is complete in
+[WI-003](docs/work-items/WI-003-mcp-integration/FEATURE.md). Official SDK 2.3.0 is
+installed in `.venv` with the editable project extra. All 37 tests pass with SDK;
+without SDK, 33 pass and four protocol tests skip. Real stdio tests and client demo
+pass. Host settings are not configured; assistant outcome evaluation remains next.
+Shared service/read-only memory is committed as `f52f667`; find the transport
+commit with `git log --oneline -- diffcontext/mcp_server.py`.
 Git-diff integration is committed as `bbed3ae`. Continuity docs are `c213c74`.
 Only the original `fa2dd36`
 baseline is known pushed; later commits remain local unless separately pushed.
@@ -46,9 +52,9 @@ controlled outcome evaluations before adding an investigation loop or dashboard.
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. 29 tests and 2 smoke cases
-  passed in WI-002. The first revision test run failed during Windows Git-object
-  cleanup; contained read-only cleanup retry resolved it. Details are in WI-002.
+- No failing application check is currently recorded. 37 tests and 2 smoke cases
+  passed in WI-003. The Windows sandbox blocked MCP subprocess pipe creation;
+  the same test passed with approved pipe access. Details are in WI-003.
 - Static analysis misses dynamic dispatch, inheritance, re-exports, nested
   functions, configuration, and some binding behavior. Missing edges do not prove
   independence. Method excerpts do not reconstruct class context.
@@ -59,7 +65,7 @@ controlled outcome evaluations before adding an investigation loop or dashboard.
   with conservative symbol fallback. See `changes.unresolved` before trusting output.
 - Memory uses whole-file hashes, over-invalidates unrelated edits, and does not
   check all dependencies. Code-first packing can leave no budget for lessons.
-- Full API, frontend, MCP, worker, tracing, model loop, incremental indexing, and
+- HTTP API, frontend, worker, tracing, model loop, incremental indexing, and
   independent end-to-end benchmarks are not implemented.
 - Restricted shell execution requires approved escalation for Git writes/network
   operations. Prior approved pushes succeeded. Some `.test-tmp/tmp*` directories
@@ -77,6 +83,7 @@ python evals/run.py
 python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
 python -m diffcontext --repo . changes --ref HEAD
 python -m diffcontext --repo . compile --ref HEAD --max-tokens 4000
+.\.venv\Scripts\python.exe examples/mcp_client.py --repo examples/refunds
 ```
 
 ## Avoid

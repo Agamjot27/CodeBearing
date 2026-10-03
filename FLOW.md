@@ -7,8 +7,9 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 ## Current modification scope
 
 WI-003 shares CLI/agent orchestration through `service.py:RepositoryService`,
-introduces read-only `memory.py:Memory` access, and adds the MCP transport next.
-F-001, F-003–F-005, F-013–F-015 route through the service; F-016 documents it. See
+introduces read-only `memory.py:Memory` access, and exposes five MCP tools.
+F-001, F-003–F-005, F-013–F-015 route through the service; F-016 documents it and
+F-017 documents transport/client execution. See
 [its feature record](docs/work-items/WI-003-mcp-integration/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
@@ -37,7 +38,7 @@ for developers/agents, not an automatically executed application function.
 | Lesson proposal | F-008: manual input |
 | Lesson confirmation | F-009 |
 | Lesson invalidation / stale detection | F-010: computed on reads |
-| MCP request | Not implemented |
+| MCP request | F-017: repository-bound read-only stdio tools |
 | Investigation loop | Not implemented |
 | Evaluation execution | F-011 and F-012 |
 | Frontend Context Explorer | Not implemented |
@@ -155,7 +156,7 @@ Revision compilation uses F-015; this section describes the explicit-symbol path
 → if memory DB exists, `memory.py:Memory.__init__(read_only=True)` →
 `Memory.list(candidate_ids)` → `Memory.close()` →
 `context.py:compile_context(index, seeds, budget, depth, lessons)` →
-`impact()` again → packing (F-006) → `main()` adds `excluded_lessons` → JSON.
+`impact()` again → packing (F-006) → service adds `excluded_lessons` → CLI JSON.
 
 **Data Transformation:** Candidate IDs scope the memory read. The compiler creates
 `text`, inclusion metadata, omitted IDs/reasons, included lesson IDs, missing seeds,
@@ -411,7 +412,7 @@ D-003, D-004, D-009.
 
 ## F-016 — Shared repository request service
 
-**Trigger:** CLI search/changes/impact/compile; future MCP handlers use the same
+**Trigger:** CLI search/changes/impact/compile and MCP handlers use the same
 service. `RepositoryService(root)` fixes a resolved, existing directory once.
 
 **Execution Path:** `service.py:RepositoryService.search_symbols()` → `build_index()`
@@ -436,3 +437,43 @@ No SDK dependency, network, or LLM in this layer.
 **Output:** Core-compatible dictionaries or actionable validation/database errors.
 `tests/test_service.py:ServiceTests` checks parity, no creation, SQL/method write
 rejection, filtering/freshness, unchanged DB bytes, and request bounds. D-010.
+
+## F-017 — MCP startup, tool requests, and client demonstration
+
+**Trigger:** An MCP host launches `python -m diffcontext --repo <root> serve`, or
+`examples/mcp_client.py` runs its model-free demonstration.
+
+**Execution Path:** `__main__.py` → `cli.py:main()` serve branch → lazy import
+`mcp_server.py:create_server(root)` → `RepositoryService(root)` → official SDK
+`MCPServer.run(transport="stdio")`. Client initialization/discovery is handled by
+the SDK. A tool call invokes the corresponding nested function in `create_server()`:
+`search_symbols()`, `localize_changes()`, `analyze_impact()`, `compile_context()`,
+or `get_lessons()` → `_call()` → same-named `service.py:RepositoryService` method
+→ F-016 and its relevant core flows → SDK response to the client. Synchronous
+handlers use the SDK worker threads; there is no application job queue/worker.
+
+`examples/mcp_client.py:demonstrate()` → `StdioServerParameters` → `Client` async
+context (starts subprocess/initializes) → `list_tools()` → `call_tool("search_symbols")`
+→ first lexical match ID → `call_tool("compile_context")` → print JSON → client
+context closes the process. This demo's automatic first match is not a planner.
+
+**Data Transformation:** Pydantic annotations produce SDK input schemas and enforce
+bounds. Service validation enforces exactly one selector and resolves symbols.
+Python dictionaries become structured tool content plus SDK text representation.
+`_call()` converts expected ValueError/OSError/SQLite failures to `ToolError`;
+the SDK returns a tool error without terminating the session. Unexpected failures
+retain SDK diagnostics. Read-only hints describe tools but do not enforce OS isolation.
+
+**Database Interaction:** Existing SQLite SELECTs only for compilation/lessons
+through F-016. No memory creation, mutation tools, or developer confirmation.
+
+**External Interaction:** Local stdin/stdout protocol; Git/filesystem/SQLite as
+described in core flows. stdout is reserved for protocol, stderr for diagnostics.
+No HTTP API, frontend, remote provider, model call, source/test execution, or network
+interaction in the tools. The optional dependency is imported only for `serve`.
+
+**Output:** Five discoverable tools, structured results and recoverable errors.
+Compilation budgets only result `text`, not metadata/MCP overhead. Tests in
+`tests/test_mcp.py:MCPTests` exercise contracts/memory; `StdioTests` uses a real
+subprocess with historical/current Git evidence. Missing SDK skips these tests
+unless `DIFFCONTEXT_REQUIRE_MCP=1`, used by the separate MCP CI job. D-011/WI-003.

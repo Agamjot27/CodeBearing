@@ -16,10 +16,12 @@ Git revision localization now maps tracked old/current line changes into both
 graphs, retains deleted evidence, and compiles labeled packages under one budget.
 Imports/constants/non-Python changes remain explicit unresolved gaps.
 
-## 2. Agent integration and change localization — next
+## 2. Agent integration and change localization — partially implemented
 
-- Read-only MCP tools: search symbols, inspect impact, compile context, retrieve
-  lessons. Keep lesson confirmation in the developer-controlled interface.
+- Implemented: five read-only MCP tools for search, change localization, impact,
+  compilation, and lessons. SDK/stdin-stdout tests exercise contracts and error
+  recovery. Lesson confirmation stays in the developer CLI. Next: demonstrate
+  usage in a real coding-assistant session; transport checks do not prove outcomes.
 - Extend implemented Git-diff seeds with complete module/class evidence and
   configuration dependencies; current fallback seeds symbols and reports gaps.
 - Proper lexical ranking and source-root configuration; incremental indexing.

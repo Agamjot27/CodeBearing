@@ -47,7 +47,7 @@ class Memory:
             raise ValueError("Lesson text cannot be empty.")
         evidence_path = safe_path(self.root, evidence)
         if evidence not in index.hashes:
-            raise ValueError("Evidence must be an indexed Python file in this first version.")
+            raise ValueError("Evidence must be a successfully indexed source file.")
         scope_hash = index.hashes[index.symbols[scope].path]
         cursor = self.connection.execute("INSERT INTO lessons(scope,lesson,evidence,evidence_hash,scope_hash) VALUES (?,?,?,?,?)", (scope, lesson, evidence, digest(evidence_path), scope_hash))
         self.connection.commit()

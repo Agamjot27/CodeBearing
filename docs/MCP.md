@@ -1,13 +1,13 @@
 # Connect your coding assistant
 
 DiffContext runs locally and gives your assistant six read-only context tools.
-Install it once, select a Python project, and copy the generated configuration
+Install it once, select a supported project, and copy the generated configuration
 into Claude Code, Cursor, or Codex. Your assistant starts the server automatically.
 DiffContext needs no model API key; your assistant keeps its own account/settings.
 
 ## 1. Install
 
-Requires Python 3.10+. **This project's 0.2.0 package is not published to PyPI yet.**
+Requires Python 3.10+. **This project's 0.3.0 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
 After this implementation is committed and pushed, install ours from GitHub
 (Git must be installed):
@@ -33,9 +33,11 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/diffcontext_lab-0.2.0-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/diffcontext_lab-0.3.0-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
-Core CLI installation requires no runtime dependencies.
+Python-only core CLI installation requires no runtime dependencies.
+For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`
+in the commands above; see [language support and limits](LANGUAGES.md).
 
 ## 2. Check the connection
 

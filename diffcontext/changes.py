@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .context import compile_context, estimate_tokens, impact
-from .index import Index, MAX_FILE_BYTES, build_index, build_index_from_sources
+from .index import Index, MAX_FILE_BYTES, build_index, build_index_from_sources, is_source_path
 
 
 def _git(root: Path, *args: str) -> bytes:
@@ -65,7 +65,7 @@ def localize_changes(root: Path, ref: str = "HEAD") -> Changes:
         metadata, raw_path = entry.split(b"\t", 1)
         mode, kind, oid, size = metadata.split()
         path = raw_path.decode("utf-8", errors="surrogateescape")
-        if not path.endswith(".py"):
+        if not is_source_path(path):
             continue
         if mode not in {b"100644", b"100755"} or kind != b"blob":
             historical_warnings.append(f"Skipped non-regular historical file: {path}")
@@ -91,8 +91,8 @@ def localize_changes(root: Path, ref: str = "HEAD") -> Changes:
         before = historical.sources.get(path)
         after = current.sources.get(path)
         row = {"path": path, "status": {"A": "added", "D": "deleted", "M": "modified", "T": "type_changed"}.get(status, status), "hunks": [], "fallback": False}
-        if not path.endswith(".py"):
-            unresolved.append({"path": path, "reason": "Non-Python change; inspect configuration or other-language dependencies manually."})
+        if not is_source_path(path):
+            unresolved.append({"path": path, "reason": "Unsupported source or configuration change; inspect other-language dependencies manually."})
             rows.append(row)
             continue
         if (status != "A" and before is None) or (status != "D" and after is None) or (before is not None and path not in historical.hashes) or (after is not None and path not in current.hashes):

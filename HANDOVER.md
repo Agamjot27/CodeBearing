@@ -12,6 +12,9 @@ current product is a local Python CLI and MCP server for coding assistants.
 ## Done
 
 - Python AST symbols and statically resolved call edges: `diffcontext/index.py`.
+- Optional TypeScript/JavaScript/TSX/JSX/MTS/MJS syntax-tree indexing, conservative
+  ESM edges, shared Git deletion recovery and memory freshness; D-017/F-027.
+  Install `[mcp,typescript]`; exact limitations: `docs/LANGUAGES.md`.
 - Lexical seed search, bounded caller/callee expansion, and whole-excerpt packing:
   `diffcontext/context.py`. Token counts are estimates, not exact tokenizer counts.
 - SQLite lesson proposal/review, exact-scope retrieval, evidence/source hash
@@ -44,14 +47,17 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-006 complete locally: [MCP distribution](docs/work-items/WI-006-mcp-distribution/FEATURE.md).
-Launcher/config generation and subprocess check are implemented. Full suite passed
-68 tests; all seven connection tests passed after two portability fixes. Initial
-clean-wheel validation and rebuilt final artifact check passed. No public
-PyPI release or actual assistant-host connection is claimed.
-Version 0.2.0 wheel is installed in `.venv` (replacing its editable 0.1.0 install).
-Its launcher --check passed on examples/refunds with six tools and no warnings.
-For future source edits, reinstall editable mode or rebuild/reinstall the wheel.
+WI-007 complete locally: [TypeScript/JavaScript indexing](docs/work-items/WI-007-typescript-indexing/FEATURE.md).
+Version 0.3.0 adds an optional parser extra without changing the six-tool interface.
+Full MCP/parser-enabled suite passed 85 tests; the subsequently added real
+TypeScript stdio test passed separately (86 tests covered in total). Existing two
+retrieval and six investigation fixtures pass. One authored TS fixture retrieves
+three expected symbols in 246 estimated tokens; no model-benefit claim.
+Clean-wheel 0.3.0 installation, TS compilation, generated configs and MCP
+subprocess check passed outside the checkout.
+WI-006 is complete and pushed as 8bfe195. No public PyPI release or actual
+assistant-host connection is claimed. The .venv is editable again; reinstall
+metadata after version changes rather than assuming a prior wheel includes edits.
 WI-005 is complete: [controlled coding evaluation](docs/work-items/WI-005-coding-evaluation/FEATURE.md).
 Full MCP-enabled suite passed 63 tests; final adapter/history changes also pass all
 nine affected experiment tests. Model-free self-check: three calibrated bugs,
@@ -64,21 +70,23 @@ with `git rev-list --left-right --count main...origin/main` after each push.
 
 ## Next planned slice
 
-Connect a selected coding assistant to an actual Python project and verify tool
-use in that host. Public publication requires a publisher identity/name verification;
-neither is configured. Users can install a wheel or pushed Git source meanwhile.
-Then configure a selected model adapter or collect responses to exported packets and
-run paired live trials. No model provider/account is configured. Add genuine prior
-correction history and temporal held-out tasks before making memory-benefit claims.
-Use observed failures to improve module/class evidence and retrieval.
+Implement persistent, versioned incremental indexing: reuse unchanged parsed files,
+rebuild relationships when imports/exports change, verify parity with a full rebuild,
+and measure cold/warm/edit latency. Then add and compare hybrid retrieval and run
+paired live coding trials using the existing harness. A graph database needs a
+measured storage/traversal requirement; currently the call graph is in memory.
+Public publication needs a selected distinct name/publisher identity, neither
+configured. CodeBearing was suggested, not selected or availability-checked.
+A real host integration and provider/model account remain unverified. Add genuine
+prior correction history and held-out tasks before claiming memory benefit.
 Model planning, autonomous edits, and a dashboard remain planned. See
 [docs/ROADMAP.md](docs/ROADMAP.md) for the larger sequence.
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. Full suite passed 68 tests;
-  final connection changes passed all seven affected tests. Prior retrieval fixtures
-  and coding-harness self-check pass. MCP pipe tests need approved sandbox access.
+- No failing application check is currently recorded. Full suite passed 85 tests
+  plus one separate TypeScript MCP test. MCP pipes need approved sandbox access.
+  CI was updated for Linux/Windows; hosted CI results are not yet verified here.
 - Coding trials are synthetic single-response edits; lessons are authored pre-task
   data, not real historical corrections. Declared model/settings/usage depend on the
   external adapter. Missing costs stay unknown across retried attempts. Grading

@@ -1,6 +1,6 @@
 # Packaging and release checks
 
-The distribution is `diffcontext-lab`, currently version 0.2.0. Its installed
+The distribution is `diffcontext-lab`, currently version 0.3.0. Its installed
 commands are `diffcontext-lab`, `diffcontext-lab-mcp`, and the existing `diffcontext`
 CLI alias. The import package remains `diffcontext` and can conflict with another
 distribution using that name. Validate in an isolated environment.
@@ -17,11 +17,11 @@ From the repository root, using Python 3.10+ and pip 22.3+ (the checker uses pip
 
 ```powershell
 python -m pip wheel . --no-deps --wheel-dir dist
-python scripts/check_wheel.py dist/diffcontext_lab-0.2.0-py3-none-any.whl
+python scripts/check_wheel.py dist/diffcontext_lab-0.3.0-py3-none-any.whl --typescript
 ```
 
 The wheel checker creates a clean temporary environment, installs the wheel
-with its `[mcp]` extra, and checks installed entry points, generated configuration,
+with `[mcp,typescript]` when `--typescript` is supplied (otherwise `[mcp]`), and checks installed entry points, generated configuration,
 and a real subprocess MCP connection away from the source checkout. It requires
 network/package-index access to install dependencies. Inspect its result and exit
 status before calling a wheel validated; merely building a wheel is insufficient.
@@ -36,11 +36,13 @@ build metadata, and temporary environments are local artifacts, not source.
 ## Test the source and transport
 
 ```powershell
-python -m pip install -e ".[mcp]"
+python -m pip install -e ".[mcp,typescript]"
 $env:DIFFCONTEXT_REQUIRE_MCP = '1'
+$env:DIFFCONTEXT_REQUIRE_TYPESCRIPT = '1'
 python -m unittest discover -s tests -v
 python evals/run.py
 python evals/investigate.py
+python evals/typescript.py
 python evals/coding_bench.py self-check
 ```
 
@@ -63,7 +65,7 @@ with an actual pushed commit; do not invent a release tag. A validated wheel can
 also be shared as an artifact and installed with:
 
 ```powershell
-python -m pip install "C:/path/to/diffcontext_lab-0.2.0-py3-none-any.whl[mcp]"
+python -m pip install "C:/path/to/diffcontext_lab-0.3.0-py3-none-any.whl[mcp]"
 ```
 
 The receiver still needs access to the wheel's dependency packages. Package users

@@ -53,7 +53,7 @@ async def check_connection(root: Path) -> dict:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo", type=Path, required=True, help="Local Python repository (Git root for revision tools)")
+    parser.add_argument("--repo", type=Path, required=True, help="Local repository (Git root for revision tools)")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--config", choices=["claude", "cursor", "codex"], help="Print host configuration without changing settings")
     mode.add_argument("--check", action="store_true", help="Test discovery and a search request; no model/API key needed")

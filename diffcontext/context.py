@@ -90,5 +90,7 @@ def compile_context(index: Index, seeds: list[str], budget: int = 4000, depth: i
         "token_estimator": "ceil(utf8_bytes / 3); actual model token count may differ",
         "included": included, "omitted": omitted, "included_lessons": included_lessons,
         "missing_seeds": missing_seeds, "complete": not omitted,
-        "warnings": [*index.warnings, "Static calls only: dynamic dispatch, inheritance, nested functions, globals and configuration can be missing."],
+        "warnings": [*index.warnings, "Static calls only: dynamic dispatch, inheritance, nested functions, globals and configuration can be missing.",
+                     *(["TypeScript/JavaScript syntax graph only: type-checker resolution, tsconfig aliases, re-exports, CommonJS and JSX references are not modeled."]
+                       if any(symbol.language != "python" for symbol in index.symbols.values()) else [])],
     }

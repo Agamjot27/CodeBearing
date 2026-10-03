@@ -13,7 +13,7 @@ from .runs import load_summary, summarize
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Local Python code context and correction memory")
+    parser = argparse.ArgumentParser(description="Local code context and correction memory (optional TypeScript/JavaScript)")
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("index", help="Parse symbols and resolved call relationships")

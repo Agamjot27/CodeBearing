@@ -24,7 +24,7 @@ def run(command, cwd):
     return result.stdout
 
 
-def verify(wheel: Path):
+def verify(wheel: Path, typescript: bool = False):
     wheel = wheel.resolve()
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
@@ -43,16 +43,24 @@ def verify(wheel: Path):
         venv.EnvBuilder(with_pip=False).create(environment)
         bin_dir = environment / ("Scripts" if os.name == "nt" else "bin")
         python = bin_dir / ("python.exe" if os.name == "nt" else "python")
-        run([sys.executable, "-m", "pip", "--python", str(python), "install", str(wheel) + "[mcp]"], scratch)
+        extra = "[mcp,typescript]" if typescript else "[mcp]"
+        run([sys.executable, "-m", "pip", "--python", str(python), "install", str(wheel) + extra], scratch)
         repo = scratch / "project with spaces"
-        shutil.copytree(checkout / "examples" / "refunds", repo,
+        fixture = "typescript-refunds" if typescript else "refunds"
+        shutil.copytree(checkout / "examples" / fixture, repo,
                         ignore=shutil.ignore_patterns("__pycache__", ".diffcontext"))
         launcher = bin_dir / ("diffcontext-lab-mcp.exe" if os.name == "nt" else "diffcontext-lab-mcp")
         core = bin_dir / ("diffcontext-lab.exe" if os.name == "nt" else "diffcontext-lab")
         run([str(launcher), "--help"], scratch)
         indexed = json.loads(run([str(core), "--repo", str(repo), "index"], scratch))
-        if not indexed:
+        if not indexed.get("symbols"):
             raise ValueError("Installed core entry point returned no index.")
+        if typescript and not any(s["language"] == "typescript" for s in indexed["symbols"]):
+            raise ValueError("Installed language adapter returned no TypeScript symbols.")
+        seed = indexed["symbols"][0]["id"]
+        compiled = json.loads(run([str(core), "--repo", str(repo), "compile", "--symbol", seed], scratch))
+        if seed not in {s["id"] for s in compiled["included"]}:
+            raise ValueError("Installed compiler omitted the fixture seed.")
         for client in ("claude", "cursor", "codex"):
             output = run([str(launcher), "--repo", str(repo), "--config", client], scratch)
             if client == "codex":
@@ -80,4 +88,6 @@ def verify(wheel: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("wheel", type=Path)
-    verify(parser.parse_args().wheel)
+    parser.add_argument("--typescript", action="store_true", help="Install optional parser extra and use TypeScript fixture")
+    args = parser.parse_args()
+    verify(args.wheel, args.typescript)

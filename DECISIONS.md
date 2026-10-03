@@ -776,3 +776,61 @@ when private-code access is defined. Publish after release review and owner setu
 
 **Implementation:** `connect.py:configuration()`, `check_connection()`, `main()`;
 `scripts/check_wheel.py:verify()`. **Flows:** F-025/F-026. **Work item:** WI-006.
+
+## D-017 — Extend the shared snapshot graph with optional web-language parsers
+
+**Decision**
+
+Add a syntax-only Tree-sitter TypeScript/JavaScript adapter behind the optional
+`typescript` extra. Preserve Python's standard-library parser and shared Index,
+context, Git, memory and MCP contracts. Pin bindings 0.26.0, TypeScript grammar
+0.23.2 and JavaScript grammar 0.25.0 to the combination verified here. This extends
+the language scope of D-008/D-009 without replacing their captured-source design.
+
+**Context**
+
+The user needs useful infrastructure for coding assistants beyond Python and
+measurable engineering evidence. Existing downstream services already consume
+language-neutral symbols, edges and source hashes. The immediate gap is parsing,
+not a need for another database or an agent framework.
+
+**Alternatives Considered**
+
+Regex extraction; a Node/TypeScript compiler or language server; replacing Python
+AST with Tree-sitter; mandatory parser dependencies for all users; indexing whole
+files without callable relationships; adding a graph database at this stage.
+
+**Why This Approach**
+
+Syntax trees provide reliable callable ranges and binding structure that regex
+does not. The Python binding parses captured bytes directly without executing
+target code or requiring Node, a project build or language-server lifecycle.
+Keeping the adapter optional retains the dependency-free Python CLI. Reusing Index
+avoids separate retrieval paths and immediately makes Git deletion recovery and
+lesson freshness available to web projects. Conservative ambiguous/shadowed/
+reassigned binding refusal prioritizes avoiding invented dependencies. Tests check
+exact edges, UTF-8 excerpts, missing dependencies, malformed files, Git recovery,
+memory and MCP; the authored retrieval fixture checks whole excerpts and budget.
+No measured latency improvement or model success improvement is claimed.
+
+**Trade-offs**
+
+This is a syntax graph, not type checking: JSX references, runtime dispatch,
+CommonJS, re-exports and aliases remain unresolved. Conservative scope guards lose
+some valid edges. Optional native wheels increase installation/platform risk;
+transitive dependencies are not locked. Source indexing still rebuilds each time;
+the graph stays in memory, with SQLite used only for lessons. Actual gaps produce
+index warnings; universal limitations stay in compiler metadata so they do not
+automatically force every investigation to partial.
+
+**Future Reconsideration**
+
+Measure real repository misses before adding compiler resolution or more adapters.
+Add persistent incremental indexing next, then compare lexical/graph/hybrid
+retrieval under matched budgets. Adopt graph storage only when measured traversal
+or persistence needs justify it. Revisit dependency pins after compatibility checks.
+
+**Implementation:** `index.py:is_source_path()`, `build_index_from_sources()`,
+`_build_python_index()`; `typescript.py:extend_index()`, `_definitions()`,
+`_imports()`, `_resolve_module()`, `_shadowed()`; `changes.py` shared eligibility.
+**Flows:** F-027, extending F-001/F-013/F-016/F-018/F-026. **Work item:** WI-007.

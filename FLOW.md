@@ -759,3 +759,44 @@ No assistant settings edited, no HTTP server or worker introduced.
 
 **Output:** Connection JSON or stderr/nonzero failure; wheel passed JSON after
 installation/entry-point/config/protocol checks. D-016/WI-006.
+
+## F-027 — Optional TypeScript/JavaScript snapshot indexing and downstream reuse
+
+**Trigger:** CLI/MCP indexing, search, compilation or investigation for a repository
+containing supported web source; Git localization also builds historical snapshots.
+
+**Execution Path:** `cli.py:main()` or `mcp_server.py:create_server()` tool →
+`service.py:RepositoryService` operation → `index.py:build_index()` → directory
+scan using `is_source_path()` → `build_index_from_sources()` → validate captured
+paths/size → `_build_python_index()` for Python → optional
+`typescript.py:extend_index()` for web bytes → grammar `Parser.parse()` →
+`_definitions()`/`_imports()`/`_put_export()` → Symbol construction → `_shadowed()`
+and `_resolve_module()` resolve eligible calls → shared Index returned.
+`changes.py` uses `is_source_path()` for current paths and historical Git blobs,
+then the same snapshot adapter; deletion recovery follows F-013–F-015.
+`context.py:search()`/`impact()`/`compile_context()` consume the shared graph;
+`memory.py` hashes evidence and scope as before; F-016–F-018 expose results through
+the same six tools/investigator. No language-specific second service is introduced.
+
+**Data Transformation:** Captured raw bytes → valid syntax tree → callable IDs
+`relative/path.ts:name`, language field, exact byte-sliced excerpts/line ranges,
+imports and SHA-256 hashes → caller/callee sets. Invalid UTF-8/error trees retain
+captured bytes but no parsed symbols/hash. Missing extras leave Python intact and
+list unindexed web files. Ambiguous/import/type/dynamic gaps stay explicit; compiler
+metadata also explains universal syntax-graph limitations. No cross-language
+runtime edge is guessed. Selection and token estimates follow existing F-003-F-006.
+
+**Database Interaction:** No persistent symbol/edge tables or indexing cache.
+Confirmed lessons use the existing SQLite schema and evidence hashes; read-only
+service operations do not create the database. No worker or graph database.
+
+**External Interaction:** Filesystem and, for revision tools, Git blob reads.
+Optional local parser libraries; no Node/build, target-code execution, network or
+LLM. Installing the extra may download packages.
+
+**Output:** The same index/search/context/change/investigation JSON contracts with
+web-language evidence and warnings. `evals/typescript.py:main()` indexes the authored
+refund fixture and calls `compile_context()` at two budgets to check expected IDs,
+whole excerpts and estimated tokens; no provider or coding-benefit measurement.
+`scripts/check_wheel.py:verify(..., typescript=True)` extends F-026 by installing
+both extras, copying the web fixture and checking installed compilation. D-017/WI-007.

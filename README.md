@@ -9,6 +9,9 @@ other project's `diffcontext` package is installed.
 ## What works today
 
 - Parse Python modules into functions, methods, and statically resolved call edges.
+- Optionally parse TypeScript/JavaScript functions and methods, with conservative
+  relative ESM import and call edges. TSX/JSX syntax is supported; component
+  relationships and type-checker resolution are not. See [language support](docs/LANGUAGES.md).
 - Find seed functions through basic lexical search.
 - Automatically localize tracked Git changes against a base commit using old and
   current code, retaining deleted symbols and recovering their surviving callers.
@@ -84,7 +87,7 @@ for Git runs, limits, status handling and saving/inspecting results.
 
 ## Analyze your Git changes
 
-From the root of a Git repository containing Python code:
+From the root of a Git repository containing supported source code:
 
 ```powershell
 python -m diffcontext --repo . changes --ref HEAD

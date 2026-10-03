@@ -1,4 +1,4 @@
-"""Conservative Python symbol indexing and statically resolved call edges."""
+"""Captured-source indexing with a stdlib Python core and optional language adapters."""
 
 from __future__ import annotations
 
@@ -11,6 +11,13 @@ from pathlib import Path
 
 EXCLUDED = {".git", ".venv", "venv", "env", "node_modules", "__pycache__", "build", "dist", ".diffcontext", "site-packages"}
 MAX_FILE_BYTES = 1_000_000
+SOURCE_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".mts", ".mjs"}
+
+
+def is_source_path(relative: str) -> bool:
+    """Recognize implementation files, excluding declarations and minified bundles."""
+    return (Path(relative).suffix in SOURCE_SUFFIXES
+            and not relative.endswith((".d.ts", ".d.mts", ".min.js", ".min.mjs")))
 
 
 @dataclass
@@ -24,6 +31,7 @@ class Symbol:
     end: int
     source: str
     preamble: str
+    language: str = "python"
 
 
 @dataclass
@@ -84,7 +92,7 @@ def build_index(root: Path) -> Index:
     for directory, dirs, files in os.walk(root, followlinks=False):
         dirs[:] = sorted(d for d in dirs if d not in EXCLUDED and not (Path(directory) / d).is_symlink() and not d.startswith("."))
         for filename in sorted(files):
-            if not filename.endswith(".py") or filename.startswith("."):
+            if not is_source_path(filename) or filename.startswith("."):
                 continue
             path = Path(directory) / filename
             relative = path.relative_to(root).as_posix()
@@ -102,6 +110,34 @@ def build_index(root: Path) -> Index:
 
 
 def build_index_from_sources(root: Path, sources: dict[str, bytes], warnings: list[str] | None = None) -> Index:
+    """Use one byte capture for both language adapters and historical snapshots."""
+    valid = {}
+    warnings = list(warnings or [])
+    for relative, raw in sorted(sources.items()):
+        parts = relative.split("/")
+        if (not is_source_path(relative) or any(p in EXCLUDED or p.startswith(".") for p in parts)
+                or Path(relative).is_absolute() or ".." in parts or "\\" in relative):
+            warnings.append(f"Skipped unsupported source path: {relative}")
+        elif len(raw) > MAX_FILE_BYTES:
+            warnings.append(f"Skipped file larger than {MAX_FILE_BYTES} bytes: {relative}")
+        else:
+            valid[relative] = raw
+    index = _build_python_index(root, {p: raw for p, raw in valid.items() if p.endswith(".py")}, warnings)
+    web_sources = {p: raw for p, raw in valid.items() if not p.endswith(".py")}
+    # Retain unparsed bytes so missing optional parsers cannot make Git changes
+    # disappear. Successful parsing alone adds hashes usable as memory evidence.
+    index.sources.update(web_sources)
+    if web_sources:
+        try:
+            from .typescript import extend_index
+            extend_index(index, web_sources)
+        except ImportError:
+            index.warnings.append("TypeScript/JavaScript parsing unavailable; install the [typescript] extra. "
+                                  "Unindexed files: " + ", ".join(sorted(web_sources)))
+    return index
+
+
+def _build_python_index(root: Path, sources: dict[str, bytes], warnings: list[str] | None = None) -> Index:
     """Index byte snapshots without checking out or executing historical code.
 
     Retain source bytes even on parse failure so diff localization can disclose

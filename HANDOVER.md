@@ -7,7 +7,7 @@ This is a current-state snapshot; detailed history belongs in Git and work items
 
 Build an independent change-aware context engine and evidence-backed engineering
 memory for coding agents. Prove usefulness through controlled evaluations. The
-current product is a local Python CLI, not the full planned web application.
+current product is a local Python CLI and MCP server for coding assistants.
 
 ## Done
 
@@ -16,7 +16,7 @@ current product is a local Python CLI, not the full planned web application.
   `diffcontext/context.py`. Token counts are estimates, not exact tokenizer counts.
 - SQLite lesson proposal/review, exact-scope retrieval, evidence/source hash
   freshness checks: `diffcontext/memory.py`.
-- CLI: `diffcontext/cli.py`; refund example; 63 regression/protocol tests; 2 existing
+- CLI: `diffcontext/cli.py`; refund example; regression/protocol tests; 2 existing
   retrieval smoke cases and 6 investigation development fixtures; CI configuration.
 - Baseline committed and pushed: `fa2dd36` on `main`, remote
   `https://github.com/Agamjot27/DiffContext.git`.
@@ -38,9 +38,20 @@ current product is a local Python CLI, not the full planned web application.
   reference calibration, paired context/memory controls, command/replay contracts,
   quota stop/resume, attempt history and provenance-checked JSON artifacts.
   `coding.py`, `experiments.py`, `evals/coding_bench.py`; D-014/D-015, F-021–F-024.
+- Installable 0.2.0 MCP launcher, generated Claude/Cursor/Codex configuration,
+  model-free protocol check and clean-wheel validation; D-016, F-025/F-026.
+  Setup/release guides: `docs/MCP.md`, `docs/RELEASING.md`. No PyPI release yet.
 
 ## Current work / handoff
 
+WI-006 complete locally: [MCP distribution](docs/work-items/WI-006-mcp-distribution/FEATURE.md).
+Launcher/config generation and subprocess check are implemented. Full suite passed
+68 tests; all seven connection tests passed after two portability fixes. Initial
+clean-wheel validation and rebuilt final artifact check passed. No public
+PyPI release or actual assistant-host connection is claimed.
+Version 0.2.0 wheel is installed in `.venv` (replacing its editable 0.1.0 install).
+Its launcher --check passed on examples/refunds with six tools and no warnings.
+For future source edits, reinstall editable mode or rebuild/reinstall the wheel.
 WI-005 is complete: [controlled coding evaluation](docs/work-items/WI-005-coding-evaluation/FEATURE.md).
 Full MCP-enabled suite passed 63 tests; final adapter/history changes also pass all
 nine affected experiment tests. Model-free self-check: three calibrated bugs,
@@ -53,7 +64,10 @@ with `git rev-list --left-right --count main...origin/main` after each push.
 
 ## Next planned slice
 
-Configure a selected model adapter or collect responses to exported packets, then
+Connect a selected coding assistant to an actual Python project and verify tool
+use in that host. Public publication requires a publisher identity/name verification;
+neither is configured. Users can install a wheel or pushed Git source meanwhile.
+Then configure a selected model adapter or collect responses to exported packets and
 run paired live trials. No model provider/account is configured. Add genuine prior
 correction history and temporal held-out tasks before making memory-benefit claims.
 Use observed failures to improve module/class evidence and retrieval.
@@ -62,8 +76,9 @@ Model planning, autonomous edits, and a dashboard remain planned. See
 
 ## Broken / blockers / limitations
 
-- No failing application check is currently recorded. 63 tests, 8 retrieval fixtures
-  and the coding-harness self-check pass. MCP pipe tests need approved sandbox access.
+- No failing application check is currently recorded. Full suite passed 68 tests;
+  final connection changes passed all seven affected tests. Prior retrieval fixtures
+  and coding-harness self-check pass. MCP pipe tests need approved sandbox access.
 - Coding trials are synthetic single-response edits; lessons are authored pre-task
   data, not real historical corrections. Declared model/settings/usage depend on the
   external adapter. Missing costs stay unknown across retried attempts. Grading

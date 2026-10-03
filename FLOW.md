@@ -6,10 +6,10 @@ Decision IDs refer to DECISIONS.md. Use `git log -p -- FLOW.md` to inspect chang
 
 ## Current modification scope
 
-WI-005 adds trusted coding fixtures/grading (F-021), paired context packets (F-022),
-runners and checkpointed reports (F-023/F-024). Investigation
-F-018 and saved-report F-019 remain unchanged. See
-[its feature record](docs/work-items/WI-005-coding-evaluation/FEATURE.md)
+WI-006 adds installed MCP startup/configuration (F-025) and connection/distribution
+checks (F-026). Existing service/tool dispatch F-016/F-017 and investigation
+F-018 remain unchanged. See
+[its feature record](docs/work-items/WI-006-mcp-distribution/FEATURE.md)
 and [HANDOVER.md](HANDOVER.md) for current progress and next work.
 
 ## Session documentation path (development workflow)
@@ -701,3 +701,61 @@ on its explicit adapter; replay has none. No automatic retry/concurrency.
 including all-failed candidates; 1 means failed calibration/unscored incompletion;
 2 means invalid configuration/file input. Default self-check calibrates three bugs
 and checks 12 reference/12 unchanged trials. D-015/WI-005.
+## F-025 — Installed MCP launch and client configuration
+
+**Trigger:** Assistant executes generated config, or user runs
+`diffcontext-lab-mcp --repo <root> [--config claude|cursor|codex]`.
+
+**Execution Path:** `pyproject.toml` console entry → `diffcontext/connect.py:main()`
+→ resolve/validate root → config mode `configuration()` → print JSON/TOML; or
+lazy import `mcp_server.py:create_server(root)` → `RepositoryService(root)` →
+SDK `run(transport="stdio")` → existing F-017 tool dispatch/F-016 service calls.
+Generated configs invoke installed Python `-m diffcontext.connect`, using this
+same path without relying on executable discovery in the GUI host's PATH.
+
+**Data Transformation:** User repository becomes an absolute existing directory.
+Config uses the owning interpreter, module and repository argument array;
+Claude adds type=stdio. JSON string escaping also serves TOML basic path strings.
+Missing root/dependencies fail with stderr and nonzero exit. Server stdout is MCP
+protocol only; config mode prints config without importing the optional SDK.
+
+**Database Interaction:** None in configuration/startup. Tool memory reads follow
+F-016; no host configuration files are written. No new database/entity introduced.
+
+**External Interaction:** Local interpreter/filesystem and host subprocess pipes.
+No HTTP, worker, model/provider call, repository execution or automatic settings
+mutation. The external coding assistant may send returned code to its model.
+
+**Output:** Mergeable configuration or the six-tool local server. One fixed root
+per launch; user must enable/approve the server in the host. D-016/WI-006.
+
+## F-026 — Connection and clean distribution validation
+
+**Trigger:** `diffcontext-lab-mcp --repo <root> --check`, or
+`python scripts/check_wheel.py <wheel>` (also in the MCP CI job).
+
+**Execution Path:** `connect.py:main()` → `asyncio.wait_for(check_connection())`
+→ SDK `Client(StdioServerParameters)` → installed Python child F-025 →
+`list_tools()` → compare six names → `call_tool(search_symbols)` → F-016 search
+→ validate structured result → print connection JSON → close child.
+Distribution: `scripts/check_wheel.py:verify()` → inspect ZIP → create disposable
+venv → `run(pip --python ... install wheel[mcp])` → copy refund fixture into path
+with spaces → run installed core index/help → generate/parse three client configs
+→ installed launcher --check → assert no memory state created → constrained cleanup.
+
+**Data Transformation:** MCP discovery/search becomes status, tool names and parser
+warnings. It checks transport, not retrieval accuracy or host integration. Wheel
+check validates ownership of interpreter/repo paths, excludes development artifacts,
+and runs outside the importable checkout root. TOML parsing uses Python 3.11+;
+3.10 remains a core runtime target. Check timeout is 45 seconds; subprocess
+distribution operations each have a 240-second timeout.
+
+**Database Interaction:** None created; search only reads/parses source. The wheel
+fixture assertion detects accidental repository-local state creation.
+
+**External Interaction:** Local ZIP, venv, source files and subprocess pipes.
+Pip may download optional dependencies; no provider/model or publishing call.
+No assistant settings edited, no HTTP server or worker introduced.
+
+**Output:** Connection JSON or stderr/nonzero failure; wheel passed JSON after
+installation/entry-point/config/protocol checks. D-016/WI-006.

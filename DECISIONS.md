@@ -723,3 +723,56 @@ concurrency only after latency/cost measurements and reliable quota handling.
 **Implementation:** `experiments.py:make_request()`, `CommandRunner`, `ReplayRunner`,
 `validate_response()`, `export_requests()`, `run_experiment()`, `summarize_results()`;
 `evals/coding_bench.py:main()`, `CalibrationRunner`. **Flows:** F-022–F-024. **Work item:** WI-005.
+
+## D-016 — Ship a local MCP launcher with configuration and wheel checks
+
+**Decision**
+
+Keep the fixed-repository stdio service. Add `diffcontext-lab-mcp` to launch it,
+print client configuration, and check discovery plus search in a child process.
+Add a distinct core CLI alias and validate an installed wheel in a fresh
+environment. Prepare release instructions without claiming PyPI publication.
+
+**Context**
+
+The user wants the fastest way to use DiffContext in existing coding assistants.
+Development-path instructions are cumbersome; a dashboard or remote service is
+not needed to call the existing tools. No publisher identity is configured.
+Another project already owns the diffcontext distribution name.
+
+**Alternatives Considered**
+
+Desktop installer/dashboard; hosted HTTP MCP with accounts/repository uploads;
+manual interpreter paths only; automatic client-settings writes; per-call arbitrary
+repository paths; a new installation framework.
+
+**Why This Approach**
+
+Setuptools entry points solve executable discovery with no new runtime library.
+Generated configuration pins sys.executable and absolute repository paths, avoiding
+GUI PATH/activation assumptions. Printing preserves existing settings and enables
+review. The SDK client validates actual protocol responses without model cost.
+Preserve the interpreter's lexical absolute path: dereferencing a POSIX virtualenv
+symlink loses its environment. Codex TOML emits Unicode scalars rather than JSON
+surrogate escapes. Review caught both issues; regressions cover them.
+Fixed roots preserve the current boundary; multiple projects use separate entries.
+A clean wheel check proves users can run outside the source checkout and catches
+missing modules/entry points. Measurable benefit: simpler setup with installed
+discovery, parsing of generated configuration and a successful search request.
+
+**Trade-offs**
+
+Users still need Python, installation and configuration. Distinct distribution and
+command names do not prevent module collision with the other diffcontext package;
+use a dedicated environment. Transitive optional dependencies are not locked.
+Checks do not prove real assistant integration or coding accuracy. Publishing
+requires owner access and package-name verification outside this work.
+
+**Future Reconsideration**
+
+Add guided host configuration/installers if user onboarding remains a barrier.
+Add multi-repository support with explicit access boundaries. Consider remote MCP
+when private-code access is defined. Publish after release review and owner setup.
+
+**Implementation:** `connect.py:configuration()`, `check_connection()`, `main()`;
+`scripts/check_wheel.py:verify()`. **Flows:** F-025/F-026. **Work item:** WI-006.

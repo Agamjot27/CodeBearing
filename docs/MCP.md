@@ -1,53 +1,138 @@
-# Connect through MCP
+# Connect your coding assistant
 
-DiffContext offers six read-only tools through a local stdio process. The host
-chooses one repository when launching it; tool arguments cannot change that root.
-No model or API key is needed to run the server or test its transport.
+DiffContext runs locally and gives your assistant six read-only context tools.
+Install it once, select a Python project, and copy the generated configuration
+into Claude Code, Cursor, or Codex. Your assistant starts the server automatically.
+DiffContext needs no model API key; your assistant keeps its own account/settings.
 
-## Install the optional extra
+## 1. Install
 
-From the project root, using Python 3.10+:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[mcp]"
-```
-
-If virtual-environment creation fails during ensurepip but leaves an interpreter,
-an existing pip installation can manage it with
-`python -m pip --python .venv install -e ".[mcp]"`. The SDK is pinned to 2.3.0;
-transitive dependencies are not locked. The core CLI still has no runtime dependencies.
-
-## Demonstrate the connection
+Requires Python 3.10+. **This project's 0.2.0 package is not published to PyPI yet.**
+Do not use `pip install diffcontext`: that installs a different author's project.
+After this implementation is committed and pushed, install ours from GitHub
+(Git must be installed):
 
 ```powershell
-.\.venv\Scripts\python.exe examples/mcp_client.py --repo examples/refunds
+python -m pip install "diffcontext-lab[mcp] @ git+https://github.com/Agamjot27/DiffContext.git"
 ```
 
-`examples/mcp_client.py:demonstrate()` launches a separate server, initializes an
-SDK client, lists tools, searches, and compiles the first match. It prints the
-result and closes the process. This proves transport, not coding-agent task success.
+Use a dedicated Python environment if another DiffContext package is installed:
+our distribution name is `diffcontext-lab`, but both projects use the import name
+`diffcontext`. On Windows, create and activate an environment before installing:
 
-## Configure an MCP host
-
-For a host accepting the common `mcpServers` JSON format, adapt these absolute paths:
-
-```json
-{
-  "mcpServers": {
-    "diffcontext": {
-      "command": "C:\\Users\\Agamjot Singh\\Desktop\\DiffContext\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "diffcontext", "--repo", "C:\\path\\to\\your\\python-repository", "serve"]
-    }
-  }
-}
+```powershell
+python -m venv .venv-diffcontext
+.\.venv-diffcontext\Scripts\Activate.ps1
 ```
 
-Hosts may use a different configuration format. Use the same command and arguments
-in that host's local stdio-server settings. Editable installation makes the module
-available even when the host launches outside this project. No user host settings
-are modified by this project. A Git revision request requires the actual Git root.
-The server reserves stdout for MCP protocol messages; diagnostics go to stderr.
+On macOS/Linux, activate with `source .venv-diffcontext/bin/activate`.
+If you already have this checkout, install from its root instead:
+
+```powershell
+python -m pip install ".[mcp]"
+```
+
+A release wheel can be installed with
+`python -m pip install "C:/path/to/diffcontext_lab-0.2.0-py3-none-any.whl[mcp]"`.
+The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
+Core CLI installation requires no runtime dependencies.
+
+## 2. Check the connection
+
+Replace the sample path with the project you want the assistant to analyze:
+
+```powershell
+diffcontext-lab-mcp --repo "C:/path/to/your-project" --check
+```
+
+The check starts a separate MCP process, discovers all six tools, performs a
+read-only search, and prints JSON with `status: connected` on success. It closes
+the process afterward. This verifies transport and a tool response; it does not
+verify your assistant's settings or prove that a coding task will succeed.
+Use the actual Git root for revision tools. One server is bound to one repository;
+tool calls cannot switch it to another project.
+
+If the launch command is not on PATH, every example also works as
+`python -m diffcontext.connect --repo "C:/path/to/your-project" --check`.
+
+## 3. Generate your assistant's configuration
+
+Run the appropriate command below from the environment where you installed
+DiffContext. It prints configuration with absolute repository and Python paths.
+The assistant therefore does not need your environment activated or its scripts
+directory on PATH. The environment must remain installed at that location.
+
+### Claude Code
+
+```powershell
+diffcontext-lab-mcp --repo "C:/path/to/your-project" --config claude
+```
+
+Copy the generated `mcpServers.diffcontext_lab` entry into `.mcp.json` at the
+target project's root. If the file exists, merge the entry into its existing
+`mcpServers` object; preserve its other servers. The entry includes `type: stdio`.
+Open Claude Code for that project, approve the project MCP server when prompted,
+and use `/mcp` to inspect its connection.
+[Official Claude Code MCP documentation](https://code.claude.com/docs/en/mcp).
+
+### Cursor
+
+```powershell
+diffcontext-lab-mcp --repo "C:/path/to/your-project" --config cursor
+```
+
+Copy the generated entry into the target project's `.cursor/mcp.json`, merging
+with existing `mcpServers` entries. Check Cursor's MCP settings and enable the
+server if needed.
+[Official Cursor MCP documentation](https://prod.cursor.com/help/customization/mcp).
+
+### Codex
+
+```powershell
+diffcontext-lab-mcp --repo "C:/path/to/your-project" --config codex
+```
+
+Merge the printed `[mcp_servers.diffcontext_lab]` TOML section into the target
+project's `.codex/config.toml`. Codex must trust the project to load project
+configuration. Preserve existing settings and avoid duplicate sections with the
+same name. Start a new session and inspect the MCP connection.
+[Official Codex MCP documentation](https://developers.openai.com/codex/mcp).
+
+Configuration generation only prints text. It never edits your assistant settings.
+It uses your local interpreter path, so do not commit a generated configuration
+as a portable setup for other developers. Other compatible hosts can use that
+same command/arguments in their local stdio settings; their configuration format
+may differ. This is a local process, not a hosted URL or remote repository service.
+
+## 4. Try it in your assistant
+
+Ask:
+
+> Use DiffContext's investigate tool to find the code relevant to this task before
+> editing. Show the selected functions, confirmed lessons, warnings, and omissions.
+
+Give a concrete task or function name from your project. Tools become available
+after connection; the assistant decides when to call them. Being connected does
+not force their use on every prompt. The returned code/lessons become part of the
+assistant's context and may be sent to its model provider under the host's settings.
+
+## Troubleshooting
+
+- **Command not found:** use `python -m diffcontext.connect` from the installation
+  environment. Generated host configuration already pins that interpreter.
+- **MCP dependency missing:** reinstall from Git/source/wheel with the `[mcp]`
+  extra in the same environment. No PyPI installation of our release is available yet.
+- **Repository missing:** supply an existing local directory; use the Git root
+  for `ref` tools. Paths with spaces need shell quotes.
+- **Check passes but host fails:** check the copied config, host approval/trust,
+  and host MCP logs. Moving/deleting the Python environment invalidates its path;
+  regenerate config afterward. Restart or reload the assistant as required.
+- **No functions found:** current indexing supports Python function/method symbols.
+  Static graph limitations remain; this is not general-language indexing.
+
+During normal server operation stdout carries MCP protocol messages only;
+diagnostics go to stderr. Do not manually start a long-running server alongside
+the host: the host starts its own process.
 
 ## Tool contracts
 
@@ -81,7 +166,18 @@ for proposal/confirmation. Read-only annotations describe behavior; they are not
 an operating-system sandbox. Indexing reads fresh files each request and does not
 provide an atomic snapshot or a complete semantic dependency graph.
 
-## Verification
+## Developer verification
+
+From a source checkout installed with the MCP extra, the existing client example
+also exercises compilation:
+
+```powershell
+.\.venv\Scripts\python.exe examples/mcp_client.py --repo examples/refunds
+```
+
+`examples/mcp_client.py:demonstrate()` initializes an SDK client, discovers tools,
+searches, compiles the first match, and closes its separate server process.
+The installed `--check` command requires no example files; use it for package users.
 
 ```powershell
 $env:DIFFCONTEXT_REQUIRE_MCP = '1'

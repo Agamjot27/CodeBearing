@@ -4,16 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "diffcontext-lab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Change-aware code context and evidence-backed engineering memory"
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
+
+[project.urls]
+Repository = "https://github.com/Agamjot27/DiffContext"
+Documentation = "https://github.com/Agamjot27/DiffContext/blob/main/docs/MCP.md"
 
 [project.optional-dependencies]
 mcp = ["mcp==2.3.0"]
 
 [project.scripts]
 diffcontext = "diffcontext.cli:main"
+diffcontext-lab = "diffcontext.cli:main"
+diffcontext-lab-mcp = "diffcontext.connect:main"
 
 [tool.setuptools.packages.find]
 include = ["diffcontext*"]

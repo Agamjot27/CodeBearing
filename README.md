@@ -28,6 +28,27 @@ The core CLI needs no API keys or runtime dependencies. Python 3.10+ is required
 MCP support uses an optional SDK extra; see [connection instructions](docs/MCP.md).
 The tool parses source; it never imports or executes the target repository.
 
+## Use with a coding assistant
+
+The installed `diffcontext-lab-mcp` launcher connects the six tools to Claude
+Code, Cursor or Codex. Python 3.10+ is required. This release is not published to
+PyPI yet; install from a built wheel or this source checkout:
+
+```powershell
+python -m pip install ".[mcp]"
+diffcontext-lab-mcp --repo "C:\path\to\your-project" --config claude
+diffcontext-lab-mcp --repo "C:\path\to\your-project" --check
+```
+
+Use `--config cursor` or `--config codex` for those clients. Merge the output
+in the appropriate client settings; generation never edits them automatically.
+The configuration pins the installed interpreter and selected repository, so the
+assistant launches the server without shell activation. `--check` verifies six
+tools and a search request without an LLM; it does not prove coding accuracy.
+See [setup](docs/MCP.md) for isolated installation, host locations, first-task
+prompts and troubleshooting; [release steps](docs/RELEASING.md) describe packaging
+and the remaining publication requirements.
+
 ## Try the included example
 
 Run these from the project directory:

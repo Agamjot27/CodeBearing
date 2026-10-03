@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffcontext-lab"
+version = "0.1.0"
+description = "Change-aware code context and evidence-backed engineering memory"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+diffcontext = "diffcontext.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["diffcontext*"]

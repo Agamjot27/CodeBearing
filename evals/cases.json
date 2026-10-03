@@ -1,0 +1,12 @@
+[
+  {
+    "name": "refund implementation requires helper, consumer and tests",
+    "seed": "billing.py:refund_total",
+    "expected": ["billing.py:round_line", "checkout.py:issue_refund", "test_billing.py:test_rounding_is_per_line", "test_billing.py:test_checkout_refund"]
+  },
+  {
+    "name": "checkout change requires refund dependency and its test",
+    "seed": "checkout.py:issue_refund",
+    "expected": ["billing.py:refund_total", "test_billing.py:test_checkout_refund"]
+  }
+]

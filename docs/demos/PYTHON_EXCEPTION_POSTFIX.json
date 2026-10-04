@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-05",
+  "protocol": "codex-packet-v1",
+  "label": "Post-result development verification of WI-028 on the same retry fixture; not held-out or quality improvement evidence",
+  "context_budget_estimated": 3000,
+  "output_budget_postcheck": 4000,
+  "temperature": "CLI default",
+  "reasoning_effort": "low",
+  "cost_usd": null,
+  "engine_hashes": {
+    "__init__.py": "883a8b9145dcf4bbe2402023d8b8ae4c4aa17d796e936cce76254395f0ababc6",
+    "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "changes.py": "21a8d6b016bbfaab7c3a070b8f5cdd4d89e553cba5c49df4db2598910862b9c1",
+    "cli.py": "39375d2ccc5c43c2de7b76c636737e1263eb0318b68b05428c6a7fa5be1e1973",
+    "codex_trials.py": "1020a526ef0a8ccad3524ff37ab423e204df423dcb810f5fa5c0eb01f18270bb",
+    "coding.py": "dc4a9ea913f58bb0dd0224b6f36c7f1420d9ea4d967528b437b2d2fdae84eb81",
+    "connect.py": "3afbb8c0ff134d974cf1c29c321a5cbeea9c7e02fa18abfcad53bbadb91ce093",
+    "context.py": "77d8e467bdf5b943cbc2f578c8d04288547c9a673d172b9206028d22bf0df689",
+    "experiments.py": "805a49842f2ed3227d429c41230b1fbb5ce72882fa1c534cd5b11818b8d4e45d",
+    "index.py": "2ca527aeff7aca8e3a0a60aa23e31552b27ac31fb121fd0f502d64b65531d9cf",
+    "index_store.py": "32368cdf02530f22f095eed3f9cd6f4c1012ebc0d15fe0a7892b231f529d80de",
+    "investigation.py": "0ddad30869ce00eb6b14ea0e4c0d29636066e3f2703e39685617fef61feee324",
+    "mcp_server.py": "8a4936a5c37147dad30754e5086fb3e51457a1da4747ea32469ace2dd6afc501",
+    "memory.py": "dec4c433003cb51e5e8ea3546963bc3d59a916db1d24500c945821452cd511cd",
+    "onboarding.py": "ef2355f1a674f80af991c5a4bff9af3f84dd016577ba87deaae20afb1b583618",
+    "presentation.py": "de09ede6d6ec13256b407d7d97ce6633f81bd9298cfb4190a006451f9cb90bb2",
+    "processes.py": "dc72ed646cb34ffc67b4d05b703e7a3984fa736d8f72e3848606b0f103ca11e8",
+    "providers.py": "af475597a191e343bbd598811e12decd2ec144f8b5232782ad0031faf9600b9e",
+    "retrieval.py": "7fd2f36fa1e02e3f6d2f7297503ee63ef63184006ad045bdd375b21cad6863d0",
+    "runs.py": "7c674356c8cae70a19c4cdf7fbb4bb5c504da403539f034af43b91cb1047edb0",
+    "service.py": "160640e7d1f6ce8ac085f734403d37a3c15771cc04e031ad1787aadc430db595",
+    "typescript.py": "2d436f7c1971d44aca91452a422eddc9d4c72497dd6e0e317e4da9fa2d4985a4"
+  },
+  "grader_hashes": {
+    "retry-exhaustion": "0f850c2a6ba054fcf1569cf5e6b0c550f7dea3ea46d51881ff96f5bce991cc6f"
+  },
+  "models": [
+    {
+      "requested_model": "gpt-6-luna",
+      "provider_attested_model": null,
+      "planned": 4,
+      "completed": 4,
+      "conditions_summary": {
+        "hybrid": {
+          "outcomes": {
+            "passed": 2
+          },
+          "passed": 2,
+          "scored": 2,
+          "trials": 2,
+          "usage_totals": {
+            "cached_input_tokens": 14080,
+            "input_tokens": 43145,
+            "output_tokens": 349,
+            "reasoning_output_tokens": 0
+          }
+        },
+        "lexical": {
+          "outcomes": {
+            "passed": 2
+          },
+          "passed": 2,
+          "scored": 2,
+          "trials": 2,
+          "usage_totals": {
+            "cached_input_tokens": 0,
+            "input_tokens": 28344,
+            "output_tokens": 238,
+            "reasoning_output_tokens": 0
+          }
+        }
+      },
+      "trials": [
+        {
+          "id": "retry-exhaustion-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "d7ba42dfb39e55a4f35d399b65ed1b6670286839f2d23676f62b12f21cd3c83a",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14173,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "1a90c3af60c17673a167985075d76dd96b93029dd3ae35b6ac8c5590058ab297",
+          "usage": {
+            "cached_input_tokens": 14080,
+            "input_tokens": 28843,
+            "output_tokens": 230,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "11da32f9a402088b79d5d227dcf3d328c1543c67c14a2ed440e9575fba72ca41",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14302,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        },
+        {
+          "id": "retry-exhaustion-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "e32d0b8074be5e22d96bf3ba84b3054e6f6932ae371d1f23933a2250033230aa",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14171,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        }
+      ]
+    },
+    {
+      "requested_model": "gpt-5.6-luna",
+      "provider_attested_model": null,
+      "planned": 4,
+      "completed": 4,
+      "conditions_summary": {
+        "hybrid": {
+          "outcomes": {
+            "passed": 2
+          },
+          "passed": 2,
+          "scored": 2,
+          "trials": 2,
+          "usage_totals": {
+            "cached_input_tokens": 0,
+            "input_tokens": 24862,
+            "output_tokens": 394,
+            "reasoning_output_tokens": 151
+          }
+        },
+        "lexical": {
+          "outcomes": {
+            "passed": 2
+          },
+          "passed": 2,
+          "scored": 2,
+          "trials": 2,
+          "usage_totals": {
+            "cached_input_tokens": 0,
+            "input_tokens": 24812,
+            "output_tokens": 369,
+            "reasoning_output_tokens": 125
+          }
+        }
+      },
+      "trials": [
+        {
+          "id": "retry-exhaustion-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "b828aad9bc196e85647bef8e989c57727da25d727a6f29383f241d6e0cd7b134",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12405,
+            "output_tokens": 186,
+            "reasoning_output_tokens": 64
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "c9ceb2c1adeea28e17faf5363c726ad6d142766b8476a53f82aa57f3e9f64fbd",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12534,
+            "output_tokens": 158,
+            "reasoning_output_tokens": 36
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "5656daad01ba7141f6764d0ae93592a79926bad021060646237b4106250eb03f",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12328,
+            "output_tokens": 236,
+            "reasoning_output_tokens": 115
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        },
+        {
+          "id": "retry-exhaustion-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "cf79ba1cfe0e224a186d4f8556325cdff342954284be18b72fd6f4a39a798b28",
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12407,
+            "output_tokens": 183,
+            "reasoning_output_tokens": 61
+          },
+          "tool_calls": 0,
+          "checks": {
+            "errors": 0,
+            "failed_tests": [],
+            "failures": 0,
+            "passed": true,
+            "tests": 4
+          }
+        }
+      ]
+    }
+  ]
+}

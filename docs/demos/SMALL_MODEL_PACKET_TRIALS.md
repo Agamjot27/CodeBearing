@@ -89,3 +89,19 @@ rejects that mix. Raw local request/event/results stay ignored; the public artif
 contains only authored-fixture metrics and hashes, without private project source
 or local user traceback paths. The pre-WI-028 engine snapshot is retained in its
 hashes; later source versions can produce different packets and results.
+
+## Separate post-result exception check
+
+WI-028 now bundles referenced conservative local Python exception declarations and
+their local exception ancestors into the same whole, budgeted excerpt. It does not
+resolve all globals or promise a complete replacement module. The existing retry
+packet grows474→509 estimated tokens before the Codex response-contract reserve.
+
+After that repair, we ran **eight new retry-only development checks**: two models,
+two policies, two repetitions. Each model's lexical and hybrid conditions passed
+2/2; every candidate passed all five independent checks, with no observed tools
+or operational/budget exclusions. [Separate observed records](PYTHON_EXCEPTION_POSTFIX.json)
+preserve usage, hashes and outcomes. These post-result checks reuse the same task,
+so they are verification of the identified defect, **not held-out improvement
+evidence**. The original32-call table above remains unchanged. Transaction failures
+from that matrix have not been retested or erased.

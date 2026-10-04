@@ -1667,3 +1667,87 @@ small suite; retain failures rather than fitting claims to the product narrative
 Use explicit API credentials/billing authorization for tightly controlled generation
 settings and cost estimates. Evaluate independent tasks and actual assistant sessions
 separately. WI-025 and the public per-trial artifact preserve current evidence.
+
+## D-035 — Simplify the existing assistant workflow before adding a UI
+
+**Decision**
+
+Make Git installation, project setup and one concrete assistant prompt the public
+entry path. Provide a public fixture walkthrough/storyboard and link measured
+trials and the memory demo. Keep evaluation commands in developer documentation.
+
+**Context**
+
+The user found development commands and infrastructure descriptions too complex.
+The six-tool MCP product already starts automatically through supported assistants;
+the missing piece was a clear explanation of installation, approval and actual use.
+
+**Alternatives Considered**
+
+- Build a dashboard/hosted service before shipping current MCP use.
+- Present every evaluation/database command as required onboarding.
+- Claim universal assistant activation or publish an unverified PyPI install.
+
+**Why This Approach**
+
+Existing setup solves configuration and transport without another service/framework.
+Concise guides reduce steps while preserving project trust, real tool activity and
+test review. Public authored fixtures are reproducible without private source.
+Links and command options are checked against actual files/functions. Metrics
+retain their scoped labels and negative outcomes.
+
+**Trade-offs**
+
+Users still install prerequisites and run installation/setup commands once. Host
+trust/configuration loading varies; transport success does not guarantee activation.
+Git installation follows source releases and needs Git/package-network access.
+A storyboard is not a recorded video; no recording or PyPI publication is claimed.
+
+**Future Reconsideration**
+
+Add a GUI/installer or verified public package distribution when user onboarding
+evidence shows persistent friction. A hosted frontend must solve a demonstrated
+need rather than add technology. WI-027 records actual guide checks.
+
+## D-036 — Bundle referenced local Python exception declarations into excerpts
+
+**Decision**
+
+Recognize same-module top-level Python exception classes with unambiguous simple
+builtin-rooted ancestry from captured source bytes. Bundle referenced declarations
+and local exception ancestors into the same cited, indivisible budget section as
+the selected function. Do not introduce graph/index/schema or global-resolution changes.
+
+**Context**
+
+Two actual GPT-6 Luna hybrid retry outputs dropped a module exception omitted from
+the packet. Full-file replacement then failed acceptance imports. The function's
+static call graph alone cannot represent an exception declaration dependency.
+
+**Alternatives Considered**
+
+- Include complete files everywhere, increasing source cost.
+- Add a general global/type dependency resolver and index/cache migrations.
+- Inject repair hints through memory, contaminating the experiment.
+- Retain the omission with only the existing globals warning.
+
+**Why This Approach**
+
+Stdlib AST and existing captured bytes solve the observed category without another
+dependency, model call or disk read. Conservative name/ancestry checks avoid
+inventing resolution. Per-compile file reuse avoids parsing per symbol. Tests
+verify complete ancestry, citations, budget omission, shadowing, ambiguity, captured
+bytes and language boundaries. Original measured trials remain unchanged.
+
+**Trade-offs**
+
+Qualified, imported, dynamic, decorated and ambiguous roots remain excluded.
+Exception classes can themselves depend on unresolved globals. Additional source
+cost can omit a whole seed; omissions stay visible. This does not promise complete
+modules, general data dependencies or independent model-quality improvement.
+
+**Future Reconsideration**
+
+Use independent observed dependency failures and measured parsing/packing costs
+before expanding declaration categories or adding typed/global resolution.
+WI-028 records the post-result repair separately from WI-025.

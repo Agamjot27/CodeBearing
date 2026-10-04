@@ -1257,3 +1257,43 @@ per-trial usage/verification and aggregate outcomes. 32/32 calls completed/score
 requested gpt-6-luna lexical7/8/hybrid5/8 and gpt-5.6-luna lexical8/8/hybrid7/8.
 No quality/cost advantage demonstrated. D-034/WI-025;
 docs/demos/SMALL_MODEL_PACKET_TRIALS.md and JSON.
+
+## F-044 — Captured Python exception declaration evidence
+
+**Trigger:** context.py:compile_context assembles a Python symbol excerpt through
+CLI/service/MCP or investigation's existing context path.
+**Execution Path:** compile_context → _python_exception_declarations(Index.sources[path], path)
+→ declared-encoding decode and AST → conservative top-level builtin/local exception
+ancestry fixed point → _referenced_exceptions(symbol.source, declarations) excludes
+local bindings and closes local ancestry → cited complete declarations → existing
+section_cost/reserve/include-or-omit budget logic.
+**Data Transformation:** Captured module bytes and selected symbol loads → relevant
+exception declarations with source line citations → indivisible declaration/function
+section. Imported/ambiguous/dynamic/decorated roots are excluded; other globals
+remain outside scope. Index symbols, edges, hashes and persistent cache schema
+are unchanged. An oversized declaration causes visible whole-symbol omission.
+**Database Interaction:** None added; existing checked lesson path is unchanged.
+**External Interaction:** None added: no new disk capture, model/network/worker/API
+or frontend. AST analysis operates on the existing snapshot with per-compile reuse.
+**Output:** Budgeted source includes recognized referenced exception definitions;
+missing seeds/omissions remain explicit. Five focused regressions pass; original
+32 model outcomes are preserved. D-036/WI-028.
+
+## F-045 — Simplified public assistant onboarding and demonstration
+
+**Trigger:** User follows README/docs/QUICKSTART.md Git install and project setup.
+**Execution Path:** Installed codebearing → onboarding.py:main setup → existing
+setup/configuration/check paths F-033 → assistant starts connect.py MCP transport
+→ mcp_server.py:investigate → RepositoryService.investigate → F-040/F-044 context
+paths. docs/DEMO.md provides the actual public refund fixture and assistant prompt;
+memory and measured trial paths are F-042/F-043, optional developer demonstrations.
+**Data Transformation:** Current project root/client choice → project-bound host
+configuration → assistant task → cited source/lessons/gaps. The assistant edits
+and tests; CodeBearing returns evidence. No new frontend/controller route exists.
+**Database Interaction:** Existing local cache/lesson reads; guide adds no tables.
+**External Interaction:** Git/package installation and supported assistant approval/
+MCP subprocess. CodeBearing makes no model call; the assistant uses its account.
+No hosted API/worker or recorded video is introduced.
+**Output:** Verified local transport/configuration and reproducible task workflow;
+host trust/activation and real-world fix correctness require their own checks.
+D-035/WI-027; README, docs/QUICKSTART.md and docs/DEMO.md.

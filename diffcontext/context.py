@@ -2,11 +2,110 @@
 
 from __future__ import annotations
 
+import ast
+import builtins
+import io
 import math
 import re
+import textwrap
+import tokenize
 from collections import deque
 
 from .index import Index, select_symbol
+
+
+def _python_exception_declarations(raw: bytes, path: str) -> dict[str, dict]:
+    """Find same-module exception classes from captured bytes, without execution.
+
+    Only top-level classes with simple statically known exception bases qualify.
+    Imported/qualified/dynamic bases and ambiguous rebinding remain unsupported;
+    this is declaration evidence, not a general Python global dependency resolver.
+    """
+    try:
+        encoding, _ = tokenize.detect_encoding(io.BytesIO(raw).readline)
+        source = raw.decode(encoding)
+        tree = ast.parse(source, filename=path)
+    except (SyntaxError, UnicodeError, LookupError, ValueError):
+        return {}
+    classes = {}
+    rebound = set()
+    for statement in tree.body:
+        if isinstance(statement, ast.ClassDef):
+            if statement.name in classes:
+                rebound.add(statement.name)
+            classes[statement.name] = statement
+        elif isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            rebound.add(statement.name)
+        elif isinstance(statement, (ast.Import, ast.ImportFrom)):
+            if any(alias.name == '*' for alias in statement.names):
+                # A star import can replace even built-in base spellings; captured
+                # syntax alone cannot establish which names the import exports.
+                return {}
+            rebound.update(alias.asname or (alias.name.split('.')[0] if isinstance(statement, ast.Import) else alias.name)
+                           for alias in statement.names)
+        else:
+            rebound.update(node.id for node in ast.walk(statement) if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store))
+    builtin_bases = {name for name, value in vars(builtins).items()
+                     if isinstance(value, type) and issubclass(value, BaseException)} - rebound - classes.keys()
+    known = {}
+    lines = source.splitlines()
+    # A finite fixed point admits local exception ancestry irrespective of order.
+    # Every ancestor is bundled too: showing only a subclass would leave its base
+    # undefined in a replacement file for exactly the same reason as this bug.
+    for _ in range(len(classes)):
+        added = False
+        for name, node in classes.items():
+            if name in known or name in rebound or not node.bases or node.decorator_list or node.keywords:
+                continue
+            if not all(isinstance(base, ast.Name) and base.id in builtin_bases | known.keys() for base in node.bases):
+                continue
+            known[name] = {"start": node.lineno, "end": node.end_lineno,
+                           "source": '\n'.join(lines[node.lineno - 1:node.end_lineno]),
+                           "parents": [base.id for base in node.bases if base.id in classes]}
+            added = True
+        if not added:
+            break
+    return known
+
+
+def _referenced_exceptions(source: str, declarations: dict[str, dict]) -> list[str]:
+    """Exclude local bindings before selecting module declaration evidence."""
+    try:
+        tree = ast.parse(textwrap.dedent(source))
+    except (SyntaxError, ValueError):
+        return []
+    if len(tree.body) != 1 or not isinstance(tree.body[0], (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return []
+    root = tree.body[0]
+    loaded, bound, globals_ = set(), set(), set()
+    def visit(node):
+        if node is not root and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bound.add(node.name)
+            return
+        if isinstance(node, ast.Lambda):
+            return
+        if isinstance(node, ast.Name):
+            (loaded if isinstance(node.ctx, ast.Load) else bound).add(node.id)
+        elif isinstance(node, ast.arg):
+            bound.add(node.arg)
+        elif isinstance(node, ast.Global):
+            globals_.update(node.names)
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            bound.add(node.name)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            bound.update(alias.asname or (alias.name.split('.')[0] if isinstance(node, ast.Import) else alias.name)
+                         for alias in node.names)
+        for child in ast.iter_child_nodes(node):
+            visit(child)
+    visit(root)
+    selected = (loaded - (bound - globals_)) & declarations.keys()
+    pending = list(selected)
+    while pending:
+        for parent in declarations[pending.pop()]["parents"]:
+            if parent not in selected:
+                selected.add(parent)
+                pending.append(parent)
+    return sorted(selected, key=lambda name: declarations[name]["start"])
 
 
 def estimate_tokens(text: str) -> int:
@@ -80,6 +179,7 @@ def compile_context(index: Index, seeds: list[str], budget: int = 4000, depth: i
         return f"\n--- Confirmed lesson #{lesson['id']} (developer evidence) ---\n{lesson['lesson']}\nEvidence: {lesson['evidence']}\n"
     reserved = []
     reserve = 0
+    exception_cache = {}
     for lesson in eligible:
         cost = estimate_tokens(lesson_section(lesson))
         if reserve + cost <= lesson_budget:
@@ -94,6 +194,17 @@ def compile_context(index: Index, seeds: list[str], budget: int = 4000, depth: i
         section = f"\n--- {symbol.path}:{symbol.start}-{symbol.end} | {symbol.name} ---\nReason: {'; '.join(citation_reasons[row['id']])}\n"
         if symbol.preamble:
             section += f"Module imports:\n{symbol.preamble}\n"
+        if symbol.language == "python":
+            if symbol.path not in exception_cache:
+                exception_cache[symbol.path] = _python_exception_declarations(index.sources.get(symbol.path, b''), symbol.path)
+            declarations = exception_cache[symbol.path]
+            for name in _referenced_exceptions(symbol.source, declarations):
+                declaration = declarations[name]
+                # Declarations and source are one indivisible budgeted section.
+                # Omitting required declaration bytes must omit the whole excerpt,
+                # so the existing missing-seed/gap contract remains truthful.
+                section += (f"Module exception declaration: {symbol.path}:{declaration['start']}-{declaration['end']} | {name}\n"
+                            f"{declaration['source']}\n")
         section += f"Source:\n{symbol.source}\n"
         section_cost = estimate_tokens(text + section)
         # Seeds take precedence over optional advice: release the reserve if it

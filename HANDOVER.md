@@ -46,10 +46,13 @@ Final trial links, release wheel/install and push pending. Full suite183 passed
 in135.779s before the additional WI-028 exception-declaration repair.
 Native recording unavailable; walkthrough/storyboard is not a recorded video.
 
-WI-028 in progress: actual matrix exposed omitted local Python exception declaration
+WI-028 complete: actual matrix exposed omitted local Python exception declaration
 when symbol excerpts are used for full-file replacement. Read
-docs/work-items/WI-028-python-exception-context/BUG.md if present; budget_fit owns
-context.py and focused tests. Preserve original matrix and label later checks.
+docs/work-items/WI-028-python-exception-evidence/BUG.md; context.py now bundles
+referenced conservative local exception declarations atomically. Five focused,
+nine core and14 investigation checks pass. D-036/F-044. Separate retry-only
+post-fix8/8 passes (same-task development checks); full suite188 passes in81.338s.
+Original matrix remains unchanged. Public postfix artifact links from trial report.
 
 ## Evidence and limits
 
@@ -63,8 +66,7 @@ repeat appropriate verification after WI-028 changes.
 
 ## Avoid / next concrete action
 
-Finish narrow WI-028 repair, integrate root decisions/flows and final guide links,
-commit meaningful units, run combined checks/build/install,
+Finish final guide links/release version, commit meaningful units, build/check/install,
 then push. Preserve original projects and existing user-level BookMyShow MCP entry.
 Do not read credentials, edit shared dependency junctions, or commit generated
 .eval-runs/.test-tmp/.diffcontext files. Temporary trial servers must be removed.

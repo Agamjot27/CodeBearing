@@ -53,3 +53,12 @@ tests in 123.044 seconds; six investigation fixtures pass. Last three additional
 presentation tests validated separately by the delegated agent (12/12). No model
 calls, new infrastructure or original application changes. Next fixed-runner
 independent localization/repair evaluation; don't treat this replay as held-out.
+
+Release verification: 0.8.0 wheel built with system Python after the project venv
+reported no pip. Clean installed-wheel checker passes TypeScript, outside-checkout
+CLI/hybrid retrieval, all client configs/setup, six-tool stdio and cache reuse.
+Wheel SHA-256 c5b7cfbf7f6a83ebbeb800b90ba72fd58f6ead5c92368dd4d8abed47fdaabe39.
+Final presentation checks rerun separately: 12/12 in 11.850s. User tool upgrade
+completed successfully, stopping only one old read-only CodeBearing MCP process
+holding Windows files open. The actual configured MCP interpreter reports 0.8.0;
+the BookMyShow binding is preserved. Existing chats may need reconnect/restart.

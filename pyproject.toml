@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codebearing"
-version = "0.7.0"
+version = "0.8.0"
 description = "Change-aware code context and evidence-backed engineering memory"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/Agamjot27/DiffContext"
-Documentation = "https://github.com/Agamjot27/DiffContext/blob/main/docs/MCP.md"
+Repository = "https://github.com/Agamjot27/CodeBearing"
+Documentation = "https://github.com/Agamjot27/CodeBearing/blob/main/docs/MCP.md"
 
 [project.optional-dependencies]
 mcp = ["mcp==2.3.0"]

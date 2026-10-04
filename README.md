@@ -38,7 +38,7 @@ No separate model API key is needed for CodeBearing. Your assistant uses its own
 account. Python and JavaScript/TypeScript are supported, with static-analysis
 limits. The install command includes both language adapters.
 
-**Install status:** CodeBearing 0.7.0 is installable from this Git repository.
+**Install status:** CodeBearing 0.8.0 is installable from this Git repository.
 It has not been published to PyPI; don't use `pip install codebearing` yet.
 The repository is now named CodeBearing; older DiffContext links redirect here.
 

@@ -24,7 +24,16 @@ WI-022 complete: bounded MCP ranking reasons/terms with exact counts, preserving
 IDs/source/scores/gaps/full detail; null early-stop context guarded. Agent checks
 12/12; full suite 167/167 and investigation fixtures 6/6. D-030/F-037. Short frozen
 compact report grows 40259→41055 bytes from counts; no universal savings claim.
-Packaging next; not installed. Retrieval fix committed 8ad5fea.
+0.8.0 clean wheel/install/setup/stdio/cache checks pass; user tool upgraded and the
+configured Codex MCP interpreter reports 0.8.0. Only one old read-only server
+stopped for Windows file locks; existing chats may need reconnect. Retrieval fix
+8ad5fea; presentation 2529d40. No public PyPI publication.
+
+WI-023 completed: fourth authored coding task, transaction-rollback, uses existing
+fixed Python grader (no model-written Windows/Node scaffold). Acceptance rejects
+incomplete error-preservation/discard fixes. Coding 5/5, experiment 9/9 checks pass;
+legacy 16 reference passes/16 unchanged failures; hybrid 28/28. No model/API calls,
+held-out benefit or cost savings established. Documentation/commit synchronization next.
 
 WI-020 completed: matched requested gpt-6-luna/low paired trial. Assisted 6/6
 independent checks; control 3/6 despite 3/3 own checks passing. Real assisted

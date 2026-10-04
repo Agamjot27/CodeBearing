@@ -36,6 +36,7 @@ WI-026 memory demo implemented and 3 tests pass: authored analogy to actual WI-0
 test gap, proposal excluded, explicit operator review, fresh-process retrieval and
 stale exclusion. scripts/demo_memory.py; docs/demos/MEMORY_CONTINUITY.md;
 docs/work-items/WI-026-memory-continuity-demo/FEATURE.md. Root flow/decision pending.
+Root integration: D-033/F-042 document actual storage/retrieval execution.
 Does not attest human approval or improved later model behavior.
 
 WI-027 quickstart/demo/README polish implemented; docs/work-items/WI-027-v1-user-guide/FEATURE.md.

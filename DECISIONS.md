@@ -1577,3 +1577,46 @@ specific localization repair, not general quality or actual token savings proof.
 
 Evaluate independent localization/repair tasks and graph accuracy before changing
 the priority or source packing. WI-024 records reproduction and checks.
+
+## D-033 — Demonstrate memory using an authored analogy and explicit operator review
+
+**Decision**
+
+Tie a disposable public memory walkthrough to the recorded WI-020 agent test gap.
+Use wholly authored source, default proposed-only advice, explicit operator review
+opt-in, fresh-process retrieval/compilation and source-hash invalidation. Do not
+represent operator review as authenticated human approval.
+
+**Context**
+
+The project needed a reproducible mistake-to-memory demonstration without copying
+private BookMyShow code or inventing a prior correction or developer attestation.
+The existing lesson status API has no authenticated reviewer identity.
+
+**Alternatives Considered**
+
+- Copy the private application into the public demonstration.
+- Silently preconfirm synthetic advice and call it human-reviewed memory.
+- Add authentication/automatic conversation capture before demonstrating storage.
+- Show only an in-process synthetic Memory object.
+
+**Why This Approach**
+
+The actual recorded test gap supplies traceable provenance; authored source makes
+the same failure class public and reproducible. Fresh Python processes establish
+SQLite persistence and production service retrieval. Explicit actor opt-in exposes
+the review boundary without expanding current local single-user scope. Regression
+assertions distinguish the actual example fix and tests check pending/stale cases.
+
+**Trade-offs**
+
+The analogy is not the original application or a later LLM session. Actor identity
+is recorded in the transcript, not authenticated/persisted by the lesson schema.
+No automatic learning or model-behavior improvement is established. Whole-file
+hashes invalidate even unrelated edits.
+
+**Future Reconsideration**
+
+Introduce authenticated review and richer provenance when shared deployment or
+automatic correction capture enters scope. Measure later agent behavior separately.
+WI-026 records actual execution and its limits.

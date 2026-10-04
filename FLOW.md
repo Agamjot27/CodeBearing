@@ -1210,3 +1210,25 @@ calls no model/network/API/worker/frontend; provider runs remain opt-in.
 **Output:** Four calibrated tasks: legacy 16 reference passes/16 unchanged failures;
 hybrid 28/28. Error-only and discard-only patches fail acceptance. This establishes
 authored runner calibration, not model quality. D-031, WI-023.
+
+## F-042 — Provenance-labeled engineering-memory walkthrough
+
+**Trigger:** scripts/demo_memory.py --repo empty-disposable-directory, optionally
+--review-actor for explicit operator review.
+**Execution Path:** demo_memory.py:run_demo → check_durable_success executes actual
+authored confirm_booking before/after fix → index.py:build_index → memory.py:Memory.add
+→ fresh_request starts a new Python interpreter → service.py:RepositoryService.get_lessons
+→ _lessons → Memory(read_only=True).list. Opt-in Memory.set_status is followed by new
+process get_lessons/compile_context calls. A later source change repeats retrieval
+and compilation, which exclude the stale lesson.
+**Data Transformation:** Authored buggy/fixed source, actual WI-020 report digest and
+lesson proposal → excluded proposed advice → operator-reviewed persisted advice →
+freshly compiled lesson → source-hash mismatch and excluded stale advice. Actor
+provenance is in the transcript; no human identity is authenticated.
+**Database Interaction:** Disposable .diffcontext/memory.sqlite lessons INSERT/status
+UPDATE, followed by separate read-only SELECT. Existing schema is unchanged.
+**External Interaction:** Local filesystem and fresh Python subprocesses only; no
+LLM/network/Git/frontend/API/worker and no original project mutation.
+**Output:** MEMORY_DEMO_RESULT.json with provenance, regression results, pending or
+reviewed retrieval and stale-exclusion assertions. This proves persistence and
+filtering, not later LLM improvement. D-033/WI-026; docs/demos/MEMORY_CONTINUITY.md.

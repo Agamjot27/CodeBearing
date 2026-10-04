@@ -1063,3 +1063,19 @@ Existing cache dependency fingerprints reject facts from the replaced binding.
 **External Interaction:** Local files/native parser and MCP process; no model call.
 **Output:** Normal search results enable verified setup to save Codex project config.
 No application source edits. D-024, WI-015; F-027 remains the language flow.
+
+
+## F-035 — BookMyShow desktop registration workaround
+
+**Trigger:** User reports missing CodeBearing in the desktop MCP list.
+**Execution Path:** Existing connect.py:main(--check) → check_connection() →
+server discovery/search (F-033/F-034), then external `codex mcp add codebearing`
+→ user-level ~/.codex/config.toml → app reload → interpreter -m diffcontext.connect
+→ mcp_server.create_server → RepositoryService methods. App reload is unverified.
+**Data Transformation:** Reuse the tested absolute Python command and repo args;
+server identity codebearing remains bound to BookMyShow. No core transformation change.
+**Database Interaction:** None added; default check only reads captured source.
+**External Interaction:** Local Codex config/CLI and MCP subprocess, no network,
+model, frontend code or worker. Existing desktop UI is the verification target.
+**Output:** CLI reports global entry added and enabled. Desktop visibility and an
+actual assistant tool call remain pending. D-025, WI-016.

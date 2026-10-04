@@ -47,6 +47,14 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
+WI-016 configured, desktop verification pending: user screenshot lacks CodeBearing
+on the BookMyShow new-chat MCP list, although CLI reads the trusted project entry.
+Exact configured interpreter passes six-tool check. Added the same server to the
+user-level Codex config using codex mcp add; get confirms enabled. This global
+entry remains bound to BookMyShow, even in other projects. General setup remains
+project-only. User must fully quit/reopen the app and confirm a real tool call.
+Root cause of UI omission unproven; D-025/F-035, WI-016 BUG.md. No app source edit.
+
 WI-015 resolved: patch 0.6.1 pins tree-sitter 0.25.2 after binding 0.26.0
 crashes natively on BookMyShow's redis.ts. Same interpreter/project succeeds
 with the prior binding (316 symbols). 30 language/cache regression tests pass.

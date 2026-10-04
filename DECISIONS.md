@@ -1224,3 +1224,43 @@ separate change.
 
 **Implementation:** pyproject.toml optional typescript dependency.
 **Flow:** F-034. **Work item:** WI-015.
+
+
+## D-025 — User-level registration for the BookMyShow desktop trial
+
+**Decision**
+
+Register the verified BookMyShow CodeBearing command in user-level Codex settings
+as a host-specific workaround; retain project-only setup as the product default.
+
+**Context**
+
+User screenshot lacks CodeBearing despite project configuration, valid interpreter,
+trusted project and CLI discovery. Desktop configuration loading is not verified.
+
+**Alternatives Considered**
+
+Repeat project setup; restart only; ask the user to type the full command in the
+settings UI; register the tested server using the supported Codex CLI.
+
+**Why This Approach**
+
+The user wants the existing installation usable in the app. User-level registration
+provides another documented configuration layer without changing the engine or
+replacing unrelated settings. Verify the exact interpreter over stdio first and
+then confirm registration. Keep claims limited to configuration and transport.
+
+**Trade-offs**
+
+The entry can appear in other projects but remains bound to BookMyShow. It is not
+a generic repository switcher. The precise desktop omission cause remains unknown;
+a restart and actual tool call are still required. No change to general setup scope.
+
+**Future Reconsideration**
+
+Remove this workaround once project-scoped desktop discovery is verified. Prefer
+project entries for multiple repositories; add explicit user-scope setup only if
+repeated host trials justify it and make repository binding clear.
+
+**Implementation:** existing codex mcp add command; user config, no product code.
+**Flow:** F-035. **Work item:** WI-016.

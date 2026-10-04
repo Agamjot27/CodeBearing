@@ -1,6 +1,6 @@
 # Packaging and release checks
 
-The distribution is `codebearing`, currently version 0.8.0. Its installed
+The distribution is `codebearing`, currently version 0.9.0. Its installed
 commands are `codebearing` and `codebearing-mcp`; old diffcontext/diffcontext-lab/
 diffcontext-lab-mcp commands remain compatibility aliases. Generated host entries
 use codebearing. The import package remains `diffcontext` and can conflict with another
@@ -11,6 +11,13 @@ credentials, or Trusted Publishing configuration is supplied by this repository.
 Availability/ownership of the proposed PyPI name has not been established. Local
 builds and CI artifacts do not imply public publication.
 
+0.9.0 validation on2026-10-05:188 source tests passed after the compiler repair;
+clean wheel checks passed outside checkout with optional TypeScript/MCP, all six
+tools, client configuration/setup and persistent cache reuse. The existing user's
+tool was upgraded and its actual configured interpreter reported0.9.0. Existing
+chats need reconnect. Details and wheel digest:
+[WI-029](work-items/WI-029-codebearing-090-release/FEATURE.md).
+
 ## Build and validate a wheel
 
 From the repository root, using Python 3.10+ and pip 22.3+ (the checker uses pip's
@@ -18,7 +25,7 @@ From the repository root, using Python 3.10+ and pip 22.3+ (the checker uses pip
 
 ```powershell
 python -m pip wheel . --no-deps --wheel-dir dist
-python scripts/check_wheel.py dist/codebearing-0.8.0-py3-none-any.whl --typescript
+python scripts/check_wheel.py dist/codebearing-0.9.0-py3-none-any.whl --typescript
 ```
 
 The wheel checker creates a clean temporary environment, installs the wheel
@@ -68,7 +75,7 @@ with an actual pushed commit; do not invent a release tag. A validated wheel can
 also be shared as an artifact and installed with:
 
 ```powershell
-python -m pip install "C:/path/to/codebearing-0.8.0-py3-none-any.whl[mcp]"
+python -m pip install "C:/path/to/codebearing-0.9.0-py3-none-any.whl[mcp]"
 ```
 
 The receiver still needs access to the wheel's dependency packages. Package users

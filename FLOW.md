@@ -1297,3 +1297,22 @@ No hosted API/worker or recorded video is introduced.
 **Output:** Verified local transport/configuration and reproducible task workflow;
 host trust/activation and real-world fix correctness require their own checks.
 D-035/WI-027; README, docs/QUICKSTART.md and docs/DEMO.md.
+
+## F-046 — CodeBearing 0.9.0 release validation and existing-tool upgrade
+
+**Trigger:** User authorizes completion/release of the current MCP implementation.
+**Execution Path:** synchronized pyproject.toml/diffcontext.__version__ → pip wheel
+→ scripts/check_wheel.py:verify → disposable installed CLI/configuration/stdio/cache
+checks outside checkout → existing uv tool install of validated wheel with mcp/typescript
+extras → configured interpreter import/version and connect.py:check_connection.
+**Data Transformation:** Source revision/package metadata → wheel artifact/hash →
+clean installed behavior → existing tool environment update. Prior measured engine
+snapshots remain historical artifacts; release changes don't overwrite results.
+**Database Interaction:** Disposable cache checks only; user lesson/project stores
+are not changed by installation. Existing project configuration remains bound.
+**External Interaction:** Local build/install, dependency package network, scoped
+old read-only connector process shutdown for Windows locks, stdio smoke and Git push.
+No publication/model call/frontend/API/worker or credential inspection.
+**Output:** Validated0.9.0 Git-distributed MCP release and verified installed tool;
+existing chats need reconnect. WI-029/doc RELEASING; independent quality validation
+and actual PyPI publication remain separate work.

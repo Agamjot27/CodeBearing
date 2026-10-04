@@ -125,7 +125,7 @@ def run(
             return finish("needs_input", "no_matches")
         best = [row["id"] for row in matches if row["score"] == matches[0]["score"]]
         if retrieval == "hybrid":
-            selection = select_task_seeds(matches)
+            selection = select_task_seeds(matches, index=current)
             report["retrieval"]["seed_selection"] = selection
             event("select", **selection)
             best = [row["id"] for row in selection["selected"]]

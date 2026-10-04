@@ -86,6 +86,23 @@ class InvestigationTests(unittest.TestCase):
         self.assertEqual(timed["stop_reason"], "time_limit")
         self.assertIsNone(timed["context"])
 
+    def test_small_budget_keeps_connected_complement_and_discloses_gaps(self):
+        self.write("operation.py", "def entry():\n    return linked()\n\ndef linked():\n    return 'rollback'\n\ndef distant():\n" + "    # irrelevant commentary\n" * 40 + "    return 'preserve'\n")
+        index = build_index(self.root)
+        matches = [
+            {"id": "operation.py:entry", "score": 1, "signals": {"exact": False, "matched_terms": {"body": ["request"]}}},
+            {"id": "operation.py:distant", "score": .8, "signals": {"exact": False, "matched_terms": {"body": ["preserve"]}}},
+            {"id": "operation.py:linked", "score": .5, "signals": {"exact": False, "matched_terms": {"body": ["rollback"]}}},
+        ]
+        with patch.object(investigation, "hybrid_search", return_value=matches):
+            report = RepositoryService(self.root).investigate(task="request rollback preserve", max_tokens=300)
+        included = {row["id"] for row in report["context"]["included"]}
+        self.assertTrue({"operation.py:entry", "operation.py:linked"} <= included)
+        self.assertNotIn("operation.py:distant", included)
+        self.assertIn("operation.py:distant", report["verification"]["missing_seeds"]["current"])
+        self.assertEqual(report["stop_reason"], "token_budget")
+        self.assertLessEqual(report["context"]["estimated_tokens"], 300)
+
     def test_snapshot_stays_fixed_and_identity_tracks_content(self):
         index = build_index(self.root)
         with patch.object(investigation, "build_index", return_value=index):

@@ -132,15 +132,18 @@ def lexical_search(index: Index, query: str, limit: int = 10) -> list[dict]:
     return _lexical_rows(index, query)[:limit]
 
 
-def select_task_seeds(matches: list[dict]) -> dict:
+def select_task_seeds(matches: list[dict], *, index: Index | None = None) -> dict:
     """Keep top-score ambiguity, then cover complementary lexical task evidence.
 
     Only a unique nonexact best match is diversified. At most three seeds come
     from the existing bounded ranked pool; rare *matched* terms favor additional
-    task aspects rather than another row repeating the first seed's words.
+    task aspects rather than another row repeating the first seed's words. When
+    captured graph evidence is available, direct caller/callee complements lead
+    disconnected ones: this avoids spending required-source budget on unrelated
+    generic vocabulary before the selected code's own failure path.
     Coverage is lexical evidence, not confidence or semantic task completeness.
     """
-    result = {"policy": "matched-term-coverage", "max_seeds": 3,
+    result = {"policy": "connected-matched-term-coverage" if index is not None else "matched-term-coverage", "max_seeds": 3,
               "selected": [], "ambiguous": False}
     if not matches:
         return result
@@ -168,13 +171,21 @@ def select_task_seeds(matches: list[dict]) -> dict:
         remaining = [row for row in matches if row not in chosen and terms(row) - covered]
         if not remaining:
             break
-        # Input rank resolves equal marginal evidence, preserving deterministic
-        # ordering and existing lexical/memory preference without new weight knobs.
-        row = max(remaining, key=lambda row: sum(weights[t] for t in sorted(terms(row) - covered)))
+        # A known execution relationship leads disconnected vocabulary. Within
+        # each group marginal evidence leads, then input rank resolves ties.
+        chosen_ids = {row["id"] for row in chosen}
+        def connected(row):
+            # Only one captured static hop counts. No graph expansion or disk
+            # reads occur here, and a neighbor still needs new lexical evidence.
+            return index is not None and any(
+                row["id"] in index.edges.get(seed, set()) or seed in index.edges.get(row["id"], set())
+                for seed in chosen_ids)
+        row = max(remaining, key=lambda row: (
+            connected(row), sum(weights[t] for t in sorted(terms(row) - covered))))
         new_terms = terms(row) - covered
         chosen.append(row)
         covered.update(new_terms)
-        result["selected"].append({"id": row["id"], "reason": "complementary matched terms",
+        result["selected"].append({"id": row["id"], "reason": "connected complementary matched terms" if connected(row) else "complementary matched terms",
                                     "new_terms": sorted(new_terms)})
     return result
 

@@ -127,6 +127,33 @@ class RetrievalRankerTests(unittest.TestCase):
         self.assertEqual(ambiguous["selected"], [])
         self.assertEqual(select_task_seeds([])["selected"], [])
 
+    def test_connected_complement_precedes_unrelated_rare_vocabulary(self):
+        index = self.index({"flow.py": "def entry():\n    return linked()\n\ndef linked():\n    return 1\n\ndef unrelated():\n    return 2\n\ndef redundant():\n    return 3\n"})
+        index.edges["flow.py:entry"].add("flow.py:redundant")
+        def row(name, score, terms):
+            return {"id": f"flow.py:{name}", "score": score,
+                    "signals": {"exact": False, "matched_terms": {"body": terms}}}
+        matches = [row("entry", 1, ["request"]), row("unrelated", .8, ["rare", "vocabulary"]),
+                   row("linked", .5, ["rollback"]), row("redundant", .4, ["request"])]
+        ordinary = select_task_seeds(matches)
+        self.assertEqual(ordinary["selected"][1]["id"], "flow.py:unrelated")
+        graph = select_task_seeds(matches, index=index)
+        self.assertEqual(graph["selected"][1]["id"], "flow.py:linked")
+        self.assertEqual(graph["selected"][1]["reason"], "connected complementary matched terms")
+        self.assertEqual(graph["selected"][2]["id"], "flow.py:unrelated")
+        self.assertEqual(graph, select_task_seeds(matches, index=index))
+        self.assertNotIn("flow.py:redundant", [r["id"] for r in graph["selected"]])
+
+    def test_connected_selector_preserves_exact_ties_and_disconnected_fallback(self):
+        index = self.index({"a.py": "def refund():\n    return 'payment'\n",
+                            "b.py": "def refund():\n    return 'rollback'\n"})
+        for query in ("refund", "a.py:refund", "payment rollback"):
+            rows = hybrid_search(index, query)
+            before = select_task_seeds(rows)
+            after = select_task_seeds(rows, index=index)
+            self.assertEqual(before["selected"], after["selected"])
+            self.assertEqual(before["ambiguous"], after["ambiguous"])
+
 
 if __name__ == "__main__":
     unittest.main()

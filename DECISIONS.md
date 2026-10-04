@@ -1408,6 +1408,8 @@ per-run input/output usage telemetry before claiming quality or cost improvement
 
 ## D-029 — Cover complementary matched task terms with bounded seeds
 
+**Complementary priority superseded by D-032; the three-seed cap and exact/tie contracts remain.**
+
 **Decision**
 
 For a unique nonexact hybrid best match, keep that seed and greedily add at most
@@ -1533,3 +1535,45 @@ benefit or usage is collected. Memory lessons remain synthetic fixture advice.
 Collect repeated matched smaller-model runs with real usage and independent tasks.
 Add isolated real-service environments only when fidelity requires them and
 platform/resource budgets are controlled. Preserve synthetic calibration labels.
+
+## D-032 — Prefer directly connected complementary task evidence
+
+**Decision**
+
+For hybrid natural-language tasks with a unique nonexact top match, prefer new-term
+candidates with a direct captured caller/callee relationship to an already selected
+seed, then inverse-frequency coverage and existing input rank. Preserve the cap of
+three, exact/tie behavior and disconnected fallback. Explicit/Git/legacy selectors
+and whole-source packing remain unchanged.
+
+**Context**
+
+The captured Luna task promoted generic disconnected parseInput vocabulary over
+the confirmation function's own transaction failure path. Required seed excerpts
+then consumed the small budget before the relevant dependency could be included.
+
+**Alternatives Considered**
+
+- Tune stopwords or application-specific names.
+- Require two new terms, losing legitimate single-term aspects such as rollback.
+- Increase every budget or add model/embedding retrieval.
+- Keep graphless complementary priority.
+
+**Why This Approach**
+
+Existing direct execution evidence provides a deterministic preference without
+new dependencies, database operations, model calls or tuning weights. New lexical
+evidence is still required; disconnected task aspects remain eligible. Focused
+tests check graph preference, zero-gain exclusion, fallback and exact contracts.
+
+**Trade-offs**
+
+Connected distractors remain possible. Selecting shared helpers exposes more
+callers and omissions. The authored replay fits all three seeds in 2884/3000
+estimated text tokens but remains partial with 15 omitted nonseeds. This is a
+specific localization repair, not general quality or actual token savings proof.
+
+**Future Reconsideration**
+
+Evaluate independent localization/repair tasks and graph accuracy before changing
+the priority or source packing. WI-024 records reproduction and checks.

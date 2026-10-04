@@ -1176,8 +1176,9 @@ WI-020/D-028, docs/demos/LUNA_BOOKING_TRIAL.md.
 
 **Trigger:** Hybrid investigation with a natural-language task.
 **Execution Path:** service.py:RepositoryService.investigate → investigation.py:run
-→ retrieval.py:hybrid_search (F-029) → select_task_seeds → matched-term sets and
-Counter/inverse-frequency gains → selected IDs → existing rank_candidates/impact
+→ retrieval.py:hybrid_search (F-029) → select_task_seeds(matches, index=current)
+→ positive uncovered matched-term candidates → one-hop current.edges relationship
+to selected seeds → inverse-frequency gain/input rank → selected IDs → existing rank_candidates/impact
 and compile_context loop. Exact/tied queries keep prior selection; legacy bypasses
 the new selector, and explicit/Git paths do not call it.
 **Data Transformation:** Bounded ranked rows → up to three seeds, with new-term
@@ -1186,9 +1187,11 @@ Scores are unchanged; context budgeting still exposes omissions and partial stat
 **Database Interaction:** None added; existing read-only fresh lessons follow F-029.
 **External Interaction:** None added; no model/network/worker/API/frontend, only
 captured source-derived ranking data.
-**Output:** Additional complementary starting context when available, preserving
-exact ambiguity. Real replay includes confirm at 3000 tokens but still omits the
-transaction helper; static/lexical limits remain. D-029, WI-021.
+**Output:** Up to three complementary seeds with connected relation reasons,
+preserving exact ambiguity. Captured replay includes total, confirmation and
+transaction at 2884/3000 estimated text tokens; partial/token_budget and 15 nonseed
+omissions remain disclosed. No new database/model/external operation occurs in
+selection. D-029/D-032, WI-021/WI-024.
 
 ## F-041 — Fixed transaction coding fixture and calibration
 

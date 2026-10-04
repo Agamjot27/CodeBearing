@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import test_core
@@ -25,6 +26,85 @@ if not HAS_MCP and os.environ.get("DIFFCONTEXT_REQUIRE_MCP") == "1":
 class PresentationTests(unittest.TestCase):
     setUp = test_core.CoreTests.setUp
     write = test_core.CoreTests.write
+
+    def test_distinct_ranking_diagnostics_are_bounded_without_dropping_rows(self):
+        from diffcontext.presentation import present_report
+
+        report = RepositoryService(self.root).investigate(task="refund_total")
+        rows = [{"id": f"symbol-{n}", "score": n / 100, "distance": n % 3,
+                 "lesson_ids": [n, n + 100],
+                 "reasons": [f"reason-{n}-{j}:" + "x" * 1000 for j in range(20)],
+                 "signals": {"lexical": n, "graph": .5, "lesson_ids": [n],
+                             "matched_terms": {"body": [f"term-{n}-{j}:" + "z" * 100 for j in range(30)]}}}
+                for n in range(40)]
+        report["search_matches"] = copy.deepcopy(rows)
+        report["context"]["retrieval"]["candidates"] = copy.deepcopy(rows)
+        report["trace"].insert(0, {"stage": "localize", "matches": copy.deepcopy(rows[:-1])})
+        before = copy.deepcopy(report)
+        compact = present_report(report)
+        fields = {field["path"]: field for field in compact["presentation"]["fields"]}
+        for path, actual in (("search_matches", compact["search_matches"]),
+                             ("context.retrieval.candidates", compact["context"]["retrieval"]["candidates"]),
+                             ("trace[0].matches", compact["trace"][0]["matches"])):
+            self.assertEqual([row["id"] for row in actual], [row["id"] for row in rows[:len(actual)]])
+            for position, row in enumerate(actual):
+                original = rows[position]
+                for key in ("id", "score", "distance", "lesson_ids"):
+                    self.assertEqual(row[key], original[key])
+                for key in ("lexical", "graph", "lesson_ids"):
+                    self.assertEqual(row["signals"][key], original["signals"][key])
+                self.assertEqual(len(row["reasons"]), 8)
+                self.assertTrue(all(len(reason) <= 160 for reason in row["reasons"]))
+                self.assertEqual(row["signals"]["matched_terms"]["body"],
+                                 [term[:80] for term in original["signals"]["matched_terms"]["body"][:8]])
+                for suffix, values, shown in (("reasons", original["reasons"], row["reasons"]),
+                                             ("signals.matched_terms.body", original["signals"]["matched_terms"]["body"], row["signals"]["matched_terms"]["body"])):
+                    counts = fields[f"{path}[{position}].{suffix}"]
+                    self.assertEqual(counts["total"], len(values))
+                    self.assertEqual(counts["omitted"], len(values) - len(shown))
+                    self.assertEqual(counts["omitted_chars"], sum(map(len, values)) - sum(map(len, shown)))
+        self.assertEqual(compact["context"]["text"], report["context"]["text"])
+        self.assertEqual(compact["verification"], report["verification"])
+        self.assertEqual(report, before)
+        self.assertIs(present_report(report, "full"), report)
+        self.assertLess(len(json.dumps(compact)), len(json.dumps(report)) // 3)
+
+    def test_small_ranking_diagnostics_remain_exact(self):
+        from diffcontext.presentation import present_report
+
+        report = RepositoryService(self.root).investigate(task="refund_total")
+        compact = present_report(report)
+        self.assertEqual(compact["search_matches"], report["search_matches"])
+        self.assertEqual(compact["context"]["retrieval"], report["context"]["retrieval"])
+
+    def test_null_context_stops_preserve_original_status(self):
+        from diffcontext.presentation import present_report
+
+        report = RepositoryService(self.root).investigate(task="zzzzunfindable")
+        self.assertEqual(report["stop_reason"], "no_matches")
+        self.assertIsNone(report["context"])
+        compact = present_report(report)
+        for key in ("status", "stop_reason", "context", "verification", "search_matches"):
+            self.assertEqual(compact[key], report[key])
+
+    def test_search_symbols_matches_receive_same_ranking_policy(self):
+        from diffcontext.presentation import present_report
+
+        report = RepositoryService(self.root).search_symbols("refund_total")
+        row = report["matches"][0]
+        row["reasons"] = [f"reason-{n}" + "x" * 300 for n in range(15)]
+        row["signals"]["matched_terms"] = {"body": [f"term-{n}" for n in range(20)]}
+        before = copy.deepcopy(report)
+        compact = present_report(report)
+        self.assertEqual(compact["matches"][0]["id"], row["id"])
+        self.assertEqual(compact["matches"][0]["score"], row["score"])
+        self.assertEqual(len(compact["matches"][0]["reasons"]), 8)
+        self.assertEqual(len(compact["matches"][0]["signals"]["matched_terms"]["body"]), 8)
+        fields = {field["path"]: field for field in compact["presentation"]["fields"]}
+        self.assertEqual(fields["matches[0].reasons"]["omitted"], 7)
+        self.assertEqual(fields["matches[0].signals.matched_terms.body"]["omitted"], 12)
+        self.assertEqual(report, before)
+        self.assertEqual(present_report(report, "full"), before)
 
     def test_warning_flood_is_bounded_without_mutating_full_report(self):
         from diffcontext.presentation import present_report
@@ -116,6 +196,41 @@ class PresentationTests(unittest.TestCase):
 class PresentationProtocolTests(unittest.IsolatedAsyncioTestCase):
     setUp = test_core.CoreTests.setUp
     write = test_core.CoreTests.write
+
+    async def test_mcp_no_matches_is_needs_input_not_tool_error(self):
+        direct = RepositoryService(self.root).investigate(task="zzzzunfindable")
+        async with Client(create_server(self.root)) as client:
+            response = await client.call_tool("investigate", {"task": "zzzzunfindable"})
+        self.assertFalse(response.is_error)
+        report = response.structured_content
+        self.assertEqual(report["status"], "needs_input")
+        self.assertEqual(report["stop_reason"], "no_matches")
+        self.assertIsNone(report["context"])
+        self.assertEqual(report["verification"], direct["verification"])
+
+    async def test_mcp_ranking_diagnostics_preserve_both_channels_and_full_detail(self):
+        report = RepositoryService(self.root).investigate(task="refund_total")
+        row = report["search_matches"][0]
+        row["reasons"] = ["unique-reason-" + str(n) + "x" * 400 for n in range(20)]
+        row["signals"]["matched_terms"] = {"body": ["term-" + str(n) for n in range(30)]}
+        before = copy.deepcopy(report)
+        # Exercise the actual SDK dictionary serialization while isolating the
+        # presentation input from task ranking changes tested in its own suite.
+        with patch.object(RepositoryService, "investigate", return_value=report):
+            async with Client(create_server(self.root)) as client:
+                compact_result = await client.call_tool("investigate", {"task": "refund_total"})
+                full_result = await client.call_tool("investigate", {"task": "refund_total", "detail": "full"})
+        self.assertFalse(compact_result.is_error)
+        self.assertFalse(full_result.is_error)
+        compact = compact_result.structured_content
+        text_channel = "\n".join(item.text for item in compact_result.content
+                                 if getattr(item, "type", None) == "text")
+        self.assertEqual(json.loads(text_channel), compact)
+        self.assertEqual(compact["context"]["text"], report["context"]["text"])
+        self.assertEqual(compact["search_matches"][0]["id"], row["id"])
+        self.assertEqual(len(compact["search_matches"][0]["reasons"]), 8)
+        self.assertEqual(full_result.structured_content, before)
+        self.assertEqual(report, before)
 
     async def test_real_stdio_warning_flood_and_explicit_full_response(self):
         for number in range(240):

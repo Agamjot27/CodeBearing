@@ -1114,6 +1114,11 @@ paths are unchanged; CLI calls services directly and bypasses presentation.
 **Data Transformation:** Compact copies the full report, samples long warnings at
 eight examples (capability caveats prioritized) with exact counts in presentation.fields,
 and replaces equal repeated trace fields with references to canonical fields.
+Then present_report.ranking_diagnostics bounds top-level matches/search_matches,
+context.retrieval.candidates and distinct trace.matches reasons (8×160 characters)
+and matched terms (8×80 per field), recording exact item/character omissions.
+Ranking IDs/order/scores/distances/lesson IDs remain. Null early-stop context
+passes through unchanged. D-030/WI-022 extends this presentation flow.
 Source, critical gaps and status are preserved; earlier different trace data remain.
 Useful context/verification precede long search metadata. Full returns service data
 unchanged. Full requests recapture current evidence; no report persistence is added.

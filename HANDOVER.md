@@ -20,9 +20,11 @@ WI-021 complete: hybrid investigation covers bounded complementary matched terms
 without changing exact, legacy, explicit or Git selectors. Luna query replay now
 includes confirm, but parseInput is a distractor and 3000 tokens still omit
 withTransaction. D-029/F-040; docs/work-items/WI-021-task-seed-coverage/BUG.md.
-WI-022 implemented: bounded MCP ranking reasons/terms with exact counts, preserving
+WI-022 complete: bounded MCP ranking reasons/terms with exact counts, preserving
 IDs/source/scores/gaps/full detail; null early-stop context guarded. Agent checks
-12/12; full suite 167/167 and investigation fixtures 6/6. Packaging next; not installed.
+12/12; full suite 167/167 and investigation fixtures 6/6. D-030/F-037. Short frozen
+compact report grows 40259→41055 bytes from counts; no universal savings claim.
+Packaging next; not installed. Retrieval fix committed 8ad5fea.
 
 WI-020 completed: matched requested gpt-6-luna/low paired trial. Assisted 6/6
 independent checks; control 3/6 despite 3/3 own checks passing. Real assisted

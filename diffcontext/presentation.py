@@ -7,17 +7,20 @@ from typing import Literal
 
 Detail = Literal["compact", "full"]
 WARNING_LIMIT = 8
+RANKING_ITEM_LIMIT = 8
+RANKING_REASON_CHAR_LIMIT = 160
+RANKING_TERM_CHAR_LIMIT = 80
 _LIMITATION_PREFIXES = (
     "Static ", "TypeScript/JavaScript ", "Untracked files ", "Renames are ",
 )
 
 
 def present_report(report: dict, detail: Detail = "compact") -> dict:
-    """Bound warning examples and reference repeated trace data without changing evidence.
+    """Bound diagnostics and reference repeated trace data without changing evidence.
 
     Full detail returns the service report as-is. Compact detail works on a copy:
     source text, selected citations, status and all observable coverage gaps are
-    unchanged. Counts disclose every sampled warning array; full detail recomputes
+    unchanged. Counts disclose sampled warnings and ranking explanations; full detail recomputes
     a fresh report rather than retrieving a persisted snapshot.
     """
     if detail == "full":
@@ -49,6 +52,44 @@ def present_report(report: dict, detail: Detail = "compact") -> dict:
                 value[position] = walk(child, f"{path}[{position}]")
         return value
 
+    def ranking_diagnostics(rows, path):
+        """Trim explanations, never ranked identities or numeric retrieval signals.
+
+        Ranking reasons repeat matched terms and may dwarf selected code. Exact
+        counts disclose list sampling and string truncation independently. Scope
+        this to ranking rows: source/omission explanations are evidence contracts.
+        """
+        if not isinstance(rows, list):
+            return
+        for position, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            row_path = f"{path}[{position}]"
+
+            def bound(items, field_path, char_limit):
+                if not isinstance(items, list) or not all(isinstance(item, str) for item in items):
+                    return items
+                shown = [item[:char_limit] for item in items[:RANKING_ITEM_LIMIT]]
+                if shown != items:
+                    total_chars = sum(map(len, items))
+                    shown_chars = sum(map(len, shown))
+                    fields.append({"path": field_path, "kind": "ranking_diagnostic_sample",
+                                   "total": len(items), "shown": len(shown),
+                                   "omitted": len(items) - len(shown),
+                                   "total_chars": total_chars, "shown_chars": shown_chars,
+                                   "omitted_chars": total_chars - shown_chars,
+                                   "item_char_limit": char_limit})
+                return shown
+
+            if "reasons" in row:
+                row["reasons"] = bound(row["reasons"], f"{row_path}.reasons", RANKING_REASON_CHAR_LIMIT)
+            signals = row.get("signals")
+            terms = signals.get("matched_terms") if isinstance(signals, dict) else None
+            if isinstance(terms, dict):
+                for field, items in terms.items():
+                    terms[field] = bound(items, f"{row_path}.signals.matched_terms.{field}",
+                                         RANKING_TERM_CHAR_LIMIT)
+
     # Trace repeats localization and verification data already available at the
     # report root. Only exact matches become references: earlier, different gaps
     # remain visible. Do this before warning sampling to compare the full evidence.
@@ -66,11 +107,25 @@ def present_report(report: dict, detail: Detail = "compact") -> dict:
                 event[f"{key}_reference"] = target
                 fields.append({"path": f"trace[{position}].{key}", "kind": "duplicate_reference",
                                "reference": target, "items": len(original) if isinstance(original, (list, dict)) else 1})
+        # Different localization snapshots remain present; bound only their
+        # scoring explanations using the same policy as canonical search rows.
+        ranking_diagnostics(event.get("matches"), f"trace[{position}].matches")
+    ranking_diagnostics(result.get("search_matches"), "search_matches")
+    ranking_diagnostics(result.get("matches"), "matches")
+    # Investigation may stop before compiling any context (no matches, unchanged
+    # diff, exhausted time). Preserve its null context and original stop reason.
+    context = result.get("context")
+    retrieval = context.get("retrieval") if isinstance(context, dict) else None
+    if isinstance(retrieval, dict):
+        ranking_diagnostics(retrieval.get("candidates"), "context.retrieval.candidates")
     walk(result)
     result["presentation"] = {
         "detail": "compact", "warning_limit": WARNING_LIMIT, "fields": fields,
+        "ranking_item_limit": RANKING_ITEM_LIMIT,
+        "ranking_reason_char_limit": RANKING_REASON_CHAR_LIMIT,
+        "ranking_term_char_limit": RANKING_TERM_CHAR_LIMIT,
         "full_detail": "Repeat this tool with the same arguments and detail='full' for complete diagnostics. The repeat reads fresh repository evidence, not this snapshot.",
-        "scope": "Only diagnostic warning examples and exact repeated trace data are compacted. Source text and coverage gaps are unchanged; total response size is not token-budgeted.",
+        "scope": "Diagnostic warning examples, ranking reasons/matched terms and exact repeated trace data are compacted with counts/references. Ranking identities/order/scores/lesson IDs, source text and coverage gaps are unchanged; total response size is not token-budgeted.",
     }
     # Some hosts clip their displayed JSON before the model/user reaches late
     # fields. Put actionable evidence and coverage gaps ahead of verbose search

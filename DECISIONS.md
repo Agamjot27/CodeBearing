@@ -1452,3 +1452,43 @@ measured coding-model benefit. Frequency is over ranked matches, not a global in
 Use independently labeled task localization and model trials to evaluate precision,
 coverage and budget trade-offs. Reconsider seed count, instruction-term handling,
 semantic retrieval and packing only with evidence, not this single task's ranking.
+
+## D-030 — Bound ranking explanations without dropping candidate identities
+
+**Decision**
+
+Compact MCP ranking rows keep IDs/order/scores/distances/lesson IDs but sample
+reasons and matched terms at eight strings per field, with 160/80-character limits
+respectively. Record exact item and character totals/shown/omissions. Apply only
+ranking lists, including distinct trace matches; full detail unchanged.
+
+**Context**
+
+The harder trial still clipped metadata after warning compaction. Repeated ranking
+explanations can dwarf cited context for broad tasks and many symbols.
+
+**Alternatives Considered**
+
+- Drop low-ranked candidate rows or source to guarantee a smaller response.
+- Remove all scoring explanations or the SDK compatibility text channel.
+- Change retrieval or the source budget to solve a presentation problem.
+
+**Why This Approach**
+
+Scoped sampling keeps actual candidates and every critical gap inspectable while
+limiting verbose explanations. It adds no library/database/model call. Counts
+disclose diagnostic omissions; full preserves exact reports. Tests exercise long
+distinct reasons, both SDK channels and null-context no-match responses.
+
+**Trade-offs**
+
+Complete explanations require full detail, which captures fresh evidence. Disclosure
+overhead can increase short reports: frozen BookMyShow compact payload grows
+40259→41055 bytes. Synthetic long diagnostics shrink more than threefold, but no
+universal response/token/cost savings are established. Total transport remains
+unbudgeted; candidate IDs, source and coverage gaps may be large.
+
+**Future Reconsideration**
+
+Measure actual host limits and observed model usage on representative independent
+tasks before changing bounds or adding a versioned bounded response envelope.

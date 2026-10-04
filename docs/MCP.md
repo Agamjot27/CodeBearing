@@ -231,6 +231,10 @@ All six tools accept `detail="compact"` (default) or `detail="full"`.
 Compact output keeps compiled source and critical coverage gaps intact. Long warning
 arrays show bounded examples; `presentation.fields` lists exact total/shown/omitted
 counts and references to repeated trace data. It does not make a partial run ready.
+Ranking explanations also show at most eight reasons (160 characters each) and
+eight matched terms per field (80 characters each), with exact item/character
+omissions. All row IDs/order/scores/distances/lesson IDs remain. Short reports can
+grow from disclosure overhead; the whole response is still not token-budgeted.
 Source and verification appear before verbose search metadata to help clients that
 truncate display. SDK text and structured response channels remain available.
 

@@ -1146,3 +1146,23 @@ two fresh Codex chats; no new API/worker/frontend, no direct paid provider calls
 assisted eight own regressions/control seven pass. All 68 original hashes unchanged;
 trial server removed. No measured correctness advantage; compact task metadata
 still clipped. WI-019, docs/demos/BOOKING_FAILURE_TRIAL.md, protocol D-026.
+
+## F-039 — Explicit smaller-model paired trial
+
+**Trigger:** User asks whether smaller GPT models benefit from CodeBearing.
+**Execution Path:** prepare_luna.py copies whitelisted captured baseline → seed.py
+applies WI-019 faults → acceptance.mjs calibrates both (F-038 actual functions) →
+create_thread(model=gpt-6-luna, thinking=low) for candidate/control → assisted
+mcp_server.py:investigate (F-037) or control source tools → solver edits/tests →
+finalize.py reruns acceptance and SHA-256 original comparison → read_thread records
+invocation metadata → remove temporary codebearing_luna.
+**Data Transformation:** Same behavioral task/seeded sources under matched requested
+settings → independent results and solver reports. Same environment-only clarification
+sent to both; control systemError resume recorded. No oracle hints supplied.
+**Database Interaction:** Mocked SQL/Redis only; no live DB or lesson write.
+**External Interaction:** Local Node/TypeScript/Python, dependency junctions, Codex
+chat models/tools, temporary MCP config; no frontend/API/worker or new paid API.
+**Output:** Final assisted 6/6, control 3/6 independent checks; originals unchanged,
+temporary entry removed. Own solver tests pass but control misses real cleanup and
+generic rollback discard. One authored task; no causal/token/cost/latency conclusion.
+WI-020/D-028, docs/demos/LUNA_BOOKING_TRIAL.md.

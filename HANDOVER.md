@@ -16,13 +16,14 @@ https://github.com/Agamjot27/CodeBearing.git; no PyPI publication yet.
 
 ## Active work
 
-WI-020: user requests smaller-model benefit testing. New matched fresh chats
-request gpt-6-luna/low (accepted): assisted 01a1074f-36ae-7383-ac0e-b17d72e4efea,
-control 01a1074f-471b-7f31-b900-05844604b999. Both new copies calibrated 2/6 before
-dispatch; same WI-019 booking task/oracle, D-028/F-038. Temporary codebearing_luna
-bound to .eval-runs/bookmyshow_luna_20261004/candidate. Next inspect traces, grade,
-compare originals, remove this temporary entry. Per-run billed tokens unavailable;
-do not conflate payload byte reduction with cost/quality improvements.
+WI-020 completed: matched requested gpt-6-luna/low paired trial. Assisted 6/6
+independent checks; control 3/6 despite 3/3 own checks passing. Real assisted
+investigate observed; control no MCP. Both had process-spawn/test-harness friction;
+identical environment clarification supplied, control also resumed after systemError.
+All 68 original hashes unchanged; codebearing_luna removed. D-028/F-039;
+docs/demos/LUNA_BOOKING_TRIAL.md. One exploratory task, no causal/quality/cost claim.
+Assisted localization selected booking-total rather than core symbols; fix ranking
+and benchmark runner before broad claims. Per-run billed tokens unavailable.
 
 WI-018: 0.7.0 compact MCP presentation implemented, installed and committed 031fac4. detail=compact
 (default) samples diagnostics with counts and references equal trace data; full
@@ -55,7 +56,8 @@ BookMyShow's user-level codebearing entry is bound to that project, even in othe
 projects. Keep it; temporary trial entries should be removed after experiments.
 Native Tree-sitter 0.26.0 crashes on real redis.ts; 0.25.2 pin fixes observed input
 (D-024/F-034). Don't upgrade without real-project regression validation.
-Next prioritize bounding verbose ranking metadata, independently chosen tasks and memory demonstration;
+Next prioritize task localization, bounding ranking metadata, a standardized
+smaller-model runner with observed usage/repeated independent tasks, and memory demonstration;
 model/evaluation infrastructure does not justify adding databases/frameworks alone.
 
 ## Limits / avoid

@@ -4,6 +4,14 @@ The harness checks executable fixes on three synthetic development repositories:
 refund rounding, pagination offsets and retry exhaustion. This is a local experiment
 framework, not a held-out benchmark or evidence that DiffContext improves a model.
 
+A separate interactive smaller-model smoke trial requested matched GPT-6 Luna/low
+settings: assisted 6/6 independent checks, control 3/6 on one authored booking task.
+Own tests passed in both; process restrictions and test-harness mistakes required
+continuation. No billed usage or causal benefit is established. See
+[the full trial record](demos/LUNA_BOOKING_TRIAL.md). This is distinct from the
+one-response packet harness below; reuse its fixed grading boundary for broader
+model comparisons rather than treating chat workflow timing as model latency.
+
 Grading and command adapters use bounded file-backed subprocess I/O and owned
 process-tree/group cleanup on timeout (D-020/F-030). Cleanup adds bounded time to
 the deadline; retained output is limited but temporary disk output has no quota.

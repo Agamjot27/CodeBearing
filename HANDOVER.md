@@ -47,6 +47,15 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
+WI-015 resolved: patch 0.6.1 pins tree-sitter 0.25.2 after binding 0.26.0
+crashes natively on BookMyShow's redis.ts. Same interpreter/project succeeds
+with the prior binding (316 symbols). 30 language/cache regression tests pass.
+Installed patch and completed BookMyShow `setup --client codex`; verified six tools
+and safely wrote its project .codex/config.toml. No application code changed.
+Original uv trampoline error was not reproduced; reinstallation refreshed launchers.
+D-024/F-034. Next: restart Codex in BookMyShow and perform the actual tool-assisted
+bug-fix trial. No model result yet. See WI-015 BUG.md for attempted fixes/evidence.
+
 WI-014 completed locally: CodeBearing is the selected public name, version 0.6.0.
 Distribution/commands are codebearing/codebearing-mcp; internal diffcontext imports,
 legacy aliases and stored data remain compatible. Project-scoped setup safely merges

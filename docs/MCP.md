@@ -20,7 +20,7 @@ entry; use --config for a manual update. Restart/enable/approve in the host.
 Automatic Codex TOML setup needs Python 3.11; core/manual generation supports 3.10.
 The remaining sections describe pip/manual setup and troubleshooting.
 
-Requires Python 3.10+. **This project's 0.6.0 package is not published to PyPI yet.**
+Requires Python 3.10+. **This project's 0.6.1 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
 Install ours from GitHub
 (Git must be installed):
@@ -46,7 +46,7 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/codebearing-0.6.0-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/codebearing-0.6.1-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
 Python-only core CLI installation requires no runtime dependencies.
 For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`

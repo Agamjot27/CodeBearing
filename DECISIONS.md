@@ -1179,3 +1179,48 @@ Measure an actual assistant task before claiming better coding outcomes.
 **Implementation:** onboarding.py:main()/prepare_config()/save_config(),
 connect.py:configuration()/check_connection(), pyproject.toml.
 **Flow:** F-033. **Work item:** WI-014.
+
+
+## D-024 — Pin Tree-sitter 0.25.2 after a real-project native crash
+
+**Decision**
+
+Replace the 0.26.0 parser binding pin with 0.25.2 in patch release 0.6.1.
+The TypeScript/JavaScript grammar pins and indexing semantics remain unchanged.
+
+**Context**
+
+BookMyShow setup discovers tools but its search request loses the server. Direct
+faulthandler indexing reproduces a Windows access violation in _File.text(), from
+_call_facts() on config/redis.ts. The same Python 3.13 interpreter and project
+index successfully with binding 0.25.2, returning 316 symbols.
+
+**Alternatives Considered**
+
+Skip the offending source; remove member-call analysis; change Python immediately;
+retain the Tree explicitly; pin the previous compatible binding.
+
+**Why This Approach**
+
+Changing only the binding version fixes the observed project without silently
+omitting relevant code or weakening dependency analysis. Explicit Tree retention
+was tested and did not prevent the crash, so that attempted code change was
+reverted. Validate the established language regressions and actual project setup.
+Existing cache fingerprints include dependency versions, invalidating old facts.
+
+**Trade-offs**
+
+Uses an earlier binding release. The precise native-library defect is not proven;
+the observed version comparison establishes a workaround, not an upstream diagnosis.
+The user's original uv trampoline error was not reproduced on retry and must not
+be conflated with the verified indexing crash.
+
+**Future Reconsideration**
+
+Test later releases against this project and language regressions before upgrading.
+Reduce a redis.ts-style reproducer without copying private project code if filing
+an upstream report becomes necessary. Improve grouped connection diagnostics in a
+separate change.
+
+**Implementation:** pyproject.toml optional typescript dependency.
+**Flow:** F-034. **Work item:** WI-015.

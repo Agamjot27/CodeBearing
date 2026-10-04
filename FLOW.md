@@ -1047,3 +1047,19 @@ Assistant trust/approval is a separate host action, not performed by setup.
 on failure. Failed connection writes no assistant configuration. The six tools
 return existing structured context/impact/lesson/investigation results, not edits.
 D-023, WI-014. This slice changes public naming, onboarding and guides only.
+
+
+## F-034 — Windows parser compatibility correction
+
+**Trigger:** JS/TS project setup or any index-backed request (including F-033).
+**Execution Path:** onboarding.main → connect.check_connection →
+mcp_server.search_symbols → RepositoryService.search_symbols → index.build_index
+→ typescript.extend_index → _parse_unit → _call_facts → _File.text.
+The execution algorithm is unchanged; optional dependency now selects binding
+0.25.2 rather than the version that crashes on the observed real project.
+**Data Transformation:** Raw sources → syntax trees → portable symbols/call facts.
+Existing cache dependency fingerprints reject facts from the replaced binding.
+**Database Interaction:** None by default; optional existing SQLite index cache.
+**External Interaction:** Local files/native parser and MCP process; no model call.
+**Output:** Normal search results enable verified setup to save Codex project config.
+No application source edits. D-024, WI-015; F-027 remains the language flow.

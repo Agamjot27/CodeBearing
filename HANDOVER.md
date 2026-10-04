@@ -16,6 +16,14 @@ https://github.com/Agamjot27/CodeBearing.git; no PyPI publication yet.
 
 ## Active work
 
+WI-020: user requests smaller-model benefit testing. New matched fresh chats
+request gpt-6-luna/low (accepted): assisted 01a1074f-36ae-7383-ac0e-b17d72e4efea,
+control 01a1074f-471b-7f31-b900-05844604b999. Both new copies calibrated 2/6 before
+dispatch; same WI-019 booking task/oracle, D-028/F-038. Temporary codebearing_luna
+bound to .eval-runs/bookmyshow_luna_20261004/candidate. Next inspect traces, grade,
+compare originals, remove this temporary entry. Per-run billed tokens unavailable;
+do not conflate payload byte reduction with cost/quality improvements.
+
 WI-018: 0.7.0 compact MCP presentation implemented, installed and committed 031fac4. detail=compact
 (default) samples diagnostics with counts and references equal trace data; full
 returns complete fresh evidence. Source/status/critical gaps preserved. Context

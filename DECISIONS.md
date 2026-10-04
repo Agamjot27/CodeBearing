@@ -1362,3 +1362,43 @@ Measure harder-task outcomes independently of payload size before benefit claims
 
 **Implementation:** MCP presentation layer and six existing tool detail arguments.
 **Flow:** F-037. **Work item:** WI-018.
+
+## D-028 — Explicitly match smaller-model settings in paired trials
+
+**Decision**
+
+Run the calibrated booking task in two fresh chats requesting gpt-6-luna and low
+reasoning, comparing required CodeBearing use with ordinary source inspection.
+
+**Context**
+
+User wants evidence that CodeBearing helps people using smaller models with limited
+context/access. Earlier default-model paired trials both succeeded and did not
+establish a correctness advantage. Available creation tools expose Luna settings.
+
+**Alternatives Considered**
+
+- Repeat default-model trials without pinning model/effort.
+- Introduce a paid API provider harness immediately.
+- Assert smaller-model benefits from response-size reduction alone.
+
+**Why This Approach**
+
+Explicit matched settings make the new experimental factor identifiable. Reusing
+the calibrated task and independent oracle is a low-cost smoke trial before
+building billing infrastructure or claiming benefits. Official model-selection
+guidance recommends comparing identical inputs and keeping the lightest setting
+meeting the quality bar: https://developers.openai.com/api/docs/guides/model-selection.
+Existing Codex chats require no new API keys, database or framework.
+
+**Trade-offs**
+
+One authored task is not a benchmark. Fresh-session instruction isolation is not
+a security boundary. Thread creation accepts requested settings but its read API
+does not independently expose model execution identity or billed usage. Response
+bytes and estimated context tokens do not measure complete model cost.
+
+**Future Reconsideration**
+
+Use independently chosen repeated tasks, fixed whole-response budgets and reliable
+per-run input/output usage telemetry before claiming quality or cost improvements.

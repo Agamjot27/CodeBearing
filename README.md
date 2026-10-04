@@ -7,14 +7,15 @@ your assistant to change something, it finds relevant functions, follows their
 dependencies and returns a compact context package. Confirmed lessons can warn
 the assistant about mistakes you previously corrected.
 
-Your assistant makes the edits. CodeBearing supplies the evidence.
+Your assistant makes the edits. CodeBearing supplies the evidence. Repeated
+diagnostics are summarized by default; full diagnostics remain available.
 
 ## Start using it
 
 With [uv](https://docs.astral.sh/uv/getting-started/installation/) and Git installed:
 
 ```powershell
-uv tool install --python 3.11 "codebearing[mcp,typescript] @ git+https://github.com/Agamjot27/DiffContext.git"
+uv tool install --python 3.11 "codebearing[mcp,typescript] @ git+https://github.com/Agamjot27/CodeBearing.git"
 ```
 
 From the project you want to work on, connect your assistant:
@@ -37,9 +38,9 @@ No separate model API key is needed for CodeBearing. Your assistant uses its own
 account. Python and JavaScript/TypeScript are supported, with static-analysis
 limits. The install command includes both language adapters.
 
-**Install status:** CodeBearing 0.6.1 is installable from this Git repository.
+**Install status:** CodeBearing 0.7.0 is installable from this Git repository.
 It has not been published to PyPI; don't use `pip install codebearing` yet.
-The repository URL still uses its earlier DiffContext name.
+The repository is now named CodeBearing; older DiffContext links redirect here.
 
 ## What it gives your assistant
 

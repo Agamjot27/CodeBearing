@@ -88,7 +88,10 @@ No run registry, frontend or automatic persistence is implemented.
 
 Use the server setup in [MCP.md](MCP.md), then call `investigate` with exactly one
 `task`, `symbols`, or `ref`. The other arguments match CLI limits in snake_case.
-This sixth tool returns the full structured report; it remains read-only.
+This sixth tool returns compact diagnostics by default and remains read-only.
+Compiled source, status and critical gaps remain available. Warning samples/counts
+and exact repeated-trace references are disclosed in presentation metadata. Add
+`detail="full"` for a complete fresh report; CLI reports remain full. See [MCP.md](MCP.md).
 
 ## Evaluation scope
 

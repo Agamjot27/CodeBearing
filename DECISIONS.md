@@ -1308,3 +1308,57 @@ Test engineering memory separately after basic host use is observed.
 
 **Implementation:** ignored local .eval-runs assets and user-authorized fresh chats.
 **Flow:** F-036. **Work item:** WI-017.
+
+
+## D-027 — Compact MCP diagnostics with explicit full-detail requests
+
+**Decision**
+
+Present bounded warning samples and references to exactly repeated trace payloads
+by default in existing MCP tools. Add detail=full for complete service responses.
+Preserve canonical context source, critical gaps, status and stopping semantics;
+place source/verification before verbose search metadata to favor useful evidence
+in hosts with truncated displays. Keep the full CLI/service report unchanged. Retain SDK text and structured channels.
+
+**Context**
+
+WI-017 solver reported oversized/truncated context. Direct BookMyShow measurement
+produces 292449 bytes of serialized investigation JSON for 5269 source-text bytes,
+with 521 index warnings repeated across report sections. This is measured source/
+metadata volume, not token cost. Existing SDK serializes JSON in both channels.
+
+**Alternatives Considered**
+
+Suppress index warnings; relax partial status; truncate arbitrary JSON; remove SDK
+text content; add persistent reports/new fetch tools; change retrieval or token
+selection; keep complete reports as the sole default.
+
+**Why This Approach**
+
+Repeated diagnostics dominate the observed output. Samples with exact total/omitted
+counts disclose the limitation without overwhelming the useful evidence. Repeated
+trace fields can refer to equal top-level fields while retaining stage/decision/
+timing. Preserve unresolved changes, missing seeds, omissions and frontier rather
+than trading correctness for size. Full opt-in and unchanged CLI reports support
+debugging without storage infrastructure. Both SDK channels protect content-only
+clients. Test mutation safety, gap preservation, deterministic samples, protocol
+schemas and actual serialized response reduction on the frozen real report.
+
+**Trade-offs**
+
+Compact MCP metadata differs from legacy full responses; callers requiring every
+warning/trace payload must request full. The canonical text budget is still an
+estimate, not a total transport cap; selected evidence/critical gaps can be large.
+Global warnings can still cause partial status even when unrelated to the task.
+Full requests rerun against current source rather than fetching a persisted earlier
+run. Both SDK channels still duplicate serialization for compatibility.
+
+**Future Reconsideration**
+
+Test a versioned single-channel envelope only with actual host compatibility data.
+Consider task-scoped structured warnings once their attribution is reliable. Add
+persistent trace lookup only when reproducible historical retrieval is needed.
+Measure harder-task outcomes independently of payload size before benefit claims.
+
+**Implementation:** MCP presentation layer and six existing tool detail arguments.
+**Flow:** F-037. **Work item:** WI-018.

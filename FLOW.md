@@ -1102,3 +1102,24 @@ checks; one actual assisted investigate is observed, control has no MCP calls.
 Temporary trial server removed; original hashes unchanged. This is a successful
 integration demonstration, not an improvement claim. D-026, WI-017; results in
 docs/demos/BOOKMYSHOW_TRIAL.md. Full private trial assets stay ignored.
+
+
+## F-037 — MCP-only diagnostic presentation
+
+**Trigger:** Any of the six MCP tools, with optional detail=compact|full.
+**Execution Path:** mcp_server.py:create_server tool closure → _call(existing
+RepositoryService method) → presentation.py:present_report → SDK dictionary result
+conversion → text and structuredContent → host. Core indexing/retrieval/compilation
+paths are unchanged; CLI calls services directly and bypasses presentation.
+**Data Transformation:** Compact copies the full report, samples long warnings at
+eight examples (capability caveats prioritized) with exact counts in presentation.fields,
+and replaces equal repeated trace fields with references to canonical fields.
+Source, critical gaps and status are preserved; earlier different trace data remain.
+Useful context/verification precede long search metadata. Full returns service data
+unchanged. Full requests recapture current evidence; no report persistence is added.
+**Database Interaction:** None added. Existing optional cache and read-only lessons
+follow original service paths; presentation performs no I/O.
+**External Interaction:** Existing stdio/SDK/host only, no extra model/network,
+frontend, API or worker. SDK channels retained for client compatibility.
+**Output:** Compact diagnostics or complete fresh report; token budget covers only
+compiled text and does not cap the whole transport. D-027, WI-018.

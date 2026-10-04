@@ -1,6 +1,6 @@
 # Packaging and release checks
 
-The distribution is `codebearing`, currently version 0.6.1. Its installed
+The distribution is `codebearing`, currently version 0.7.0. Its installed
 commands are `codebearing` and `codebearing-mcp`; old diffcontext/diffcontext-lab/
 diffcontext-lab-mcp commands remain compatibility aliases. Generated host entries
 use codebearing. The import package remains `diffcontext` and can conflict with another
@@ -18,7 +18,7 @@ From the repository root, using Python 3.10+ and pip 22.3+ (the checker uses pip
 
 ```powershell
 python -m pip wheel . --no-deps --wheel-dir dist
-python scripts/check_wheel.py dist/codebearing-0.6.1-py3-none-any.whl --typescript
+python scripts/check_wheel.py dist/codebearing-0.7.0-py3-none-any.whl --typescript
 ```
 
 The wheel checker creates a clean temporary environment, installs the wheel
@@ -59,7 +59,7 @@ Use platform-appropriate environment-variable syntax outside PowerShell.
 After committing and pushing, users with Git can install directly:
 
 ```powershell
-python -m pip install "codebearing[mcp] @ git+https://github.com/Agamjot27/DiffContext.git"
+python -m pip install "codebearing[mcp] @ git+https://github.com/Agamjot27/CodeBearing.git"
 ```
 
 That command follows the repository's current default branch. For a reproducible
@@ -68,7 +68,7 @@ with an actual pushed commit; do not invent a release tag. A validated wheel can
 also be shared as an artifact and installed with:
 
 ```powershell
-python -m pip install "C:/path/to/codebearing-0.6.1-py3-none-any.whl[mcp]"
+python -m pip install "C:/path/to/codebearing-0.7.0-py3-none-any.whl[mcp]"
 ```
 
 The receiver still needs access to the wheel's dependency packages. Package users

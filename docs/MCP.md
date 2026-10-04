@@ -10,7 +10,7 @@ CodeBearing needs no model API key; your assistant keeps its own account/setting
 Recommended isolated installation (requires uv and Git):
 
 ```powershell
-uv tool install --python 3.11 "codebearing[mcp,typescript] @ git+https://github.com/Agamjot27/DiffContext.git"
+uv tool install --python 3.11 "codebearing[mcp,typescript] @ git+https://github.com/Agamjot27/CodeBearing.git"
 codebearing setup --client cursor --repo "C:/path/to/your-project"
 ```
 
@@ -20,13 +20,13 @@ entry; use --config for a manual update. Restart/enable/approve in the host.
 Automatic Codex TOML setup needs Python 3.11; core/manual generation supports 3.10.
 The remaining sections describe pip/manual setup and troubleshooting.
 
-Requires Python 3.10+. **This project's 0.6.1 package is not published to PyPI yet.**
+Requires Python 3.10+. **This project's 0.7.0 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
 Install ours from GitHub
 (Git must be installed):
 
 ```powershell
-python -m pip install "codebearing[mcp] @ git+https://github.com/Agamjot27/DiffContext.git"
+python -m pip install "codebearing[mcp] @ git+https://github.com/Agamjot27/CodeBearing.git"
 ```
 
 Use a dedicated Python environment if another DiffContext package is installed:
@@ -46,7 +46,7 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/codebearing-0.6.1-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/codebearing-0.7.0-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
 Python-only core CLI installation requires no runtime dependencies.
 For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`
@@ -223,3 +223,18 @@ codebearing-mcp --repo "C:/path/to/your-project" --cache --config claude
 Use the corresponding client name for Cursor/Codex. Tools still read source and
 lessons; cache-enabled requests write derived state in `.diffcontext/index.sqlite3`.
 Without the flag, retrieval creates no local state. See [indexing details](INDEXING.md).
+
+
+## Compact responses and complete diagnostics
+
+All six tools accept `detail="compact"` (default) or `detail="full"`.
+Compact output keeps compiled source and critical coverage gaps intact. Long warning
+arrays show bounded examples; `presentation.fields` lists exact total/shown/omitted
+counts and references to repeated trace data. It does not make a partial run ready.
+Source and verification appear before verbose search metadata to help clients that
+truncate display. SDK text and structured response channels remain available.
+
+Use the same arguments with `detail="full"` to inspect every warning/trace field.
+That performs a fresh read-only request against current files, not a fetch of the
+previous snapshot. Full CLI/service reports remain unchanged; use full reports for
+saved-trace inspection. The text budget still excludes JSON/transport overhead.

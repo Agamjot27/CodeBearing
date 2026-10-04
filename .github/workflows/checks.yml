@@ -32,4 +32,4 @@ jobs:
           DIFFCONTEXT_REQUIRE_TYPESCRIPT: '1'
       - run: python evals/typescript.py
       - run: python -m pip wheel . --no-deps --wheel-dir dist
-      - run: python scripts/check_wheel.py dist/codebearing-0.6.1-py3-none-any.whl --typescript
+      - run: python scripts/check_wheel.py dist/codebearing-0.7.0-py3-none-any.whl --typescript

@@ -1620,3 +1620,50 @@ hashes invalidate even unrelated edits.
 Introduce authenticated review and richer provenance when shared deployment or
 automatic correction capture enters scope. Measure later agent behavior separately.
 WI-026 records actual execution and its limits.
+
+## D-034 — Use an explicit Codex packet protocol for observed account usage
+
+**Decision**
+
+Add an opt-in developer runner that invokes saved-sign-in Codex exec with a frozen
+public packet, requested model/low effort, schema, ignored user config and an empty
+read-only root. Capture terminal usage and reject tool-contaminated responses.
+Keep CLI default temperature and post-generation output checks explicit rather
+than reusing the API harness's temperature-zero/provider-cap contract.
+
+**Context**
+
+Prior fresh-chat trials had no per-run token counts. User authorized broader
+smaller-model testing using available resources. No API credentials/cost authority
+were supplied; the installed authenticated CLI can report actual usage but exposes
+different controls from OpenRouter.
+
+**Alternatives Considered**
+
+- Add paid API calls or extract authentication tokens.
+- Infer actual usage from character counts or account-limit percentages.
+- Pretend CLI requests honor the existing API sampling/generation settings.
+- Continue unmeasured one-off interactive chats.
+
+**Why This Approach**
+
+Existing saved sign-in and fixed graders collect observable outcomes and usage
+without a new service/library/provider credential. Separate protocol prevents false
+settings equivalence. Counterbalanced repeated requests and frozen source/engine/
+grader hashes keep comparisons reviewable. Tests catch contamination, unknown
+usage, changed acceptance/checkpoints, malformed edits and output-budget exclusion.
+
+**Trade-offs**
+
+Requested model identity is not backend-attested. Input includes large CLI
+scaffolding; cache patterns vary. Temperature is default and output is postchecked,
+not provider-capped. No USD estimate or hostile-code isolation is established.
+All four tasks are authored exact-symbol queries and do not measure interactive
+MCP or natural-language localization. Actual 32-call results favor lexical in this
+small suite; retain failures rather than fitting claims to the product narrative.
+
+**Future Reconsideration**
+
+Use explicit API credentials/billing authorization for tightly controlled generation
+settings and cost estimates. Evaluate independent tasks and actual assistant sessions
+separately. WI-025 and the public per-trial artifact preserve current evidence.

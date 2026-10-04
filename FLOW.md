@@ -1225,10 +1225,35 @@ and compilation, which exclude the stale lesson.
 lesson proposal → excluded proposed advice → operator-reviewed persisted advice →
 freshly compiled lesson → source-hash mismatch and excluded stale advice. Actor
 provenance is in the transcript; no human identity is authenticated.
-**Database Interaction:** Disposable .diffcontext/memory.sqlite lessons INSERT/status
+**Database Interaction:** Disposable .diffcontext/memory.sqlite3 lessons INSERT/status
 UPDATE, followed by separate read-only SELECT. Existing schema is unchanged.
 **External Interaction:** Local filesystem and fresh Python subprocesses only; no
 LLM/network/Git/frontend/API/worker and no original project mutation.
 **Output:** MEMORY_DEMO_RESULT.json with provenance, regression results, pending or
 reviewed retrieval and stale-exclusion assertions. This proves persistence and
 filtering, not later LLM improvement. D-033/WI-026; docs/demos/MEMORY_CONTINUITY.md.
+
+## F-043 — Observed-usage Codex packet trials
+
+**Trigger:** evals/codex_bench.py prepare/run with an explicit model and output path.
+**Execution Path:** main → coding.py:load_suite → codex_trials.py:prepare_trials →
+trial_workspace → experiments.py:make_request (lexical or hybrid RepositoryService
+investigation) → frozen request/manifest and hashes. run_trials validates engine/
+grader/request hashes before checkpoint reuse → CodexPacketRunner.__call__ →
+processes.py:run_bounded launches codex exec → parse_events → post-generation usage
+check → coding.py:apply_edits → grade → checkpoint/result/summary write.
+**Data Transformation:** Authored task and captured source → shared estimated prompt
+allowance plus explicit array/no-tool contract → schema-valid replacements and
+observed input/cached/output usage → allowlisted edits → acceptance results.
+Counterbalanced repetitions preserve conditions; unknown usage is null. CLI default
+temperature and uncapped generation differ explicitly from API runner settings.
+**Database Interaction:** No lesson writes or live database; existing context path
+may inspect a disposable repository store/cache. No application database/worker.
+**External Interaction:** Filesystem, bounded trusted Python graders, opt-in Codex
+CLI/model network via saved sign-in. No credential inspection, user MCP configuration,
+frontend/HTTP API or paid API fallback. Accepted traces contain no tool calls.
+**Output:** Frozen requests, sanitized public metrics/hashes, local ignored events,
+per-trial usage/verification and aggregate outcomes. 32/32 calls completed/scored;
+requested gpt-6-luna lexical7/8/hybrid5/8 and gpt-5.6-luna lexical8/8/hybrid7/8.
+No quality/cost advantage demonstrated. D-034/WI-025;
+docs/demos/SMALL_MODEL_PACKET_TRIALS.md and JSON.

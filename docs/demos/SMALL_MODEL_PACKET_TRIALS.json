@@ -1,0 +1,624 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-05",
+  "protocol": "codex-packet-v1",
+  "label": "Pre-WI-028 authored fixed-packet experiment; not independent or interactive MCP evaluation",
+  "repetitions": 2,
+  "tasks": [
+    "refund-rounding",
+    "pagination-offset",
+    "retry-exhaustion",
+    "transaction-rollback"
+  ],
+  "context_budget_estimated": 3000,
+  "output_budget_postcheck": 4000,
+  "temperature": "CLI default",
+  "reasoning_effort": "low",
+  "cost_usd": null,
+  "engine_hashes": {
+    "__init__.py": "883a8b9145dcf4bbe2402023d8b8ae4c4aa17d796e936cce76254395f0ababc6",
+    "__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "changes.py": "21a8d6b016bbfaab7c3a070b8f5cdd4d89e553cba5c49df4db2598910862b9c1",
+    "cli.py": "39375d2ccc5c43c2de7b76c636737e1263eb0318b68b05428c6a7fa5be1e1973",
+    "codex_trials.py": "1020a526ef0a8ccad3524ff37ab423e204df423dcb810f5fa5c0eb01f18270bb",
+    "coding.py": "dc4a9ea913f58bb0dd0224b6f36c7f1420d9ea4d967528b437b2d2fdae84eb81",
+    "connect.py": "3afbb8c0ff134d974cf1c29c321a5cbeea9c7e02fa18abfcad53bbadb91ce093",
+    "context.py": "8921d4ca30df126caa867b7817785b2d6e7b8da6099b6291641f0fa206757d18",
+    "experiments.py": "805a49842f2ed3227d429c41230b1fbb5ce72882fa1c534cd5b11818b8d4e45d",
+    "index.py": "2ca527aeff7aca8e3a0a60aa23e31552b27ac31fb121fd0f502d64b65531d9cf",
+    "index_store.py": "32368cdf02530f22f095eed3f9cd6f4c1012ebc0d15fe0a7892b231f529d80de",
+    "investigation.py": "0ddad30869ce00eb6b14ea0e4c0d29636066e3f2703e39685617fef61feee324",
+    "mcp_server.py": "8a4936a5c37147dad30754e5086fb3e51457a1da4747ea32469ace2dd6afc501",
+    "memory.py": "dec4c433003cb51e5e8ea3546963bc3d59a916db1d24500c945821452cd511cd",
+    "onboarding.py": "ef2355f1a674f80af991c5a4bff9af3f84dd016577ba87deaae20afb1b583618",
+    "presentation.py": "de09ede6d6ec13256b407d7d97ce6633f81bd9298cfb4190a006451f9cb90bb2",
+    "processes.py": "dc72ed646cb34ffc67b4d05b703e7a3984fa736d8f72e3848606b0f103ca11e8",
+    "providers.py": "af475597a191e343bbd598811e12decd2ec144f8b5232782ad0031faf9600b9e",
+    "retrieval.py": "7fd2f36fa1e02e3f6d2f7297503ee63ef63184006ad045bdd375b21cad6863d0",
+    "runs.py": "7c674356c8cae70a19c4cdf7fbb4bb5c504da403539f034af43b91cb1047edb0",
+    "service.py": "160640e7d1f6ce8ac085f734403d37a3c15771cc04e031ad1787aadc430db595",
+    "typescript.py": "2d436f7c1971d44aca91452a422eddc9d4c72497dd6e0e317e4da9fa2d4985a4"
+  },
+  "grader_hashes": {
+    "pagination-offset": "f57c32091c37483041ba3da960b9d3b5fc83e5b76cc4341d6459a316d15d11f3",
+    "refund-rounding": "18f1636bc316c6e69a068f4809c4f8110429a9d6a8791bf518f71efeef2c6864",
+    "retry-exhaustion": "0f850c2a6ba054fcf1569cf5e6b0c550f7dea3ea46d51881ff96f5bce991cc6f",
+    "transaction-rollback": "4cedc6f7ccb98e62d57c8d11ea9f3d3521712d9a7b8d7651ff941181f511ef1b"
+  },
+  "models": [
+    {
+      "requested_model": "gpt-6-luna",
+      "provider_attested_model": null,
+      "cli_versions": [
+        "codex-cli 0.160.0"
+      ],
+      "planned": 16,
+      "completed": 16,
+      "conditions_summary": {
+        "hybrid": {
+          "outcomes": {
+            "passed": 5,
+            "test_failed": 3
+          },
+          "passed": 5,
+          "scored": 8,
+          "trials": 8,
+          "usage_totals": {
+            "cached_input_tokens": 39168,
+            "input_tokens": 115060,
+            "output_tokens": 769,
+            "reasoning_output_tokens": 0
+          }
+        },
+        "lexical": {
+          "outcomes": {
+            "passed": 7,
+            "test_failed": 1
+          },
+          "passed": 7,
+          "scored": 8,
+          "trials": 8,
+          "usage_totals": {
+            "cached_input_tokens": 0,
+            "input_tokens": 113380,
+            "output_tokens": 845,
+            "reasoning_output_tokens": 0
+          }
+        }
+      },
+      "trials": [
+        {
+          "id": "refund-rounding-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "1e90c57d32e342e08d65c35d7464c8b6ef88a3e25006d55397d4eda1f2e3dcdd",
+          "prompt_estimated_tokens": 423,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14142,
+            "output_tokens": 69,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        },
+        {
+          "id": "refund-rounding-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "b886e8f596d04393b0fa990fc36fdb2adb747dbbc517b4172ebbaf9ee390c7d2",
+          "prompt_estimated_tokens": 958,
+          "usage": {
+            "cached_input_tokens": 13056,
+            "input_tokens": 14524,
+            "output_tokens": 69,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "7ec128bb9448b32409a01b522b015e31800d490ed5225e6bdd3d8b0517aa076f",
+          "prompt_estimated_tokens": 399,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14141,
+            "output_tokens": 85,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "89489b2d3266e4991328fcd9e1d69dbbac7d98e032ae79cf2f8465612cf707e4",
+          "prompt_estimated_tokens": 560,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14264,
+            "output_tokens": 86,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "d7ba42dfb39e55a4f35d399b65ed1b6670286839f2d23676f62b12f21cd3c83a",
+          "prompt_estimated_tokens": 464,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14173,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r1",
+          "outcome": "test_failed",
+          "request_hash": "51626373f7b3b93ec50eb2c7a2d0209f428f6a7a32c59f29923219bc9c828cdb",
+          "prompt_estimated_tokens": 594,
+          "usage": {
+            "cached_input_tokens": 13056,
+            "input_tokens": 14277,
+            "output_tokens": 106,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 0,
+          "failed_tests": []
+        },
+        {
+          "id": "transaction-rollback-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "b87993f36999c8dab1c13dbfbc7c9ba79c93ec4ec446e066cee6429b5e6eef53",
+          "prompt_estimated_tokens": 618,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14235,
+            "output_tokens": 151,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": []
+        },
+        {
+          "id": "transaction-rollback-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "1e0c3d034d29e103542719841851474a2128c0a64af93b7a6716f3c51613ed0e",
+          "prompt_estimated_tokens": 975,
+          "usage": {
+            "cached_input_tokens": 13056,
+            "input_tokens": 14467,
+            "output_tokens": 123,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": []
+        },
+        {
+          "id": "transaction-rollback-hybrid-r2",
+          "outcome": "test_failed",
+          "request_hash": "45ee25269154373a24974f734179fb80e5d1a9f81bd24a1c5b964b34546f4a3f",
+          "prompt_estimated_tokens": 975,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14467,
+            "output_tokens": 124,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": [
+            "<run_path>.AcceptanceTests.test_commit_error_is_preserved_when_rollback_fails",
+            "<run_path>.AcceptanceTests.test_original_error_survives_failed_rollback"
+          ]
+        },
+        {
+          "id": "transaction-rollback-lexical-r2",
+          "outcome": "test_failed",
+          "request_hash": "92b4990f101a169038c633d89aa9b3e941de54c43c3c648595cb0059fc228ac1",
+          "prompt_estimated_tokens": 618,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14233,
+            "output_tokens": 148,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": [
+            "<run_path>.AcceptanceTests.test_commit_error_is_preserved_when_rollback_fails",
+            "<run_path>.AcceptanceTests.test_original_error_survives_failed_rollback"
+          ]
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r2",
+          "outcome": "test_failed",
+          "request_hash": "ef84f7a49c259e178edac2ee259d3e78a9f835038dde156ea6a110b92692fee8",
+          "prompt_estimated_tokens": 594,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14277,
+            "output_tokens": 106,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 0,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "e32d0b8074be5e22d96bf3ba84b3054e6f6932ae371d1f23933a2250033230aa",
+          "prompt_estimated_tokens": 464,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14169,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "5adb8a2c9f086501194207ba75d7f22c39c11c9e0583c6a57d6b6825802f4de9",
+          "prompt_estimated_tokens": 560,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14260,
+            "output_tokens": 86,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "7255fbd8406a10facc037ce916aa9955ff498757f7d9527ae75d634a0a7b9f73",
+          "prompt_estimated_tokens": 399,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14145,
+            "output_tokens": 85,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "refund-rounding-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "2c0d90251f31ac54f8499e274ac07f3377b28bc1f5c2e174a7f28df83b545a7a",
+          "prompt_estimated_tokens": 958,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14524,
+            "output_tokens": 69,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        },
+        {
+          "id": "refund-rounding-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "f9e6fd8c3d83f23e9d7d074dc237cced7b11442e30cf30c5e72a0112477b0454",
+          "prompt_estimated_tokens": 423,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 14142,
+            "output_tokens": 69,
+            "reasoning_output_tokens": 0
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        }
+      ]
+    },
+    {
+      "requested_model": "gpt-5.6-luna",
+      "provider_attested_model": null,
+      "cli_versions": [
+        "codex-cli 0.160.0"
+      ],
+      "planned": 16,
+      "completed": 16,
+      "conditions_summary": {
+        "hybrid": {
+          "outcomes": {
+            "passed": 7,
+            "test_failed": 1
+          },
+          "passed": 7,
+          "scored": 8,
+          "trials": 8,
+          "usage_totals": {
+            "cached_input_tokens": 19968,
+            "input_tokens": 100930,
+            "output_tokens": 1865,
+            "reasoning_output_tokens": 1070
+          }
+        },
+        "lexical": {
+          "outcomes": {
+            "passed": 8
+          },
+          "passed": 8,
+          "scored": 8,
+          "trials": 8,
+          "usage_totals": {
+            "cached_input_tokens": 9984,
+            "input_tokens": 99254,
+            "output_tokens": 1998,
+            "reasoning_output_tokens": 1122
+          }
+        }
+      },
+      "trials": [
+        {
+          "id": "refund-rounding-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "1dc31e5c4a76316544a0ffec44b4af177c5de89213e52992d10e1d1c11479ce1",
+          "prompt_estimated_tokens": 423,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12376,
+            "output_tokens": 179,
+            "reasoning_output_tokens": 98
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        },
+        {
+          "id": "refund-rounding-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "e41fcc73340461b3373925e129b114deff9c1889fb7d855f66fb42c1b5b724b0",
+          "prompt_estimated_tokens": 958,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12760,
+            "output_tokens": 119,
+            "reasoning_output_tokens": 51
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "5af09c0d7a7a1f7524de786d6c94a939ccda0b949e61f121c9488c56874af25d",
+          "prompt_estimated_tokens": 399,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12375,
+            "output_tokens": 123,
+            "reasoning_output_tokens": 35
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "e025f9f6e457b66452db03b091f171439eb5e3355a3e110164412da63ba36cee",
+          "prompt_estimated_tokens": 560,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12496,
+            "output_tokens": 138,
+            "reasoning_output_tokens": 51
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "b828aad9bc196e85647bef8e989c57727da25d727a6f29383f241d6e0cd7b134",
+          "prompt_estimated_tokens": 464,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12405,
+            "output_tokens": 207,
+            "reasoning_output_tokens": 86
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r1",
+          "outcome": "passed",
+          "request_hash": "56327f462b2c6f3c09b91b293b3e2509d79b52819a040582743a9158fc22231f",
+          "prompt_estimated_tokens": 594,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12509,
+            "output_tokens": 324,
+            "reasoning_output_tokens": 203
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "transaction-rollback-lexical-r1",
+          "outcome": "passed",
+          "request_hash": "59e941e492146fb787c2a22901bc7f2091ae04d2d82ac3f95277a0fb467fc155",
+          "prompt_estimated_tokens": 618,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12471,
+            "output_tokens": 538,
+            "reasoning_output_tokens": 390
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": []
+        },
+        {
+          "id": "transaction-rollback-hybrid-r1",
+          "outcome": "test_failed",
+          "request_hash": "3b90f3af69ed081cf78665ce6ce9f651078de94d5ceea1bec53de645204525d3",
+          "prompt_estimated_tokens": 975,
+          "usage": {
+            "cached_input_tokens": 9984,
+            "input_tokens": 12699,
+            "output_tokens": 262,
+            "reasoning_output_tokens": 145
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": [
+            "<run_path>.AcceptanceTests.test_begin_error_rolls_back_and_releases",
+            "<run_path>.AcceptanceTests.test_successful_rollback_preserves_error_and_reuses_client"
+          ]
+        },
+        {
+          "id": "transaction-rollback-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "54cc51532bdcc49178bc897abd60227ccc2fc25f9528000076be20a0a1b63ba3",
+          "prompt_estimated_tokens": 975,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12703,
+            "output_tokens": 446,
+            "reasoning_output_tokens": 321
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": []
+        },
+        {
+          "id": "transaction-rollback-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "96a23ec522ec256b5f8636cd3953b08d225796aa3339962bbc1f066f190ea7fa",
+          "prompt_estimated_tokens": 618,
+          "usage": {
+            "cached_input_tokens": 9984,
+            "input_tokens": 12471,
+            "output_tokens": 436,
+            "reasoning_output_tokens": 289
+          },
+          "tool_calls": 0,
+          "checks_run": 7,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "f7a628768a8beb86876ad95ac52f2523cc93fbfbb566a59acbb48506495bcf58",
+          "prompt_estimated_tokens": 594,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12511,
+            "output_tokens": 324,
+            "reasoning_output_tokens": 203
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "retry-exhaustion-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "cf79ba1cfe0e224a186d4f8556325cdff342954284be18b72fd6f4a39a798b28",
+          "prompt_estimated_tokens": 464,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12407,
+            "output_tokens": 184,
+            "reasoning_output_tokens": 62
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "469de932e3fa5a77ae6765ea0bd45556b42ec93a52b305e7d0b1f1ef7887037c",
+          "prompt_estimated_tokens": 560,
+          "usage": {
+            "cached_input_tokens": 9984,
+            "input_tokens": 12496,
+            "output_tokens": 137,
+            "reasoning_output_tokens": 49
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "pagination-offset-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "fae72d2ae0014346ffaa9df039d57c34bd4b2625ca2590b42d175083672ea619",
+          "prompt_estimated_tokens": 399,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12373,
+            "output_tokens": 155,
+            "reasoning_output_tokens": 67
+          },
+          "tool_calls": 0,
+          "checks_run": 4,
+          "failed_tests": []
+        },
+        {
+          "id": "refund-rounding-hybrid-r2",
+          "outcome": "passed",
+          "request_hash": "9bbc60322474648ea38879a21c53e54c5a6085c87dd4af9d255514576e82fb63",
+          "prompt_estimated_tokens": 958,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12756,
+            "output_tokens": 115,
+            "reasoning_output_tokens": 47
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        },
+        {
+          "id": "refund-rounding-lexical-r2",
+          "outcome": "passed",
+          "request_hash": "c7f62fdf664b162d93bf514e1d75ee0394c4bda255420cd3045e13336a8ef5e7",
+          "prompt_estimated_tokens": 423,
+          "usage": {
+            "cached_input_tokens": 0,
+            "input_tokens": 12376,
+            "output_tokens": 176,
+            "reasoning_output_tokens": 95
+          },
+          "tool_calls": 0,
+          "checks_run": 5,
+          "failed_tests": []
+        }
+      ]
+    }
+  ]
+}

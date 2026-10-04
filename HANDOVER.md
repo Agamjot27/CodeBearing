@@ -24,24 +24,32 @@ disconnected vocabulary. Captured Luna query includes total/confirm/transaction
 at 2884/3000 estimated text tokens, still partial with 15 omitted nonseeds.
 28 focused tests pass. D-032/F-040; docs/work-items/WI-024-connected-task-evidence/BUG.md.
 
-WI-025 in progress: repeated smaller-model fixed-packet trials with actual Codex
+WI-025 complete: repeated smaller-model fixed-packet trials with actual Codex
 CLI usage. Read docs/work-items/WI-025-observed-codex-trials/FEATURE.md first.
 Parent owns diffcontext/codex_trials.py, evals/codex_bench.py, tests/test_codex_trials.py
-and processes.py env parameter. Six focused tests pass. Pilot lexical/hybrid refund
-both pass, no tools, usage observed. Two matched 16-call model matrices are running.
+and processes.py env parameter. Six focused tests pass. Two pilot calls excluded;
+32/32 matrix calls scored, no tools/operational/budget exclusions. gpt6luna
+lexical7/8/hybrid5/8;gpt5.6luna lexical8/8/hybrid7/8. No advantage established.
+Public docs/demos/SMALL_MODEL_PACKET_TRIALS.md/JSON; D-034/F-043.
 CLI default temperature/no enforced generation cap are explicit; output allowance
 is postchecked. Model ID is requested, not provider-attested; USD unknown.
 
 WI-026 memory demo implemented and 3 tests pass: authored analogy to actual WI-020
 test gap, proposal excluded, explicit operator review, fresh-process retrieval and
 stale exclusion. scripts/demo_memory.py; docs/demos/MEMORY_CONTINUITY.md;
-docs/work-items/WI-026-memory-continuity-demo/FEATURE.md. Root flow/decision pending.
-Root integration: D-033/F-042 document actual storage/retrieval execution.
+docs/work-items/WI-026-memory-continuity-demo/FEATURE.md. D-033/F-042 document actual
+storage/retrieval execution.
 Does not attest human approval or improved later model behavior.
 
 WI-027 quickstart/demo/README polish implemented; docs/work-items/WI-027-v1-user-guide/FEATURE.md.
-Final trial links, root docs, full suite, release wheel/install and push pending.
+Final trial links, release wheel/install and push pending. Full suite183 passed
+in135.779s before the additional WI-028 exception-declaration repair.
 Native recording unavailable; walkthrough/storyboard is not a recorded video.
+
+WI-028 in progress: actual matrix exposed omitted local Python exception declaration
+when symbol excerpts are used for full-file replacement. Read
+docs/work-items/WI-028-python-exception-context/BUG.md if present; budget_fit owns
+context.py and focused tests. Preserve original matrix and label later checks.
 
 ## Evidence and limits
 
@@ -50,13 +58,13 @@ hybrid28/28. Calibration is model-free. Real paired demos: WI-017 both5/5,
 WI-019 both6/6; exploratory requested gpt-6-luna/low WI-020 assisted6/6 versus
 control3/6 with process/harness friction. No independent causal or cost claim.
 All68 original BookMyShow hashes remained unchanged. Public scoped reports live
-in docs/demos; ignored .eval-runs holds local artifacts. Full suite167 passed
-before latest fixture/presentation changes; final combined suite pending.
+in docs/demos; ignored .eval-runs holds local artifacts. Full suite183 passed;
+repeat appropriate verification after WI-028 changes.
 
 ## Avoid / next concrete action
 
-Finish WI-025 repeated matrix and aggregate measured usage honestly, integrate
-root decisions/flows, commit meaningful units, run combined checks/build/install,
+Finish narrow WI-028 repair, integrate root decisions/flows and final guide links,
+commit meaningful units, run combined checks/build/install,
 then push. Preserve original projects and existing user-level BookMyShow MCP entry.
 Do not read credentials, edit shared dependency junctions, or commit generated
 .eval-runs/.test-tmp/.diffcontext files. Temporary trial servers must be removed.

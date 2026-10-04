@@ -52,7 +52,8 @@ def _tail(stream, limit: int) -> tuple[str, bool]:
 
 
 def run_bounded(command: list[str], *, timeout: float, cwd: Path | None = None,
-                input_text: str = "", stdout_limit: int = 250_000) -> ProcessResult:
+                input_text: str = "", stdout_limit: int = 250_000,
+                env: dict[str, str] | None = None) -> ProcessResult:
     """Run an argv command with bounded waiting and bounded retained output.
 
     Disk output is not quota-limited. Files prevent descendants holding capture
@@ -65,7 +66,8 @@ def run_bounded(command: list[str], *, timeout: float, cwd: Path | None = None,
         stdin.write(input_text.encode("utf-8"))
         stdin.seek(0)
         process = subprocess.Popen(command, cwd=cwd, stdin=stdin, stdout=stdout,
-                                   stderr=stderr, shell=False, start_new_session=os.name != "nt")
+                                   stderr=stderr, shell=False, env=env,
+                                   start_new_session=os.name != "nt")
         try:
             process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:

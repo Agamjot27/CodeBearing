@@ -33,7 +33,9 @@ WI-023 completed: fourth authored coding task, transaction-rollback, uses existi
 fixed Python grader (no model-written Windows/Node scaffold). Acceptance rejects
 incomplete error-preservation/discard fixes. Coding 5/5, experiment 9/9 checks pass;
 legacy 16 reference passes/16 unchanged failures; hybrid 28/28. No model/API calls,
-held-out benefit or cost savings established. Documentation/commit synchronization next.
+held-out benefit or cost savings established. D-031/F-041; read
+docs/work-items/WI-023-transaction-coding-fixture/FEATURE.md. Full suite ran before
+this fixture addition; both affected harness modules pass afterward (14 tests).
 
 WI-020 completed: matched requested gpt-6-luna/low paired trial. Assisted 6/6
 independent checks; control 3/6 despite 3/3 own checks passing. Real assisted
@@ -75,8 +77,9 @@ BookMyShow's user-level codebearing entry is bound to that project, even in othe
 projects. Keep it; temporary trial entries should be removed after experiments.
 Native Tree-sitter 0.26.0 crashes on real redis.ts; 0.25.2 pin fixes observed input
 (D-024/F-034). Don't upgrade without real-project regression validation.
-Next prioritize task localization, bounding ranking metadata, a standardized
-smaller-model runner with observed usage/repeated independent tasks, and memory demonstration;
+Next use the fixed packet/grader runner for repeated smaller-model comparisons
+with observed usage and independently selected tasks; evaluate localization/packing
+precision and demonstrate real prior engineering memory separately;
 model/evaluation infrastructure does not justify adding databases/frameworks alone.
 
 ## Limits / avoid

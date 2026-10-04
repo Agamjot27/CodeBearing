@@ -58,7 +58,7 @@ from trusted instructions and test injection attempts through comments and lesso
 
 ## 5. Controlled evaluations and experiments — development harness implemented
 
-Implemented: three synthetic buggy repositories, separated acceptance/reference
+Implemented: four synthetic buggy repositories, separated acceptance/reference
 assets, executable grading, paired lexical/graph/confirmed-memory/stale controls,
 shared declared model/budgets, prompt fingerprints, JSON command/replay contracts,
 atomic scored checkpoints, quota-stop/resume and matched-task reports. Model-free

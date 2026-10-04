@@ -1,7 +1,7 @@
 # Controlled coding-task experiments
 
-The harness checks executable fixes on three synthetic development repositories:
-refund rounding, pagination offsets and retry exhaustion. This is a local experiment
+The harness checks executable fixes on four synthetic development repositories:
+refund rounding, pagination offsets, retry exhaustion and transaction rollback. This is a local experiment
 framework, not a held-out benchmark or evidence that DiffContext improves a model.
 
 A separate interactive smaller-model smoke trial requested matched GPT-6 Luna/low
@@ -26,13 +26,13 @@ python evals/coding_bench.py self-check
 python evals/coding_bench.py self-check --condition-set hybrid
 ```
 
-The self-check verifies that each original bug fails tests, then runs 12 reference
-trials and 12 unchanged-code trials across four conditions. References should pass;
+The self-check verifies that each original bug fails tests, then runs 16 reference
+trials and 16 unchanged-code trials across four conditions. References should pass;
 unchanged code should fail. It checks that confirmed synthetic lessons enter memory
 context and stale lessons do not. No model/provider is called. Artifacts go into
 an ignored `.eval-runs/self-check-<id>` directory unless you specify `--output`.
-The opt-in hybrid set runs 21 reference and 21 unchanged trials across seven
-conditions, including six fresh and six stale memory checks. These are calibration
+The opt-in hybrid set runs 28 reference and 28 unchanged trials across seven
+conditions, including eight fresh and eight stale memory checks. These are calibration
 outcomes, never model-success statistics.
 
 Acceptance tests (`checks.py`) and reference fixes (`reference.json`) live outside
@@ -69,7 +69,7 @@ Reported output above the declared budget is an unscored budget violation.
 
 Manifest queries are preassigned development localization hints, not a zero-shot
 localization benchmark. Conditions rotate deterministically across tasks to reduce
-a fixed order effect. Three tasks are too few for statistical conclusions, and
+a fixed order effect. Four tasks are too few for statistical conclusions, and
 there are no repeated stochastic model samples yet.
 
 The lesson text is authored as **synthetic pre-task fixture data**, not claimed to
@@ -84,7 +84,7 @@ Stale evidence changes only a comment; this intentional control changes source h
 python evals/coding_bench.py prepare --model YOUR_MODEL_ID --output .eval-runs/trial-01
 ```
 
-This writes 12 JSON requests into `requests/`. Each contains `prompt`, declared
+This writes 16 JSON requests into `requests/`. Each contains `prompt`, declared
 settings, editable paths, source hashes, trial ID and a stable `request_hash`.
 Send only `prompt` as task evidence to the selected model; envelope metadata is not
 part of the estimated prompt budget. Do not give the model acceptance/reference

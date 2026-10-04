@@ -1189,3 +1189,21 @@ captured source-derived ranking data.
 **Output:** Additional complementary starting context when available, preserving
 exact ambiguity. Real replay includes confirm at 3000 tokens but still omits the
 transaction helper; static/lexical limits remain. D-029, WI-021.
+
+## F-041 — Fixed transaction coding fixture and calibration
+
+**Trigger:** coding_bench.py self-check/prepare/run with the expanded suite.
+**Execution Path:** diffcontext/coding.py:load_suite → trial_workspace copies
+evals/coding_tasks/transaction-rollback/repo → grade runs public test_public.py
+plus external checks.py → orders.py:submit_order → transactions.py:run_transaction
+→ synthetic pool.acquire/client.begin/operation/commit or rollback → client.release.
+Packet/retrieval/usage/timeout paths F-021–F-024 remain unchanged.
+**Data Transformation:** Suite task/editable paths and captured sources → frozen
+request or calibration reference edit → lifecycle assertions → scored results.
+Reference/checks stay outside indexed repo and model packet.
+**Database Interaction:** None; synthetic client methods, no SQL/Redis/store.
+**External Interaction:** Bounded local Python subprocesses/files. Calibration
+calls no model/network/API/worker/frontend; provider runs remain opt-in.
+**Output:** Four calibrated tasks: legacy 16 reference passes/16 unchanged failures;
+hybrid 28/28. Error-only and discard-only patches fail acceptance. This establishes
+authored runner calibration, not model quality. D-031, WI-023.

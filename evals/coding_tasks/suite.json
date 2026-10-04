@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "label": "Three synthetic development coding tasks, not held-out benchmarks",
+  "label": "Four wholly authored synthetic development coding tasks, not held-out benchmarks",
   "tasks": [
     {"id": "refund-rounding", "directory": "refund-rounding", "query": "refund_total",
      "task": "Fix refund_total so a refund matches the per-line rounding of the original invoice. Preserve Decimal arithmetic and the refund_preview response shape, including empty refunds.",
@@ -13,6 +13,10 @@
     {"id": "retry-exhaustion", "directory": "retry-exhaustion", "query": "run_with_retry",
      "task": "Fix run_with_retry so max_attempts is the total number of calls. Return on success; re-raise the original TransientError when all attempts fail; do not retry other exceptions. Reject max_attempts below one with ValueError.",
      "editable": ["retrying.py"], "scope": "retrying.py:run_with_retry", "evidence": "test_public.py",
-     "lesson": "A previous synthetic retry correction found that zero-based loop indices never equal max_attempts. Exhaustion must preserve the last original exception instead of silently returning None."}
+     "lesson": "A previous synthetic retry correction found that zero-based loop indices never equal max_attempts. Exhaustion must preserve the last original exception instead of silently returning None."},
+    {"id": "transaction-rollback", "directory": "transaction-rollback", "query": "run_transaction",
+     "task": "Fix run_transaction: preserve the exact original exception object if the operation, begin or commit fails, even when rollback also raises. If rollback fails, release the client with discard=True; otherwise use discard=False. Release an acquired client exactly once. Preserve success ordering begin, operation, commit, release and the operation result. On acquire failure, propagate its original error without attempting cleanup. Clients' release calls do not raise in this task.",
+     "editable": ["transactions.py"], "scope": "transactions.py:run_transaction", "evidence": "test_public.py",
+     "lesson": "In this wholly authored synthetic transaction task, rollback failure must not replace the original operation error. Mark the client for discard when rollback fails and release once in finally so the next pool borrower cannot inherit broken state."}
   ]
 }

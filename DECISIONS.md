@@ -1492,3 +1492,44 @@ unbudgeted; candidate IDs, source and coverage gaps may be large.
 
 Measure actual host limits and observed model usage on representative independent
 tasks before changing bounds or adding a versioned bounded response envelope.
+
+## D-031 — Reuse the fixed grader for transaction-error evaluation
+
+**Decision**
+
+Add a fourth wholly authored Python coding fixture for original-error preservation
+and failed-rollback client disposal to existing packet/edit/grader contracts. Keep
+acceptance/reference assets outside the indexed repo and test incomplete fixes.
+
+**Context**
+
+Luna trials spent work on Windows Node/esbuild permissions and faulty model-written
+mocks. Own tests passed while real behavior remained wrong. A reliable prewritten
+runner is needed before comparing smaller-model costs.
+
+**Alternatives Considered**
+
+- Require each model to author a mock runner.
+- Commit private application copies or depend on live services.
+- Build a new agent framework or port grading to Node.
+- Keep the original three fixtures without the observed failure class.
+
+**Why This Approach**
+
+The existing Python harness isolates authored checks, freezes requests/settings
+and records usage when supplied. Synthetic lifecycle methods need no package or
+service infrastructure. Independent checks exercise actual fixture functions;
+partial-fix controls catch satisfying only one error path. Calibration is model-free.
+
+**Trade-offs**
+
+This is simplified authored data, not real PostgreSQL/Redis or held-out evidence.
+Packet editing is one-response evaluation, not interactive MCP repair. Default
+trials increase 12→16 (hybrid 21→28), so model runs make more calls. No new model
+benefit or usage is collected. Memory lessons remain synthetic fixture advice.
+
+**Future Reconsideration**
+
+Collect repeated matched smaller-model runs with real usage and independent tasks.
+Add isolated real-service environments only when fidelity requires them and
+platform/resource budgets are controlled. Preserve synthetic calibration labels.

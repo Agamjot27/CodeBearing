@@ -1,6 +1,6 @@
 # Independent evaluation: the remaining data boundary
 
-The three coding fixtures and seven retrieval cases are authored development
+The four coding fixtures and seven retrieval cases are authored development
 data. New tasks authored while looking at the implementation are still development
 data. No independent held-out result has been collected.
 

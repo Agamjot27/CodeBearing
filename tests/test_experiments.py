@@ -177,5 +177,5 @@ class ExperimentTests(unittest.TestCase):
                               "--command-file", str(command_file)], capture_output=True, text=True)
         self.assertEqual(run.returncode, 0, run.stderr)
         report = json.loads(run.stdout)
-        self.assertEqual(report["completed"], 12)
+        self.assertEqual(report["completed"], len(load_suite(SUITE)) * len(CONDITIONS))
         self.assertTrue(all(row["outcome"] == "test_failed" for row in report["trials"]))

@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 
 from diffcontext.index import build_index_from_sources
-from diffcontext.retrieval import eligible_lessons, hybrid_search, lexical_search, rank_candidates
+from diffcontext.retrieval import eligible_lessons, hybrid_search, lexical_search, rank_candidates, select_task_seeds
 
 
 class RetrievalRankerTests(unittest.TestCase):
@@ -93,6 +93,39 @@ class RetrievalRankerTests(unittest.TestCase):
         for invalid in (0, -1, True, 1.5):
             with self.assertRaises(ValueError):
                 lexical_search(index, "helper", invalid)
+
+    def test_disconnected_task_aspects_survive_single_highest_score(self):
+        index = self.index({
+            "totals.py": "def bookingTotal():\n    return 1\n",
+            "service.py": "def confirm():\n    confirmation = 'booking payment'\n    return confirmation\n",
+            "transaction.py": "def run_transaction():\n    return 'rollback'\n",
+        })
+        matches = hybrid_search(index, "booking confirmation payment rollback", limit=50)
+        self.assertEqual(sum(row["score"] == matches[0]["score"] for row in matches), 1)
+        selection = select_task_seeds(matches)
+        self.assertEqual({row["id"] for row in selection["selected"]}, set(index.symbols))
+        self.assertEqual(selection, select_task_seeds(matches))
+
+    def test_seed_selection_preserves_exact_ambiguity_and_avoids_redundancy(self):
+        index = self.index({
+            "a.py": "def refund():\n    return 'payment'\n",
+            "b.py": "def refund():\n    return 'payment rollback'\n",
+            "c.py": "def other():\n    return 'payment'\n",
+        })
+        selection = select_task_seeds(hybrid_search(index, "refund"))
+        self.assertEqual([row["id"] for row in selection["selected"]], ["a.py:refund", "b.py:refund"])
+        self.assertFalse(selection["ambiguous"])
+        exact = select_task_seeds(hybrid_search(index, "b.py:refund"))
+        self.assertEqual([row["id"] for row in exact["selected"]], ["b.py:refund"])
+        only_payment = select_task_seeds(hybrid_search(index, "payment"))
+        highest = hybrid_search(index, "payment")[0]["score"]
+        self.assertEqual(len(only_payment["selected"]),
+                         sum(row["score"] == highest for row in hybrid_search(index, "payment")))
+        index = self.index({f"{i}.py": "def duplicate():\n    return 1\n" for i in range(4)})
+        ambiguous = select_task_seeds(hybrid_search(index, "duplicate"))
+        self.assertTrue(ambiguous["ambiguous"])
+        self.assertEqual(ambiguous["selected"], [])
+        self.assertEqual(select_task_seeds([])["selected"], [])
 
 
 if __name__ == "__main__":

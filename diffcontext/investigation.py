@@ -13,7 +13,7 @@ from typing import Callable
 from .changes import compile_changes, localize_changes
 from .context import compile_context, impact, search
 from .index import Index, build_index, select_symbol
-from .retrieval import eligible_lessons, hybrid_search, rank_candidates
+from .retrieval import eligible_lessons, hybrid_search, rank_candidates, select_task_seeds
 
 
 def _identity(index: Index) -> str:
@@ -124,7 +124,15 @@ def run(
         if not matches:
             return finish("needs_input", "no_matches")
         best = [row["id"] for row in matches if row["score"] == matches[0]["score"]]
-        if len(best) > 3:
+        if retrieval == "hybrid":
+            selection = select_task_seeds(matches)
+            report["retrieval"]["seed_selection"] = selection
+            event("select", **selection)
+            best = [row["id"] for row in selection["selected"]]
+            ambiguous = selection["ambiguous"]
+        else:
+            ambiguous = len(best) > 3
+        if ambiguous:
             return finish("needs_input", "ambiguous_matches")
         report["seeds"]["current"] = best
     elif changed is not None:

@@ -35,6 +35,12 @@ behavior; they do not acquire task ranking just because hybrid is the default.
    explanations stay in JSON/trace metadata, rather than consuming code-text budget.
 
 Inspect `search_matches[*].signals/reasons` and `context.retrieval.candidates`.
+Hybrid task investigation also exposes `retrieval.seed_selection`: a unique
+nonexact highest score starts up to three seeds, greedily covering previously
+uncovered matched terms using bounded-pool inverse frequency. Exact/tied queries
+retain their ambiguity behavior. This can retrieve disconnected aspects, but
+generic task words can introduce distractors and more seeds consume source budget.
+Search result order/scores themselves are unchanged. D-029/F-040, WI-021.
 Scores are ranking heuristics, not confidence probabilities. `ready` still means
 selected static graph coverage, not a correct fix or exhaustive task localization.
 Cache mode reuses parse facts; query ranking is recalculated from current evidence.

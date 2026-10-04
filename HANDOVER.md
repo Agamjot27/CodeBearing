@@ -1,6 +1,6 @@
 # Current handover
 
-Updated: 2026-10-04 (Asia/Calcutta). Read after AGENTS.md at session start.
+Updated: 2026-10-05 (Asia/Calcutta). Read after AGENTS.md at session start.
 This is a current-state record; history is in Git, decisions and work items.
 
 ## Product and completed capabilities
@@ -15,6 +15,14 @@ and internal diffcontext imports/storage are retained. Public repository now is
 https://github.com/Agamjot27/CodeBearing.git; no PyPI publication yet.
 
 ## Active work
+
+WI-021 complete: hybrid investigation covers bounded complementary matched terms
+without changing exact, legacy, explicit or Git selectors. Luna query replay now
+includes confirm, but parseInput is a distractor and 3000 tokens still omit
+withTransaction. D-029/F-040; docs/work-items/WI-021-task-seed-coverage/BUG.md.
+WI-022 implemented: bounded MCP ranking reasons/terms with exact counts, preserving
+IDs/source/scores/gaps/full detail; null early-stop context guarded. Agent checks
+12/12; full suite 167/167 and investigation fixtures 6/6. Packaging next; not installed.
 
 WI-020 completed: matched requested gpt-6-luna/low paired trial. Assisted 6/6
 independent checks; control 3/6 despite 3/3 own checks passing. Real assisted

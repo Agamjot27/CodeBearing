@@ -25,8 +25,11 @@ memory. It splits snake_case/camelCase identifiers and ranks graph candidates wi
 visible signals. Up to 20% of the text budget is reserved for whole applicable
 lessons, subject to seed priority and inclusion of the lesson's scoped code.
 Use `--retrieval legacy` for the original baseline. See [retrieval](RETRIEVAL.md).
-There is no semantic planner. It selects up to three tied best candidates;
-larger ties/no matches request more input. Inspect `search_matches` and `seeds`;
+There is no semantic planner. For a unique nonexact best candidate, hybrid adds
+up to two candidates covering new matched task terms. Inspect
+`retrieval.seed_selection` for IDs/reasons/new terms. Exact and tied candidates
+keep the prior ambiguity behavior; larger ties/no matches request more input.
+Inspect `search_matches` and `seeds`;
 switch to exact `--symbol` IDs if the task selected the wrong code.
 
 For tracked Git changes from the actual repository root:

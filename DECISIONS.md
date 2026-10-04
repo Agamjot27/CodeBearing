@@ -564,6 +564,9 @@ provider abstraction. Add cancellable workers if strict wall-clock bounds become
 required. Reconsider top-score seed selection with labeled localization cases.
 Persist traces only when browsing/history requirements justify storage.
 
+**Task-seed selection superseded by D-029 for hybrid natural-language tasks.**
+Legacy score ties and explicit/Git selectors retain this decision's behavior.
+
 **Implementation:** `investigation.py:run()`, `_frontier()`, `_identity()`,
 `service.py:RepositoryService.investigate()`. **Flow:** F-018. **Work item:** WI-004.
 
@@ -1402,3 +1405,50 @@ bytes and estimated context tokens do not measure complete model cost.
 
 Use independently chosen repeated tasks, fixed whole-response budgets and reliable
 per-run input/output usage telemetry before claiming quality or cost improvements.
+
+## D-029 — Cover complementary matched task terms with bounded seeds
+
+**Decision**
+
+For a unique nonexact hybrid best match, keep that seed and greedily add at most
+two ranked candidates covering new matched query terms. Weight term gains by
+inverse frequency within the bounded search pool. Expose policy/selected IDs/new
+terms in retrieval.seed_selection and trace. Exact/tied/legacy/explicit/Git behavior
+stays as before. BM25 weights, graph limits and source packing are unchanged.
+
+**Context**
+
+The Luna query replay selected only a short booking-total helper. Confirmation
+and transaction evidence ranked lower and never became starting context. The
+problem is observable evidence discarded by single-best selection, not absence
+of a graph database or provider. Confirmation's existing graph reaches transaction.
+
+**Alternatives Considered**
+
+- Tune field weights until this app's confirmation function wins.
+- Take the top three scores even when all repeat one aspect.
+- Add embeddings/model localization or a new graph store.
+- Preserve single-best and require the assistant to supply better symbol IDs.
+
+**Why This Approach**
+
+It reuses at most 50 ranked matches with visible term evidence, adds no library,
+database or model call, and broadens disconnected task aspects while keeping a
+three-seed bound. Marginal coverage favors new vocabulary over redundant names.
+Deterministic ties retain input order. Exact selectors remain predictable. Tests
+check actual disconnected source inclusion, ambiguity, legacy parity and bounds;
+real query replay checks whether the previously absent confirmation enters context.
+
+**Trade-offs**
+
+Terms are lexical, including source comments. Generic instruction words may select
+distractors: the real query also adds parseInput for 'preserve'. More seeds compete
+for the same budget. The 3000-token replay now includes confirm but still omits
+withTransaction. This is not semantic completeness, calibrated confidence or
+measured coding-model benefit. Frequency is over ranked matches, not a global index.
+
+**Future Reconsideration**
+
+Use independently labeled task localization and model trials to evaluate precision,
+coverage and budget trade-offs. Reconsider seed count, instruction-term handling,
+semantic retrieval and packing only with evidence, not this single task's ranking.

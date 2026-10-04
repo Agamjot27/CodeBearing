@@ -132,6 +132,53 @@ def lexical_search(index: Index, query: str, limit: int = 10) -> list[dict]:
     return _lexical_rows(index, query)[:limit]
 
 
+def select_task_seeds(matches: list[dict]) -> dict:
+    """Keep top-score ambiguity, then cover complementary lexical task evidence.
+
+    Only a unique nonexact best match is diversified. At most three seeds come
+    from the existing bounded ranked pool; rare *matched* terms favor additional
+    task aspects rather than another row repeating the first seed's words.
+    Coverage is lexical evidence, not confidence or semantic task completeness.
+    """
+    result = {"policy": "matched-term-coverage", "max_seeds": 3,
+              "selected": [], "ambiguous": False}
+    if not matches:
+        return result
+    best = [row for row in matches if row["score"] == matches[0]["score"]]
+    if len(best) > 3:
+        result["ambiguous"] = True
+        return result
+
+    def terms(row):
+        return {term for values in row.get("signals", {}).get("matched_terms", {}).values()
+                for term in values}
+
+    chosen = list(best)
+    covered = set().union(*(terms(row) for row in chosen))
+    result["selected"] = [{"id": row["id"], "reason": "highest-score match",
+                            "new_terms": sorted(terms(row))} for row in chosen]
+    # An explicit name is a selection request. More than one top match retains
+    # the old tie contract; optional memory cannot break that ambiguity either.
+    if len(best) != 1 or best[0].get("signals", {}).get("exact"):
+        return result
+    frequency = Counter(term for row in matches for term in terms(row))
+    weights = {term: math.log(1 + (len(matches) + 0.5) / (count + 0.5))
+               for term, count in frequency.items()}
+    while len(chosen) < 3:
+        remaining = [row for row in matches if row not in chosen and terms(row) - covered]
+        if not remaining:
+            break
+        # Input rank resolves equal marginal evidence, preserving deterministic
+        # ordering and existing lexical/memory preference without new weight knobs.
+        row = max(remaining, key=lambda row: sum(weights[t] for t in sorted(terms(row) - covered)))
+        new_terms = terms(row) - covered
+        chosen.append(row)
+        covered.update(new_terms)
+        result["selected"].append({"id": row["id"], "reason": "complementary matched terms",
+                                    "new_terms": sorted(new_terms)})
+    return result
+
+
 def eligible_lessons(index: Index, lessons: list[dict] | None) -> list[dict]:
     """Validate review status and hashes against captured bytes, without disk reads.
 

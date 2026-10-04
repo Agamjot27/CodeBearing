@@ -887,7 +887,7 @@ ranked match response. No graph traversal is performed by the search tool itself
 
 Investigation: `RepositoryService.investigate()` → `investigation.py:run()` →
 one source/index capture and lesson snapshot → `hybrid_search()` → best-score ties
-up to three seeds (otherwise needs_input) → for each bounded depth,
+or F-040 complementary-term selection, up to three seeds (otherwise needs_input) → for each bounded depth,
 `retrieval.py:rank_candidates()` → `context.py:impact()` pool → lexical/graph/memory
 candidate scores, seed-first order → eligible scoped lessons/query-match priority
 → `compile_context(candidates=..., lesson_budget=max_tokens//5,
@@ -1166,3 +1166,21 @@ chat models/tools, temporary MCP config; no frontend/API/worker or new paid API.
 temporary entry removed. Own solver tests pass but control misses real cleanup and
 generic rollback discard. One authored task; no causal/token/cost/latency conclusion.
 WI-020/D-028, docs/demos/LUNA_BOOKING_TRIAL.md.
+
+## F-040 — Complementary task-seed coverage
+
+**Trigger:** Hybrid investigation with a natural-language task.
+**Execution Path:** service.py:RepositoryService.investigate → investigation.py:run
+→ retrieval.py:hybrid_search (F-029) → select_task_seeds → matched-term sets and
+Counter/inverse-frequency gains → selected IDs → existing rank_candidates/impact
+and compile_context loop. Exact/tied queries keep prior selection; legacy bypasses
+the new selector, and explicit/Git paths do not call it.
+**Data Transformation:** Bounded ranked rows → up to three seeds, with new-term
+selection reasons and ambiguity flag in retrieval.seed_selection / select trace.
+Scores are unchanged; context budgeting still exposes omissions and partial status.
+**Database Interaction:** None added; existing read-only fresh lessons follow F-029.
+**External Interaction:** None added; no model/network/worker/API/frontend, only
+captured source-derived ranking data.
+**Output:** Additional complementary starting context when available, preserving
+exact ambiguity. Real replay includes confirm at 3000 tokens but still omits the
+transaction helper; static/lexical limits remain. D-029, WI-021.

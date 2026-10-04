@@ -53,6 +53,24 @@ class InvestigationTests(unittest.TestCase):
         self.assertEqual(shallow["stop_reason"], "depth_limit")
         self.assertIn("billing.py:refund_total", shallow["verification"]["frontier"]["current"])
 
+    def test_hybrid_task_context_covers_disconnected_aspects_and_legacy_stays_pinned(self):
+        self.write("totals.py", "def bookingTotal():\n    return 1\n")
+        self.write("booking.py", "def confirm():\n    confirmation = 'booking payment'\n    return confirmation\n")
+        self.write("transaction.py", "def transaction():\n    return 'rollback'\n")
+        service = RepositoryService(self.root)
+        query = "booking confirmation payment rollback"
+        result = service.investigate(task=query, max_tokens=4000)
+        self.assertTrue({"booking.py:confirm", "transaction.py:transaction"}
+                        <= set(result["seeds"]["current"]))
+        self.assertLessEqual(len(result["seeds"]["current"]), 3)
+        self.assertIn("def confirm", result["context"]["text"])
+        self.assertIn("def transaction", result["context"]["text"])
+        self.assertEqual(result["retrieval"]["seed_selection"]["max_seeds"], 3)
+        old = service.investigate(task=query, retrieval="legacy")
+        top = old["search_matches"][0]["score"]
+        self.assertEqual(old["seeds"]["current"],
+                         [r["id"] for r in old["search_matches"] if r["score"] == top])
+
     def test_step_limit_and_cooperative_deadline(self):
         result = RepositoryService(self.root).investigate(symbols=["round_line"], max_steps=2)
         self.assertEqual(result["stop_reason"], "step_limit")

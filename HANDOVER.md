@@ -16,7 +16,7 @@ https://github.com/Agamjot27/CodeBearing.git; no PyPI publication yet.
 
 ## Active work
 
-WI-018: 0.7.0 compact MCP presentation implemented and installed. detail=compact
+WI-018: 0.7.0 compact MCP presentation implemented, installed and committed 031fac4. detail=compact
 (default) samples diagnostics with counts and references equal trace data; full
 returns complete fresh evidence. Source/status/critical gaps preserved. Context
 and verification appear before verbose search metadata. D-027/F-037.
@@ -26,13 +26,16 @@ order regression. Clean wheel install/setup/stdio/cache checks pass.
 Upgrade required stopping only old read-only CodeBearing MCP processes holding
 Windows interpreter files open. Existing chats need reconnect/restart for 0.7.0.
 
-WI-019: harder isolated booking durability/rollback paired trial running.
+WI-019: harder isolated booking durability/rollback paired trial completed.
 Read docs/work-items/WI-019-booking-failure-trial/FEATURE.md. Local ignored assets:
 .eval-runs/bookmyshow_harder_20261004. Baseline 6/6; seeded copies 2/6, four failures.
-Fresh assisted 01a10741-f7a5-78a0-9000-344930674852, control
-01a10742-08f6-7021-a460-e6bf90246926. Temporary codebearing_trial points to candidate.
-Next inspect actual tool activity and fixes, independently grade, verify original
-hashes, remove trial server and save honest results. No live services/secrets.
+Both fresh chats fix all three faults and pass six independent checks; assisted
+eight own regressions/control seven pass; source typechecks pass. Assisted actual
+investigate observed twice before reads; control has no MCP calls. All 68 original
+hashes unchanged; temporary codebearing_trial removed. F-038; public report
+docs/demos/BOOKING_FAILURE_TRIAL.md. No correctness advantage demonstrated.
+Task-based compact response still clipped due to unbounded search metadata; focused
+symbols response useful, partial/token_budget disclosed. No live services/secrets.
 
 ## Evidence and next steps
 
@@ -44,7 +47,7 @@ BookMyShow's user-level codebearing entry is bound to that project, even in othe
 projects. Keep it; temporary trial entries should be removed after experiments.
 Native Tree-sitter 0.26.0 crashes on real redis.ts; 0.25.2 pin fixes observed input
 (D-024/F-034). Don't upgrade without real-project regression validation.
-After current trial, prioritize independently chosen tasks and memory demonstration;
+Next prioritize bounding verbose ranking metadata, independently chosen tasks and memory demonstration;
 model/evaluation infrastructure does not justify adding databases/frameworks alone.
 
 ## Limits / avoid

@@ -1,6 +1,6 @@
 # WI-019 — Harder booking durability and rollback trial
 
-Status: fresh sessions running
+Status: completed; both conditions pass independent acceptance
 Opened: 2026-10-04
 
 ## Scope
@@ -44,3 +44,33 @@ codebearing_trial bound to candidate only. Fresh assisted chat
 or seed edits. Default settings retained; candidate required actual MCP investigate
 before reads, control prohibited from all CodeBearing paths. Await independent
 post-fix grading and original-hash verification; remove temporary entry afterward.
+
+## Results and actual attempts
+
+Both fresh sessions completed. Assisted trace shows two actual investigate calls
+before source reads (task then explicit withTransaction/confirm symbols); control
+trace has no MCP calls. Assisted adds eight mocked regressions, four failing before
+edits and all passing afterward; control adds seven, three failing before and all
+passing afterward. Both source typechecks exit zero. Trial tests use explicit
+commands rather than the existing TypeScript-only npm test glob.
+
+Assisted initially reports a namespace metadata lookup unavailable, followed by
+successful actual investigations. Control encountered sandbox write/spawn limits,
+resolved by scoped approved escalation, and an unsupported PowerShell -NoNewline
+write option, corrected with File.WriteAllText. These are actual attempts, not
+product failures or automatic approval rejections. No live services were run.
+
+Orchestrator independently reruns acceptance twice after fixes: both 6/6, zero
+failures. Finalize script saves outputs and compares SHA-256 for all 68 original
+captured files: none changed. Temporary codebearing_trial removed successfully.
+Trace metadata and independent-results.json saved in ignored local evidence.
+Report: docs/demos/BOOKING_FAILURE_TRIAL.md; exact runtime flow F-038.
+
+## Remaining limits / next work
+
+Both conditions succeed, so no correctness advantage demonstrated. Compact response
+still clipped on the assisted task-based call because search metadata is outside
+the text budget. The focused call gave useful source and disclosed partial coverage.
+Future presentation work should bound repetitive ranking metadata while preserving
+citations, total counts and all critical gaps. Independently selected repeated tasks
+and an engineering-memory demonstration remain planned, not completed.

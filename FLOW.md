@@ -1123,3 +1123,26 @@ follow original service paths; presentation performs no I/O.
 frontend, API or worker. SDK channels retained for client compatibility.
 **Output:** Compact diagnostics or complete fresh report; token budget covers only
 compiled text and does not cap the whole transport. D-027, WI-018.
+
+## F-038 — Booking durability/rollback paired trial
+
+**Trigger:** User authorizes harder isolated bugs and fresh sessions.
+**Execution Path:** Local preparation captures baseline → acceptance.mjs fixture
+mocks pool.query/pool.connect/client.query and redis.evalShared →
+backend/src/services/bookings.service.ts:confirm →
+backend/db/transactions.ts:withTransaction → bookings.repository.ts:insert/ticket
+and holds.repository.ts:lockShow/inspectSeats →
+backend/src/lib/seat-holds.ts:checkOrRelease. Calibrate correct and seeded copies;
+fresh assisted investigate follows F-037/F-018 on candidate; control reads files.
+Solvers add mocked tests and repair copies. Orchestrator reruns independent oracle
+and finalize.py compares original hashes, then removes temporary MCP registration.
+**Data Transformation:** Captured files → identical three-fault inputs → context and
+source patches → independent lifecycle assertions and saved trace/result metadata.
+**Database Interaction:** Synthetic SQL/pool/client and Redis doubles; no live
+database, credentials or lesson writes. Existing service indexing may read cache.
+**External Interaction:** Node/Python subprocesses, local dependency junctions and
+two fresh Codex chats; no new API/worker/frontend, no direct paid provider calls.
+**Output:** Both conditions 6/6 independent acceptance and source typechecks;
+assisted eight own regressions/control seven pass. All 68 original hashes unchanged;
+trial server removed. No measured correctness advantage; compact task metadata
+still clipped. WI-019, docs/demos/BOOKING_FAILURE_TRIAL.md, protocol D-026.

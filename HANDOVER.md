@@ -17,7 +17,9 @@ interpreter imports installed0.9.0; codebearing --help and six-tool stdio check 
 Existing chats require reconnect/new chat after stopping only the old read-only
 connector tree for Windows locks. Existing BookMyShow user MCP entry preserved.
 Release record docs/work-items/WI-029-codebearing-090-release/FEATURE.md; F-046.
-Final documentation/release commit and push pending at this snapshot.
+Release source pushed successfully through1dfcdb1; later documentation commits
+are visible in Git. User next action: start a fresh Codex chat/reconnect and try a
+real task with CodeBearing investigate before editing.
 
 ## Four authorized phases completed
 
@@ -48,7 +50,7 @@ retained. D-036/F-044; docs/work-items/WI-028-python-exception-evidence/BUG.md.
 Full188 tests passed in81.338s after compiler changes; six investigation fixtures,
 two TypeScript budget fixtures and clean wheel/install/setup/stdio/cache checks pass.
 Meaningful commits so far e6b7fbb retrieval,9b00438 memory,7ffc2f1 measured trials,
-65aa91b exception evidence. Finish release/docs commit, push and verify clean state.
+65aa91b exception evidence,83a0ff1 onboarding and1dfcdb1 release; all pushed.
 Next research is independent held-out tasks/actual assistant outcomes; don't invent
 additional required product phases or claim superiority from authored checks.
 

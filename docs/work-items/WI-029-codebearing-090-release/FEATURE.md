@@ -1,6 +1,6 @@
 # WI-029 — Package, validate and install CodeBearing 0.9.0
 
-Status: validated/installed; push pending
+Status: complete — validated, installed and source pushed to Git
 Opened / updated: 2026-10-05
 
 ## Request and scope
@@ -30,7 +30,7 @@ metric. Existing D-023/D-035 packaging/onboarding scope applies.
 
 Scoped before version edits. Built dist/codebearing-0.9.0-py3-none-any.whl,
 68,821 bytes, SHA256268bb1d01e487290acfa1f1b99e9b7cefcc10b3f10322d2ea5763c8972faea2c.
-Clean wheel checker passed; global install verified; push pending.38 public local links
+Clean wheel checker passed; global install verified; release source pushed.38 public local links
 resolve; six investigation fixtures and TypeScript budget fixtures ran successfully.
 Stopped only the exact prior read-only CodeBearing connector tree rooted atPID1612
 for Windows interpreter locks; its two descendants were included. No Codex app or
@@ -55,8 +55,14 @@ Root HANDOVER/FLOW synchronized (F-046). Do not read
 credentials, overwrite user MCP entries or stop unrelated application processes.
 If Windows locks the interpreter, stop only the exact old read-only CodeBearing
 connector process, then verify the configured interpreter's installed version.
+Completed: release commit1dfcdb1 pushed successfully to origin/main after meaningful
+retrieval/memory/eval/compiler/onboarding commits. User next action is a fresh
+assistant chat/reconnect to load installed0.9.0 and try an actual task. Public
+package-index publication and independent quality/cost advantage remain unclaimed.
 
 ## Git trace
 
 Predecessors e6b7fbb retrieval,9b00438 memory demo,7ffc2f1 measured trials,
 65aa91b exception evidence. Use git log --oneline -- this record for release history.
+Release code/version/install verification commit1dfcdb1; first push observed
+b90f79f..1dfcdb1 to origin/main. Later continuity records may have later hashes.

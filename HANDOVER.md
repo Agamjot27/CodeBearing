@@ -47,7 +47,18 @@ current product is a local Python CLI and MCP server for coding assistants.
 
 ## Current work / handoff
 
-WI-016 configured, desktop verification pending: user screenshot lacks CodeBearing
+WI-017 completed: two seeded event-list regressions on isolated BookMyShow copies.
+Fresh assisted/control sessions both pass all five independent checks; both add
+regression tests and pass source typecheck. Real assisted MCP investigate before
+reads is directly observed; control has no MCP calls. Original backend hashes
+unchanged; temporary trial server removed. No correctness advantage demonstrated.
+Results: docs/demos/BOOKMYSHOW_TRIAL.md; local artifacts .eval-runs/bookmyshow_trial_20261004.
+D-026/F-036, WI-017 FEATURE.md. Next improve large/partial warning-context usability,
+then harder independent trials; memory demonstration remains outstanding.
+Previous await fix/test/typecheck remains user-reported evidence. MCP availability
+and fresh-session investigate are now directly observed; desktop UI cause unproven.
+
+WI-016 configuration workaround completed; real MCP use now observed in WI-017: user screenshot lacks CodeBearing
 on the BookMyShow new-chat MCP list, although CLI reads the trusted project entry.
 Exact configured interpreter passes six-tool check. Added the same server to the
 user-level Codex config using codex mcp add; get confirms enabled. This global

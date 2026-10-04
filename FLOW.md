@@ -1079,3 +1079,26 @@ server identity codebearing remains bound to BookMyShow. No core transformation 
 model, frontend code or worker. Existing desktop UI is the verification target.
 **Output:** CLI reports global entry added and enabled. Desktop visibility and an
 actual assistant tool call remain pending. D-025, WI-016.
+
+
+## F-036 — Controlled BookMyShow fresh-session experiment
+
+**Trigger:** User asks to introduce bugs and test in new sessions.
+**Execution Path:** Copy backend → acceptance.mjs uses node:test and mocked pool.query
+→ events.controller.ts:listPublic/listAdmin → events.service.ts:list →
+events.repository.ts:listEvents. Calibrate baseline pass and mutant failure;
+create_thread sends symptoms to candidate/control. Candidate MCP investigate uses
+mcp_server.py:investigate → RepositoryService.investigate → F-018/F-029 retrieval
+and packing on candidate only. Control uses ordinary file tools. Solvers edit copies;
+orchestrator checks tool activity and reruns independent acceptance.
+**Data Transformation:** Captured sources → identical mutant inputs → context/patches
+→ test/result records. Oracle not provided to solvers.
+**Database Interaction:** Mocked PostgreSQL queries only; no lesson writes/cache
+condition, no live database or production credentials.
+**External Interaction:** Local files/dependency junctions, Node subprocesses and
+new Codex chats with model/tool calls. No new API, worker or frontend component.
+**Output:** Both fresh sessions fix two regressions and pass five independent
+checks; one actual assisted investigate is observed, control has no MCP calls.
+Temporary trial server removed; original hashes unchanged. This is a successful
+integration demonstration, not an improvement claim. D-026, WI-017; results in
+docs/demos/BOOKMYSHOW_TRIAL.md. Full private trial assets stay ignored.

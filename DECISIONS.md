@@ -1264,3 +1264,47 @@ repeated host trials justify it and make repository binding clear.
 
 **Implementation:** existing codex mcp add command; user config, no product code.
 **Flow:** F-035. **Work item:** WI-016.
+
+
+## D-026 — Isolated paired fresh-session product demonstration
+
+**Decision**
+
+Use isolated BookMyShow backend copies, identical two-regression inputs, separate
+fresh sessions and independent checks outside solver scope. Candidate uses a
+copy-bound MCP server; control uses ordinary file search.
+
+**Context**
+
+User authorizes introducing bugs and starting sessions to test CodeBearing.
+Their working project has uncommitted fixes/tests and must remain usable.
+
+**Alternatives Considered**
+
+Modify original source; solve after seeing seed edits; run only an assisted demo;
+construct a public benchmark now; reinstall all dependencies.
+
+**Why This Approach**
+
+Copies preserve local work. Fresh sessions do not inherit seed explanations.
+Baseline pass and faulty-input failure calibrate checks before dispatch. A matched
+control prevents attributing a simple fix to CodeBearing without evidence. Reuse
+installed dependencies via a junction with no-edit instructions. Mocked queries
+and synthetic configuration avoid live data/credential copies. A trial server
+prevents retrieving correct source from the original project.
+
+**Trade-offs**
+
+One authored task/two regressions is a demo, not a statistical comparison or
+held-out benchmark. Solvers can technically access sibling files: instruction-based
+separation is not a security sandbox. No live SQL; default session model settings
+retained, token usage may be unavailable. Shared dependencies must stay unchanged.
+
+**Future Reconsideration**
+
+Use stronger isolation, independently collected tasks and repeated paired samples
+before efficacy claims. Materialize dependencies if sharing harms reproducibility.
+Test engineering memory separately after basic host use is observed.
+
+**Implementation:** ignored local .eval-runs assets and user-authorized fresh chats.
+**Flow:** F-036. **Work item:** WI-017.

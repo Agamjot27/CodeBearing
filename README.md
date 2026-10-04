@@ -38,7 +38,7 @@ No separate model API key is needed for CodeBearing. Your assistant uses its own
 account. Python and JavaScript/TypeScript are supported, with static-analysis
 limits. The install command includes both language adapters.
 
-**Install status:** CodeBearing 0.8.0 is installable from this Git repository.
+**Install status:** CodeBearing 0.9.0 is installable from this Git repository.
 It has not been published to PyPI; don't use `pip install codebearing` yet.
 The repository is now named CodeBearing; older DiffContext links redirect here.
 
@@ -56,6 +56,10 @@ real-world coding improvement yet.
 
 ## More help
 
+- [Quickstart: install, connect, try one task](docs/QUICKSTART.md)
+- [Reproducible demo and evidence](docs/DEMO.md)
+- [Correction memory across fresh requests](docs/demos/MEMORY_CONTINUITY.md)
+- [Repeated smaller-model results and measured usage](docs/demos/SMALL_MODEL_PACKET_TRIALS.md)
 - [Setup and troubleshooting](docs/MCP.md)
 - [First bug-fix walkthrough](docs/FIRST_TASK.md)
 - [Language support](docs/LANGUAGES.md)
@@ -64,3 +68,7 @@ real-world coding improvement yet.
 
 The evaluator and OpenRouter adapter are developer tooling. You do not need them
 to use CodeBearing in your coding assistant.
+
+The memory walkthrough uses an authored reproduction of a recorded test gap and
+explicit operator review. It verifies persistence and stale exclusion; it does not
+claim automatic learning or improved later model behavior.

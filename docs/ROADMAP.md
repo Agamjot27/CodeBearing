@@ -20,15 +20,18 @@ Imports/constants/unsupported-language changes remain explicit unresolved gaps.
 
 - Implemented: six read-only MCP tools for search, change localization, impact,
   compilation, lessons and investigation. SDK/stdin-stdout tests exercise contracts and error
-  recovery. Lesson confirmation stays in the developer CLI. Next: demonstrate
-  usage in a real coding-assistant session; transport checks do not prove outcomes.
+  recovery. Lesson confirmation stays in the developer CLI. Real assistant MCP
+  use is recorded in the [public trials](DEMO.md); transport checks alone do not
+  prove outcomes. Project setup supports Claude Code, Cursor and Codex.
 - Extend implemented Git-diff seeds with complete module/class evidence and
   configuration dependencies; current fallback seeds symbols and reports gaps.
 - Implemented: optional TS/JS parsing and persistent incremental parse reuse
   with full current-graph relinking; see [INDEXING.md](INDEXING.md).
 - Implemented: code-aware lexical/graph/confirmed-memory ranking and bounded
   lesson reservation; [authored matched-budget comparison](RETRIEVAL.md).
-  Next: held-out tasks, real coding trials and source-root configuration.
+  Real authored trials and [repeated smaller-model packets](demos/SMALL_MODEL_PACKET_TRIALS.md)
+  with observed usage are recorded. No advantage established. Next: independently
+  selected held-out tasks and source-root configuration.
 - Implemented for investigation: inline run IDs, captured-byte snapshot identities,
   candidates, verification, limits, timing and stop reasons; explicit saved-JSON
   CLI inspection. Persistent history and traces for unexpected errors remain planned.
@@ -50,11 +53,16 @@ independent agents only when parallel execution shows measurable benefit.
 
 ## 4. Correction memory and reliability
 
-Capture an explicit correction, mistaken approach, explanation, patch/commit,
-test evidence, scope, source version, and status. Propose records automatically
-but require review before treating them as authoritative. Handle renamed symbols,
-contradictions, changed dependencies, and supersession. Separate repository content
-from trusted instructions and test injection attempts through comments and lessons.
+Implemented: explicit lesson proposal and developer confirmation, SQLite storage,
+symbol scopes/source hashes, and retrieval that excludes unconfirmed or stale
+advice. The six MCP tools read memory; they do not create or confirm lessons.
+Implemented demonstration: [authored analogy to an actual recorded test gap](demos/MEMORY_CONTINUITY.md),
+explicit operator review, fresh-process retrieval and stale exclusion. It does not
+attest human identity or later model benefit. Next: authenticated provenance and
+independently measured later-session behavior where shared use requires them.
+Automatic correction capture, renamed-symbol reconciliation and contradiction
+handling remain future work. Repository content and lessons are untrusted evidence,
+not instructions overriding the coding assistant.
 
 ## 5. Controlled evaluations and experiments — development harness implemented
 
@@ -62,12 +70,19 @@ Implemented: four synthetic buggy repositories, separated acceptance/reference
 assets, executable grading, paired lexical/graph/confirmed-memory/stale controls,
 shared declared model/budgets, prompt fingerprints, JSON command/replay contracts,
 atomic scored checkpoints, quota-stop/resume and matched-task reports. Model-free
-CI calibrates reference passes and unchanged failures. No live model outcomes have
-been collected; authored lessons are not genuine historical corrections. See
+CI calibrates reference passes and unchanged failures. Interactive assistant
+outcomes are recorded separately in the [public trial reports](DEMO.md); they
+do not establish broad quality/cost improvements. Authored lessons are not genuine
+historical corrections. See
 [CODING_EVALS.md](CODING_EVALS.md). Opt-in hybrid controls and a built-in OpenRouter
-HTTP adapter are implemented; only fake transport tests have exercised it. Live
-model/account verification, repeat samples, strong execution isolation and
-[independent temporal task splits](INDEPENDENT_EVALS.md) remain next.
+HTTP adapter are implemented; only fake transport tests have exercised that
+adapter. Interactive trials use the assistant's account rather than this adapter.
+Implemented: separate opt-in saved-sign-in Codex packet protocol with actual
+input/cached/output usage, counterbalanced repetitions and frozen engine/graders.
+[32-call results](demos/SMALL_MODEL_PACKET_TRIALS.md) show no quality/cost advantage;
+eight post-result retry checks verify a narrow declaration repair separately.
+Strong execution isolation and [independent temporal task splits](INDEPENDENT_EVALS.md)
+remain future evaluation work.
 
 Use temporally separated development and held-out tasks. Index only the repository
 state available before each task; do not expose gold patches or future corrections.
@@ -85,5 +100,9 @@ after measuring a credible baseline, not an arbitrary headline percentage.
 Recorded retrieval failures propose ranking or retrieval-policy changes. Compare
 candidate policies against independent regression and held-out sets before retaining
 them. The optimization loop cannot change its own scoring rules or access boundaries.
-Build a dashboard showing the task, graph, selected evidence, lessons, trace, and
-before/after results once the backend is working and measured.
+The [quickstart](QUICKSTART.md) and [reproducible demo plan](DEMO.md) show the existing
+assistant workflow. Smaller-model testing and provenance-labeled correction-memory
+demonstrations are published with their limits. Current evaluation does not
+establish general improvement; independent validation remains future research.
+A dashboard is optional future presentation work, not required to use the MCP
+server. No frontend, HTTP API or autonomous editor is implemented.

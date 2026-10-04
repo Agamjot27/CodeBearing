@@ -9,7 +9,7 @@ python -m diffcontext --repo examples/typescript-refunds compile --symbol billin
 ```
 
 For installation from Git, use
-`python -m pip install "diffcontext-lab[mcp,typescript] @ git+https://github.com/Agamjot27/DiffContext.git"`.
+`python -m pip install "codebearing[mcp,typescript] @ git+https://github.com/Agamjot27/CodeBearing.git"`.
 The same launcher and six MCP tools work with either language. No Node runtime,
 build, model key, or execution of the target repository is required.
 
@@ -35,8 +35,11 @@ Without the parser extra, Python still works and web files produce an explicit
 unindexed-files warning. Inspect warnings and unresolved Git changes.
 
 All adapters feed the same snapshot, graph traversal, token-budget compiler,
-Git old/current comparison and confirmed-memory freshness checks. Mixed-language
-repositories can be indexed, but HTTP calls, generated clients and other
+Git old/current comparison and confirmed-memory freshness checks. The compiler
+also includes recognized referenced same-module Python exception declarations
+and local exception ancestors. Those declarations share the complete excerpt's
+budget; imported/dynamic/ambiguous classes and general globals remain unresolved.
+Mixed-language repositories can be indexed, but HTTP calls, generated clients and other
 cross-language runtime relationships are not inferred. Go, Java, Rust and other
 languages have no adapters yet. A ready investigation means selected static graph
 coverage, not a complete semantic model of the application.

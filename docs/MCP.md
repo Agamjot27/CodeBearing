@@ -4,6 +4,7 @@ CodeBearing runs locally and gives your assistant six read-only context tools.
 Install it once, run setup for your project, and open your assistant. Your
 assistant starts the server automatically.
 CodeBearing needs no model API key; your assistant keeps its own account/settings.
+For the shortest install/connect/first-task path, see the [quickstart](QUICKSTART.md).
 
 ## 1. Install
 
@@ -144,8 +145,9 @@ assistant's context and may be sent to its model provider under the host's setti
 - **Check passes but host fails:** check the copied config, host approval/trust,
   and host MCP logs. Moving/deleting the Python environment invalidates its path;
   regenerate config afterward. Restart or reload the assistant as required.
-- **No functions found:** current indexing supports Python function/method symbols.
-  Static graph limitations remain; this is not general-language indexing.
+- **No functions found:** Python functions/methods are indexed by default; JS/TS
+  needs the `[typescript]` parser extra. Other languages have no adapters yet.
+  Check [language support](LANGUAGES.md), excluded paths and parse warnings.
 
 During normal server operation stdout carries MCP protocol messages only;
 diagnostics go to stderr. Do not manually start a long-running server alongside

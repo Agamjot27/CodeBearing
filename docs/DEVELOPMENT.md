@@ -1,8 +1,7 @@
 # CodeBearing development reference
 
 The distribution, import package and public CLI now use `codebearing`.
-For install/connect, see [the main guide](../README.md); existing installations
-should read [namespace migration](NAMING.md).
+For install/connect, see [the main guide](../README.md).
 
 ## What works today
 

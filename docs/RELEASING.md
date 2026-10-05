@@ -3,7 +3,8 @@
 The distribution and import package are both `codebearing`, version 0.10.0.
 Installed commands are `codebearing` and `codebearing-mcp`; new host entries use
 `python -m codebearing.connect`. The old `diffcontext` Python namespace and legacy
-console aliases are no longer shipped. See [migration notes](NAMING.md).
+console aliases are no longer shipped. Existing host entries need regeneration
+with `codebearing-mcp --config` after upgrading.
 
 **No public PyPI release has been performed.** No publisher account, publishing
 credentials, or Trusted Publishing configuration is supplied by this repository.

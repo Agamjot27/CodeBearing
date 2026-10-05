@@ -52,3 +52,9 @@ no runtime path or benchmark result changed. Proposed experiments are unexecuted
 ## Git trace
 
 Predecessor b216c0e. Use git log --oneline -- this record for introducing commits.
+
+
+User correction on 2026-10-06: removed the unrequested standalone NAMING.md and
+ALTERNATIVES.md guides and their public links. Kept the codebearing namespace
+rename, tests, packaging and existing workflow records. No replacement guide or
+new work-item file created. Related comparison is for chat, not a new document.

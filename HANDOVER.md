@@ -6,12 +6,12 @@ Updated 2026-10-06 (Asia/Calcutta). Read AGENTS first; history is in work items/
 
 WI-031 namespace migration complete: source renamed to codebearing/, imports/launch configs
 and active guides updated. Source version 0.10.0; existing global 0.9.0 tool and
-BookMyShow configuration untouched. D-038/F-047; docs/NAMING.md. .diffcontext data
+BookMyShow configuration untouched. D-038/F-047. .diffcontext data
 paths preserved to avoid losing lessons/cache. Open checkout root stays registered
 as DiffContext; close/rename/reopen instructions provided.
 WI-032 alternatives comparison complete: researched Aider, Serena, CodeGraphContext, Cursor
-and Claude Code primary docs; docs/ALTERNATIVES.md has sourced trade-offs,
-interview answer and proposed fair benchmark protocol. D-039. No competing-tool or new model trial performed.
+and Claude Code primary docs. User requested removal of the separate naming
+and comparison guides; both removed, namespace implementation retained. D-039. No competing-tool or new model trial performed.
 WI-033 CI stale-wheel fix complete: current 0.10.0 filename matches metadata;
 local clean-wheel command passed. Hosted Actions status not observed. F-048.
 
@@ -43,7 +43,7 @@ Run .venv/Scripts/python.exe -m unittest discover -s tests -v for source checks.
 
 Source rename 903a0b4 and comparison 066332a committed; CI closure is a
 separate commit. Current guide links/anchors: 107 passed. Existing global 0.9.0 user tool still works unchanged; upgrading requires
-new launch entries per docs/NAMING.md. No new product phases are mandatory.
+new codebearing.connect launch entries. No new product phases are mandatory.
 Any claimed competitive benefit needs the proposed independent matched-workflow
 comparison, which has not been executed. Root folder rename requires reopening
 the registered workspace; source directory is already codebearing/.

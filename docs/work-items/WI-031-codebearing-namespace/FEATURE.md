@@ -60,3 +60,9 @@ D-038/F-047 synchronized; existing installed 0.9.0 remains unchanged.
 ## Git trace
 
 Predecessor b216c0e. Use git log --oneline -- this record for introducing commits.
+
+
+User correction on 2026-10-06: removed the unrequested standalone NAMING.md and
+ALTERNATIVES.md guides and their public links. Kept the codebearing namespace
+rename, tests, packaging and existing workflow records. No replacement guide or
+new work-item file created. Related comparison is for chat, not a new document.

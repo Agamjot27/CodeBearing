@@ -135,8 +135,8 @@ assistant's own instructions.
 | `get_lessons` | What confirmed, fresh advice applies to these symbols? |
 | `investigate` | Gather context through a bounded loop and explain its stopping point. |
 
-The Python package is now `codebearing/`; [upgrade and folder naming notes](docs/NAMING.md)
-explain the change from 0.9.0.
+The Python package is now `codebearing/`. Existing MCP entries from 0.9.0
+need to launch `codebearing.connect` when upgrading.
 
 All six tools are read-only and bound to the configured repository. They do not
 edit source, run tests or confirm lessons.
@@ -195,18 +195,6 @@ Estimated text tokens are not whole-session billing tokens. Neither the text
 budget nor the test suite establishes general quality, speed or cost improvement.
 
 </details>
-
-## Where it fits
-
-Aider already offers graph-ranked repo maps; Serena provides semantic navigation,
-editing and memory; code-graph MCP servers and assistant built-ins also overlap.
-CodeBearing focuses on a **read-only context compiler with reviewed, source-validated
-lessons and inspectable omissions**.
-
-Choose it when that explicit evidence policy is useful to your workflow. This is
-a design distinction, not a claim of outperforming those tools.
-
-[Alternatives, trade-offs and a proposed comparison protocol](docs/ALTERNATIVES.md)
 
 ## Explore further
 

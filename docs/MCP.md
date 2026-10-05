@@ -244,4 +244,6 @@ That performs a fresh read-only request against current files, not a fetch of th
 previous snapshot. Full CLI/service reports remain unchanged; use full reports for
 saved-trace inspection. The text budget still excludes JSON/transport overhead.
 
-For upgrades from 0.9.0, see [the namespace migration guide](NAMING.md).
+When upgrading from 0.9.0, regenerate the CodeBearing entry with `--config`
+and replace only that entry: the new module is `codebearing.connect`.
+Preserve other servers and reconnect your assistant.

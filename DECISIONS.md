@@ -1842,6 +1842,9 @@ WI-031 tracks current changes; D-023's setup safeguards remain in force.
 
 ## D-039 — Compare documented contracts separately from measured outcomes
 
+Standalone-guide publication withdrawn on 2026-10-06 at the user's request.
+The comparison belongs in chat; no performance benchmark was executed.
+
 **Decision**
 
 Publish a sourced alternatives review and a proposed controlled evaluation

@@ -1751,3 +1751,46 @@ modules, general data dependencies or independent model-quality improvement.
 Use independent observed dependency failures and measured parsing/packing costs
 before expanding declaration categories or adding typed/global resolution.
 WI-028 records the post-result repair separately from WI-025.
+
+
+## D-037 — Make the README a visual entry point with reproducible evidence
+
+**Decision**
+
+Use original static SVG assets, concise navigation, capability tables and an
+actual excerpt from the public refund fixture. Keep install/setup prominent;
+link detailed evidence and retain scoped evaluation notes in an expandable block.
+
+**Context**
+
+The user requested an engaging README after reviewing Reef's presentation.
+Our existing entry page explained installation but did not show the context
+output or make indexing, graph traversal and reviewed memory easy to scan.
+
+**Alternatives Considered**
+
+- Text-only rearrangement without showing architecture or output.
+- A hosted website, generated raster hero or embedded video.
+- Copying Reef's branding or adding unsupported performance badges.
+
+**Why This Approach**
+
+Repository-local SVGs render on GitHub, remain editable and need no frontend,
+image generation or service. Tables and a real excerpt explain the product with
+less interpretation. A reproduction command makes the example checkable. Version,
+language and tool badges state facts; no stale green CI claim is introduced.
+Measure correctness through link/anchor checks, SVG parsing, rendering and output
+comparison. There is no measured conversion or usability claim.
+
+**Trade-offs**
+
+SVGs require deliberate maintenance, and fixed layouts scale down on narrow
+screens; the adjacent prose/table preserves the explanation. External Shields
+badges depend on that service. The recorded example and test count are snapshots,
+not continuously refreshed results. Native GitHub Markdown controls final layout.
+
+**Future Reconsideration**
+
+Update the excerpt and labels when source or interfaces change. Add a recorded
+demo or website only when real onboarding needs justify it. WI-030 tracks this
+presentation change; runtime behavior remains unchanged.

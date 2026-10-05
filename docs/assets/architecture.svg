@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title desc">
+<title id="title">How CodeBearing prepares context</title>
+<desc id="desc">Assistant requests enter a local MCP server. AST and Tree-sitter indexing feed localization, dependency expansion and context packing. Confirmed fresh SQLite lessons join packing. Cited evidence returns to the assistant, which edits and tests.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#81e4cb"/></marker></defs>
+<rect width="1200" height="440" rx="18" fill="#0e1b2b"/>
+<g font-family="Segoe UI, Arial, sans-serif">
+<text x="36" y="43" fill="#81e4cb" font-size="12" letter-spacing="2">FROM A TASK TO REPOSITORY EVIDENCE</text>
+<g fill="#172e40" stroke="#31576b">
+<rect x="36" y="79" width="218" height="90" rx="12"/>
+<rect x="300" y="79" width="192" height="90" rx="12"/>
+<rect x="36" y="263" width="218" height="103" rx="12"/>
+<rect x="536" y="79" width="184" height="90" rx="12"/>
+<rect x="768" y="79" width="184" height="90" rx="12"/>
+<rect x="998" y="79" width="166" height="90" rx="12" stroke="#81e4cb"/>
+<rect x="768" y="263" width="396" height="103" rx="12"/>
+</g>
+<g fill="#edf6fa" font-size="18" font-weight="600">
+<text x="54" y="112">Coding assistant</text><text x="320" y="112">Local MCP server</text>
+<text x="54" y="296">Repository index</text><text x="556" y="112">Localize</text>
+<text x="788" y="112">Expand graph</text><text x="1016" y="112">Pack context</text>
+<text x="788" y="297">Reviewed engineering memory</text>
+</g>
+<g fill="#a4c0cd" font-size="14">
+<text x="54" y="139">Task / symbols / Git ref</text><text x="320" y="139">Six read-only tools</text>
+<text x="54" y="323">AST + Tree-sitter</text><text x="54" y="346">Source, imports, call edges</text>
+<text x="556" y="139">Lexical + diff evidence</text><text x="788" y="139">Bounded callers / callees</text>
+<text x="1016" y="139">Estimated text budget</text>
+<text x="788" y="325">SQLite · confirmed lessons · source-hash freshness</text>
+<text x="788" y="347">Developer proposal and review happen outside MCP.</text>
+</g>
+<g fill="none" stroke="#81e4cb" stroke-width="2" marker-end="url(#arrow)">
+<path d="M254 123H291"/><path d="M492 123H527"/><path d="M720 123H759"/><path d="M952 123H989"/>
+<path d="M254 308H629V178"/><path d="M1081 263V178"/>
+<path d="M1081 169V211H145V178"/>
+</g>
+<rect x="367" y="193" width="409" height="35" rx="8" fill="#0e1b2b"/>
+<text x="384" y="216" fill="#81e4cb" font-size="14">Cited source + lessons + omissions + investigation trace</text>
+<text x="36" y="409" fill="#a4c0cd" font-size="14">CodeBearing supplies evidence. Your assistant makes the edits and runs the tests.</text>
+</g>
+</svg>

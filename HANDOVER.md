@@ -1,6 +1,6 @@
 # Current handover
 
-Updated2026-10-05 (Asia/Calcutta). Read after AGENTS.md, then the relevant work item,
+Updated 2026-10-06 (Asia/Calcutta). Read after AGENTS.md, then the relevant work item,
 decisions and flows. This is the current snapshot; detailed history lives in Git.
 
 ## Product/current release
@@ -20,6 +20,18 @@ Release record docs/work-items/WI-029-codebearing-090-release/FEATURE.md; F-046.
 Release source pushed successfully through1dfcdb1; later documentation commits
 are visible in Git. User next action: start a fresh Codex chat/reconnect and try a
 real task with CodeBearing investigate before editing.
+
+## Current presentation work
+
+WI-030 README redesign complete: original SVG header/architecture, actual
+public refund output, tool/memory tables and evidence links. D-037/F-045;
+docs/work-items/WI-030-readme-presentation/FEATURE.md. Runtime unchanged.
+Verified 50 README links/anchors, both SVGs and upper/lower local rendered
+previews. Public example matches five symbols/514 estimated text tokens under
+2000 allowance. Documentation-only; original 188-test release evidence retained.
+Known follow-up: .github/workflows/checks.yml clean-wheel command still points
+to 0.8.0 although release is 0.9.0. No CI-success badge added; create a separate
+bug record before repairing that pre-existing CI command.
 
 ## Four authorized phases completed
 

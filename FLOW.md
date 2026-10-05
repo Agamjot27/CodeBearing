@@ -1297,6 +1297,10 @@ No hosted API/worker or recorded video is introduced.
 **Output:** Verified local transport/configuration and reproducible task workflow;
 host trust/activation and real-world fix correctness require their own checks.
 D-035/WI-027; README, docs/QUICKSTART.md and docs/DEMO.md.
+Presentation update D-037/WI-030: README links original docs/assets SVGs and
+docs/README_EXAMPLE.md. Its reproduction command enters cli.py:main ->
+RepositoryService.compile_context -> context.py:compile_context (F-044), without
+model calls or database writes. This changes documentation entry points only.
 
 ## F-046 — CodeBearing 0.9.0 release validation and existing-tool upgrade
 

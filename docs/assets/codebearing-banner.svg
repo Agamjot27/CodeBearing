@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+<title id="title">CodeBearing — context with a clear direction</title>
+<desc id="desc">Local MCP infrastructure for coding assistants. A dependency graph leads into a compact cited context package.</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1424"/><stop offset="1" stop-color="#122c39"/></linearGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#a3cbd5" stroke-opacity=".055"/></pattern>
+</defs>
+<rect width="1200" height="380" rx="20" fill="url(#bg)"/>
+<rect width="1200" height="380" rx="20" fill="url(#grid)"/>
+<g font-family="Segoe UI, Arial, sans-serif">
+  <rect x="56" y="49" width="238" height="28" rx="14" fill="#173946"/>
+  <text x="74" y="68" fill="#81e4cb" font-size="12" font-weight="600" letter-spacing="1.8">CONTEXT + ENGINEERING MEMORY</text>
+  <text x="54" y="148" fill="#f3f8fc" font-size="66" font-weight="700" letter-spacing="-2">CodeBearing</text>
+  <text x="58" y="196" fill="#d1e5ec" font-size="26">Give your coding agent a clear direction.</text>
+  <text x="58" y="237" fill="#94b4c4" font-size="17">Relevant code. Connected dependencies. Reviewed lessons.</text>
+  <path d="M58 278H586" stroke="#2b4657"/>
+  <text x="58" y="315" fill="#81e4cb" font-size="14" letter-spacing="1">LOCAL MCP</text>
+  <text x="184" y="315" fill="#aac5d1" font-size="14">Python + JavaScript / TypeScript</text>
+</g>
+<g fill="none" stroke="#48798d" stroke-width="2">
+ <path d="M738 101L816 181L743 271M816 181L932 111M816 181L943 260M932 111L1041 181M943 260L1041 181"/>
+ <path d="M816 181H1041" stroke="#81e4cb" stroke-width="3"/>
+</g>
+<g fill="#152f3e" stroke="#628899" stroke-width="2">
+ <circle cx="738" cy="101" r="15"/><circle cx="743" cy="271" r="15"/>
+ <circle cx="932" cy="111" r="15"/><circle cx="943" cy="260" r="15"/>
+ <circle cx="816" cy="181" r="24" fill="#234e57" stroke="#81e4cb"/>
+</g>
+<g font-family="Consolas, monospace" font-size="13" fill="#adcbd5">
+ <text x="697" y="71">callers</text><text x="695" y="308">lessons</text>
+ <text x="886" y="80">imports</text><text x="891" y="299">callees</text>
+</g>
+<rect x="1005" y="140" width="135" height="86" rx="12" fill="#132e3a" stroke="#81e4cb" stroke-width="2"/>
+<path d="M1026 163H1118M1026 181H1096M1026 199H1107" stroke="#81e4cb" stroke-width="4" stroke-linecap="round"/>
+<text x="1016" y="252" fill="#d1e5ec" font-family="Segoe UI, Arial, sans-serif" font-size="13">cited context</text>
+</svg>

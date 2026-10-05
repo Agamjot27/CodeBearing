@@ -2,7 +2,7 @@
 
 Updated 2026-10-06 (Asia/Calcutta). Read AGENTS first; history is in work items/Git.
 
-## Active work
+## Completed current work
 
 WI-031 namespace migration complete: source renamed to codebearing/, imports/launch configs
 and active guides updated. Source version 0.10.0; existing global 0.9.0 tool and
@@ -12,7 +12,8 @@ as DiffContext; close/rename/reopen instructions provided.
 WI-032 alternatives comparison complete: researched Aider, Serena, CodeGraphContext, Cursor
 and Claude Code primary docs; docs/ALTERNATIVES.md has sourced trade-offs,
 interview answer and proposed fair benchmark protocol. D-039. No competing-tool or new model trial performed.
-WI-033 CI stale-wheel fix: scoped; synchronize checker filename to new release.
+WI-033 CI stale-wheel fix complete: current 0.10.0 filename matches metadata;
+local clean-wheel command passed. Hosted Actions status not observed. F-048.
 
 ## Verification
 
@@ -37,3 +38,12 @@ Do not rewrite historical trial artifacts/fingerprints, edit original projects,
 read credentials or alter shared dependencies. Do not commit .eval-runs/.test-tmp/
 .diffcontext/dist. Keep Tree-sitter 0.25.2 pinned (0.26 crashed real redis.ts).
 Run .venv/Scripts/python.exe -m unittest discover -s tests -v for source checks.
+
+## Next action
+
+Source rename 903a0b4 and comparison 066332a committed; CI closure is a
+separate commit. Current guide links/anchors: 107 passed. Existing global 0.9.0 user tool still works unchanged; upgrading requires
+new launch entries per docs/NAMING.md. No new product phases are mandatory.
+Any claimed competitive benefit needs the proposed independent matched-workflow
+comparison, which has not been executed. Root folder rename requires reopening
+the registered workspace; source directory is already codebearing/.

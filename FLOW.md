@@ -1336,3 +1336,19 @@ create_server -> RepositoryService -> existing analysis/compilation paths.
 service/worker/frontend. Existing installed host entries need explicit regeneration.
 **Output:** Same six-tool contract under the new namespace. D-038/WI-031.
 Earlier versioned release/trial names remain historical evidence.
+
+
+## F-048 — Current CI clean-wheel verification
+
+**Trigger:** .github/workflows/checks.yml push/pull_request MCP job.
+**Execution Path:** setup-python -> pip editable install of extras -> source
+unittest/TypeScript eval -> pip wheel -> scripts/check_wheel.py:verify -> run ->
+clean installed codebearing/onboarding.py and connect.py -> MCP service checks.
+**Data Transformation:** Current 0.10.0 source -> same-version wheel -> observed
+installed CLI/configuration/discovery/cache outcomes. Legacy namespace members
+are rejected before install. WI-033 fixes the obsolete 0.8.0 filename.
+**Database Interaction:** Disposable SQLite indexing cache only; no user DB.
+**External Interaction:** CI filesystem/subprocesses and dependency installation;
+no model/network inference, frontend or worker. Hosted result not observed here.
+**Output:** Job success/failure from real checks. The equivalent local wheel
+command passed; that does not establish hosted Actions status.

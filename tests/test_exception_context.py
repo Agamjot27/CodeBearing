@@ -3,8 +3,8 @@
 from pathlib import Path
 import unittest
 
-from diffcontext.context import compile_context, estimate_tokens
-from diffcontext.index import build_index_from_sources
+from codebearing.context import compile_context, estimate_tokens
+from codebearing.index import build_index_from_sources
 
 
 class ExceptionContextTests(unittest.TestCase):

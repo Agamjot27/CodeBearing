@@ -6,8 +6,8 @@ from pathlib import Path
 
 import test_core
 import test_changes
-from diffcontext.changes import localize_changes
-from diffcontext.index import build_index
+from codebearing.changes import localize_changes
+from codebearing.index import build_index
 
 
 class CacheCliTests(unittest.TestCase):
@@ -15,7 +15,7 @@ class CacheCliTests(unittest.TestCase):
     write = test_core.CoreTests.write
 
     def test_cli_cache_survives_separate_processes(self):
-        command = [sys.executable, "-m", "diffcontext", "--repo", str(self.root), "--cache", "index"]
+        command = [sys.executable, "-m", "codebearing", "--repo", str(self.root), "--cache", "index"]
         counts = []
         for _ in range(2):
             result = subprocess.run(command, cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=30)

@@ -30,7 +30,7 @@ class TypeScriptStdioTests(unittest.IsolatedAsyncioTestCase):
         project = Path(__file__).resolve().parents[1]
         parameters = StdioServerParameters(
             command=sys.executable,
-            args=["-m", "diffcontext", "--repo", str(self.root), "serve"],
+            args=["-m", "codebearing", "--repo", str(self.root), "serve"],
             cwd=project,
         )
         async with Client(parameters, read_timeout_seconds=30) as client:

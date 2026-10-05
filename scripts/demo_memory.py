@@ -16,8 +16,8 @@ import sys
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
+from codebearing.index import build_index
+from codebearing.memory import Memory
 
 SOURCE = '''def confirm_booking(commit, cleanup):
     result = commit()
@@ -45,7 +45,7 @@ def fresh_request(root: Path, action: str = "lessons") -> dict:
     """A new interpreter observes persisted status/hashes, not a shared object."""
     code = (
         "import json,sys; from pathlib import Path; "
-        "from diffcontext.service import RepositoryService; "
+        "from codebearing.service import RepositoryService; "
         "s=RepositoryService(Path(sys.argv[1])); "
         "r=s.get_lessons(['booking.py:confirm_booking']) if sys.argv[2]=='lessons' "
         "else s.compile_context(symbols=['booking.py:confirm_booking']); "

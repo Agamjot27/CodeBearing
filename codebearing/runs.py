@@ -9,7 +9,7 @@ MAX_RUN_BYTES = 10_000_000
 def summarize(report: dict) -> dict:
     """Keep evidence citations, decisions and gaps; omit the source text itself."""
     if not isinstance(report, dict) or report.get("schema_version") != 1:
-        raise ValueError("Expected a full DiffContext investigation report with schema_version 1.")
+        raise ValueError("Expected a full CodeBearing investigation report with schema_version 1.")
     try:
         if report["status"] not in {"ready", "partial", "needs_input", "no_changes"}:
             raise ValueError("Invalid investigation status.")

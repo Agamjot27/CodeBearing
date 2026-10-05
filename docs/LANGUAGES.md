@@ -5,7 +5,7 @@ optional syntax-tree adapter. Install both MCP and parser extras for those proje
 
 ```powershell
 python -m pip install ".[mcp,typescript]"
-python -m diffcontext --repo examples/typescript-refunds compile --symbol billing.ts:refundTotal --max-tokens 2000
+python -m codebearing --repo examples/typescript-refunds compile --symbol billing.ts:refundTotal --max-tokens 2000
 ```
 
 For installation from Git, use

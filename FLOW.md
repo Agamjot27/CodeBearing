@@ -60,7 +60,7 @@ roadmap as if they were callable code.
 **Trigger:** `python -m diffcontext --repo <directory> <command>` or the installed
 `diffcontext` entry point.
 
-**Execution Path:** `diffcontext/__main__.py` → `diffcontext/cli.py:main()`.
+**Execution Path:** `codebearing/__main__.py` → `codebearing/cli.py:main()`.
 The installed script maps directly to `cli:main` through `pyproject.toml`.
 `main()` parses arguments → constructs `service.py:RepositoryService(args.repo)`
 → dispatches search/changes/impact/compile to service methods (F-016), or calls
@@ -223,7 +223,7 @@ initialization, so listing from the developer CLI can still create empty storage
 filtering is performed in Python after `SELECT * FROM lessons ORDER BY id`.
 `stale` is added in memory; `list()` includes proposed and stale rows for inspection.
 
-**Database Interaction:** Creates `.diffcontext/memory.sqlite3` and the `lessons`
+**Database Interaction:** Creates `.codebearing/memory.sqlite3` and the `lessons`
 table if necessary. Reads all lesson rows. The table contains `id`, `scope`,
 `lesson`, `evidence`, `evidence_hash`, `scope_hash`, `status`, and `created_at`.
 
@@ -730,7 +730,7 @@ and checks 12 reference/12 unchanged trials. D-015/WI-005.
 **Trigger:** Assistant executes generated config, or user runs
 `diffcontext-lab-mcp --repo <root> [--config claude|cursor|codex]`.
 
-**Execution Path:** `pyproject.toml` console entry → `diffcontext/connect.py:main()`
+**Execution Path:** `pyproject.toml` console entry → `codebearing/connect.py:main()`
 → resolve/validate root → config mode `configuration()` → print JSON/TOML; or
 lazy import `mcp_server.py:create_server(root)` → `RepositoryService(root)` →
 SDK `run(transport="stdio")` → existing F-017 tool dispatch/F-016 service calls.
@@ -858,7 +858,7 @@ returning current evidence. Counters distinguish reused/parsed/uncached/removed
 files; cache pipeline time excludes capture, which ordinary current builds measure
 separately. Git/historical costs are outside current-cache counters.
 
-**Database Interaction:** `.diffcontext/index.sqlite3` tables `metadata`, `files`,
+**Database Interaction:** `.codebearing/index.sqlite3` tables `metadata`, `files`,
 `symbols`, `edges`; transactional generation publication. No lesson-table writes;
 `memory.sqlite3` stays separate. No graph server or worker. Without `--cache`, no
 cache database is opened and previous no-state retrieval behavior remains.
@@ -1020,13 +1020,13 @@ proving API access. D-022, WI-013.
 **Trigger:** Installed `codebearing setup --client cursor|claude|codex`, optionally
 `--repo` and `--cache`. Without --repo, use the current working directory.
 
-**Execution Path:** pyproject.toml entry point → diffcontext/onboarding.py:main()
-→ prepare_config() → diffcontext/connect.py:configuration() → JSON/TOML validation
+**Execution Path:** pyproject.toml entry point → codebearing/onboarding.py:main()
+→ prepare_config() → codebearing/connect.py:configuration() → JSON/TOML validation
 and merge → asyncio.wait_for(check_connection(), 45 seconds) → existing stdio
 launcher/server discovery and search check (F-025/F-026) → save_config() → project
 settings file. A later assistant launch follows connect.py:main() →
 mcp_server.py:create_server() → existing six RepositoryService tools (F-017).
-Advanced `codebearing` arguments delegate to diffcontext/cli.py:main().
+Advanced `codebearing` arguments delegate to codebearing/cli.py:main().
 
 **Data Transformation:** Project path and client select `.mcp.json` (Claude),
 `.cursor/mcp.json` (Cursor), or `.codex/config.toml` (Codex). Generated configuration
@@ -1196,7 +1196,7 @@ selection. D-029/D-032, WI-021/WI-024.
 ## F-041 — Fixed transaction coding fixture and calibration
 
 **Trigger:** coding_bench.py self-check/prepare/run with the expanded suite.
-**Execution Path:** diffcontext/coding.py:load_suite → trial_workspace copies
+**Execution Path:** codebearing/coding.py:load_suite → trial_workspace copies
 evals/coding_tasks/transaction-rollback/repo → grade runs public test_public.py
 plus external checks.py → orders.py:submit_order → transactions.py:run_transaction
 → synthetic pool.acquire/client.begin/operation/commit or rollback → client.release.
@@ -1225,7 +1225,7 @@ and compilation, which exclude the stale lesson.
 lesson proposal → excluded proposed advice → operator-reviewed persisted advice →
 freshly compiled lesson → source-hash mismatch and excluded stale advice. Actor
 provenance is in the transcript; no human identity is authenticated.
-**Database Interaction:** Disposable .diffcontext/memory.sqlite3 lessons INSERT/status
+**Database Interaction:** Disposable .codebearing/memory.sqlite3 lessons INSERT/status
 UPDATE, followed by separate read-only SELECT. Existing schema is unchanged.
 **External Interaction:** Local filesystem and fresh Python subprocesses only; no
 LLM/network/Git/frontend/API/worker and no original project mutation.
@@ -1320,3 +1320,19 @@ No publication/model call/frontend/API/worker or credential inspection.
 **Output:** Validated0.9.0 Git-distributed MCP release and verified installed tool;
 existing chats need reconnect. WI-029/doc RELEASING; independent quality validation
 and actual PyPI publication remain separate work.
+
+
+## F-047 — Canonical CodeBearing launch after namespace migration
+
+**Trigger:** Installed codebearing/codebearing-mcp or python -m codebearing.
+**Execution Path:** pyproject.toml entry -> codebearing/onboarding.py:main ->
+codebearing/cli.py:main for advanced commands; module launch enters
+codebearing/__main__.py -> onboarding.main. Configuration generation enters
+codebearing/connect.py:configuration -> host entry with codebearing.connect ->
+create_server -> RepositoryService -> existing analysis/compilation paths.
+**Data Transformation:** Client/repository/interpreter -> new module launch args.
+**Database Interaction:** Existing .diffcontext lesson/cache format unchanged.
+**External Interaction:** Local subprocess/MCP; no new model/network/database
+service/worker/frontend. Existing installed host entries need explicit regeneration.
+**Output:** Same six-tool contract under the new namespace. D-038/WI-031.
+Earlier versioned release/trial names remain historical evidence.

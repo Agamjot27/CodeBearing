@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from diffcontext.index import _build_python_index, build_index_from_sources
+from codebearing.index import _build_python_index, build_index_from_sources
 
 
 class PythonUnitTests(unittest.TestCase):
@@ -16,11 +16,11 @@ class PythonUnitTests(unittest.TestCase):
             "checkout.py": b"from billing import refund as calculate\ndef checkout(x):\n    return calculate(x)\n",
         }
         units = {}
-        with patch("diffcontext.index.ast.parse", wraps=ast.parse) as parse:
+        with patch("codebearing.index.ast.parse", wraps=ast.parse) as parse:
             cold = _build_python_index(Path.cwd(), sources, units=units)
             self.assertEqual(parse.call_count, 2)
         units = json.loads(json.dumps(units))
-        with patch("diffcontext.index.ast.parse", side_effect=AssertionError("warm file reparsed")):
+        with patch("codebearing.index.ast.parse", side_effect=AssertionError("warm file reparsed")):
             warm = _build_python_index(Path.cwd(), sources, units=units)
         self.assertEqual(cold.describe(), warm.describe())
         self.assertEqual(warm.describe(), build_index_from_sources(Path.cwd(), sources).describe())
@@ -36,7 +36,7 @@ class PythonUnitTests(unittest.TestCase):
         # The persistence owner removes changed units after comparing byte hashes.
         sources["target.py"] = b"def replacement():\n    return 2\n"
         units.pop("target.py")
-        with patch("diffcontext.index.ast.parse", wraps=ast.parse) as parse:
+        with patch("codebearing.index.ast.parse", wraps=ast.parse) as parse:
             edited = _build_python_index(Path.cwd(), sources, units=units)
             self.assertEqual(parse.call_count, 1)
         self.assertEqual(edited.edges["caller.py:call"], set())
@@ -50,7 +50,7 @@ class PythonUnitTests(unittest.TestCase):
         deleted = _build_python_index(Path.cwd(), sources, units=units)
         self.assertEqual(deleted.edges["caller.py:call"], set())
         sources["new.py"] = b"def added():\n    return 4\n"
-        with patch("diffcontext.index.ast.parse", wraps=ast.parse) as parse:
+        with patch("codebearing.index.ast.parse", wraps=ast.parse) as parse:
             added = _build_python_index(Path.cwd(), sources, units=units)
             self.assertEqual(parse.call_count, 1)
         self.assertEqual(added.describe(), build_index_from_sources(Path.cwd(), sources).describe())
@@ -59,7 +59,7 @@ class PythonUnitTests(unittest.TestCase):
         sources = {"bad.py": b"def ?", "invalid.py": b"\xff", "ok.py": b"def ok(): pass\n"}
         units = {}
         cold = _build_python_index(Path.cwd(), sources, ["scan warning"], units)
-        with patch("diffcontext.index.ast.parse", side_effect=AssertionError("cached failure reparsed")):
+        with patch("codebearing.index.ast.parse", side_effect=AssertionError("cached failure reparsed")):
             warm = _build_python_index(Path.cwd(), sources, ["scan warning"], json.loads(json.dumps(units)))
         self.assertEqual(warm.describe(), cold.describe())
         self.assertEqual(warm.sources, sources)
@@ -77,7 +77,7 @@ class PythonUnitTests(unittest.TestCase):
         _build_python_index(Path.cwd(), sources, units=units)
         sources["pkg/__init__.py"] = b"from b import run\ndef inner():\n    return run()\n"
         units.pop("pkg/__init__.py")
-        with patch("diffcontext.index.ast.parse", wraps=ast.parse) as parse:
+        with patch("codebearing.index.ast.parse", wraps=ast.parse) as parse:
             edited = _build_python_index(Path.cwd(), sources, units=units)
             self.assertEqual(parse.call_count, 1)
         self.assertEqual(edited.edges["pkg.py:outer"], {"b.py:run"})

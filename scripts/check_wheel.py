@@ -31,7 +31,9 @@ def verify(wheel: Path, typescript: bool = False):
         names = archive.namelist()
         if any(name.startswith(("tests/", "evals/", "examples/", "scripts/", ".")) for name in names):
             raise ValueError("Wheel contains development artifacts.")
-        if "diffcontext/connect.py" not in names:
+        if any(name.startswith("diffcontext/") for name in names):
+            raise ValueError("Wheel still ships the conflicting legacy namespace.")
+        if "codebearing/connect.py" not in names:
             raise ValueError("Wheel is missing the installed MCP launcher.")
     checkout = Path(__file__).resolve().parents[1]
     scratch = checkout / ".test-tmp" / ("wheel-" + uuid.uuid4().hex)
@@ -81,7 +83,7 @@ def verify(wheel: Path, typescript: bool = False):
                 entry = json.loads(output)["mcpServers"]["codebearing"]
             if Path(entry["command"]).absolute() != python.absolute() or entry["args"][-1] != str(repo.resolve()):
                 raise ValueError("Configuration does not point to the clean installation/repository.")
-            run([entry["command"], "-I", "-c", "import diffcontext.connect, mcp"], scratch)
+            run([entry["command"], "-I", "-c", "import codebearing.connect, mcp"], scratch)
         checked = json.loads(run([str(launcher), "--repo", str(repo), "--check"], scratch))
         if checked["status"] != "connected" or len(checked["tools"]) != 6:
             raise ValueError("Installed MCP server failed discovery/search.")

@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 import test_core
-from diffcontext.coding import apply_edits, calibrate, grade, load_suite, source_hashes, trial_workspace
+from codebearing.coding import apply_edits, calibrate, grade, load_suite, source_hashes, trial_workspace
 
 
 SUITE = Path(__file__).resolve().parents[1] / "evals" / "coding_tasks" / "suite.json"

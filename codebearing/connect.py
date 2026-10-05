@@ -15,7 +15,7 @@ def configuration(root: Path, client: str, python: str | None = None, *, cache: 
     # POSIX virtualenv executables are symlinks: resolving them selects the base
     # interpreter and loses this installation. Preserve the absolute venv path.
     command = str(Path(python or sys.executable).absolute())
-    args = ["-m", "diffcontext.connect", "--repo", str(root.resolve())]
+    args = ["-m", "codebearing.connect", "--repo", str(root.resolve())]
     if cache:
         args.append("--cache")
     # Pin the interpreter that owns this installation. GUI hosts need not inherit
@@ -35,13 +35,13 @@ async def check_connection(root: Path, *, cache: bool = False) -> dict:
     from mcp import Client, StdioServerParameters
 
     parameters = StdioServerParameters(command=sys.executable,
-        args=["-m", "diffcontext.connect", "--repo", str(root), *(["--cache"] if cache else [])])
+        args=["-m", "codebearing.connect", "--repo", str(root), *(["--cache"] if cache else [])])
     async with Client(parameters, read_timeout_seconds=30) as client:
         listing = await client.list_tools()
         names = {tool.name for tool in listing.tools}
         if names != TOOLS:
             raise RuntimeError(f"Unexpected tool set: {sorted(names)}")
-        result = await client.call_tool("search_symbols", {"query": "__diffcontext_connection_check__"})
+        result = await client.call_tool("search_symbols", {"query": "__codebearing_connection_check__"})
         if result.is_error or not isinstance(result.structured_content, dict):
             raise RuntimeError("The search tool did not return a successful structured response.")
         if "matches" not in result.structured_content:

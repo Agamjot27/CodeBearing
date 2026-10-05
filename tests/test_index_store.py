@@ -11,9 +11,9 @@ from unittest.mock import patch
 import test_core
 import test_typescript
 
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
-from diffcontext.service import RepositoryService
+from codebearing.index import build_index
+from codebearing.memory import Memory
+from codebearing.service import RepositoryService
 
 
 class IndexStoreTests(unittest.TestCase):
@@ -45,7 +45,7 @@ class IndexStoreTests(unittest.TestCase):
         self.assert_parity(cold)
         self.assertEqual(cold.indexing["parsed_files"], 3)
         self.assertEqual(cold.indexing["reused_files"], 0)
-        with patch("diffcontext.index._python_unit", side_effect=AssertionError("Warm build parsed unchanged bytes")):
+        with patch("codebearing.index._python_unit", side_effect=AssertionError("Warm build parsed unchanged bytes")):
             warm = self.cached()
         self.assert_parity(warm)
         self.assertEqual(warm.indexing["parsed_files"], 0)
@@ -111,7 +111,7 @@ class IndexStoreTests(unittest.TestCase):
         self.assert_parity(cold)
         self.assertIn("broken.py", cold.sources)
         self.assertNotIn("broken.py", cold.hashes)
-        with patch("diffcontext.index._python_unit", side_effect=AssertionError("Failed parse reparsed unchanged")):
+        with patch("codebearing.index._python_unit", side_effect=AssertionError("Failed parse reparsed unchanged")):
             warm = self.cached()
         self.assert_parity(warm)
         self.assertEqual(warm.indexing["reused_files"], 4)
@@ -164,7 +164,7 @@ class IndexStoreTests(unittest.TestCase):
         self.assertTrue(any("cache" in warning.lower() for warning in recovered.warnings))
 
     def test_cache_publish_failure_returns_fresh_graph_and_warning(self):
-        with patch("diffcontext.index_store.IndexStore.publish", side_effect=sqlite3.OperationalError("fixture write failure")):
+        with patch("codebearing.index_store.IndexStore.publish", side_effect=sqlite3.OperationalError("fixture write failure")):
             index = self.cached()
         fresh = build_index(self.root)
         self.assertEqual(index.symbols, fresh.symbols)

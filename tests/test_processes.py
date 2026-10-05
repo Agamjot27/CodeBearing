@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 import test_core
-from diffcontext.processes import run_bounded
-from diffcontext.experiments import CommandRunner, RunnerError
+from codebearing.processes import run_bounded
+from codebearing.experiments import CommandRunner, RunnerError
 
 
 class ProcessTests(unittest.TestCase):

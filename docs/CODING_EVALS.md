@@ -2,7 +2,7 @@
 
 The harness checks executable fixes on four synthetic development repositories:
 refund rounding, pagination offsets, retry exhaustion and transaction rollback. This is a local experiment
-framework, not a held-out benchmark or evidence that DiffContext improves a model.
+framework, not a held-out benchmark or evidence that CodeBearing improves a model.
 
 A separate interactive smaller-model smoke trial requested matched GPT-6 Luna/low
 settings: assisted 6/6 independent checks, control 3/6 on one authored booking task.

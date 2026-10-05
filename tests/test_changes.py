@@ -7,10 +7,10 @@ import unittest
 import uuid
 from pathlib import Path
 
-from diffcontext.changes import changes_impact, compile_changes, localize_changes
-from diffcontext.context import estimate_tokens
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
+from codebearing.changes import changes_impact, compile_changes, localize_changes
+from codebearing.context import estimate_tokens
+from codebearing.index import build_index
+from codebearing.memory import Memory
 
 
 class ChangesTests(unittest.TestCase):
@@ -144,7 +144,7 @@ class ChangesTests(unittest.TestCase):
     def test_cli_changes_impact_and_compile(self):
         self.write("billing.py", "RATE = 2\n\ndef helper(x):\n    return x * RATE\n")
         for command in ["changes", "impact", "compile"]:
-            result = subprocess.run([sys.executable, "-m", "diffcontext", "--repo", str(self.root), command, "--ref", "HEAD"], capture_output=True, text=True)
+            result = subprocess.run([sys.executable, "-m", "codebearing", "--repo", str(self.root), command, "--ref", "HEAD"], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             payload = json.loads(result.stdout)
             report = payload if command == "changes" else payload["changes"]

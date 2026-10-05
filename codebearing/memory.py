@@ -11,6 +11,8 @@ from .index import Index, digest, safe_path
 class Memory:
     def __init__(self, root: Path, *, read_only: bool = False):
         self.root = root.resolve()
+        # Preserve the existing on-disk format across the package rename: creating
+        # a new directory would hide previously confirmed lessons or cached facts.
         directory = self.root / ".diffcontext"
         if directory.is_symlink():
             raise ValueError("Memory directory must not be a symbolic link.")

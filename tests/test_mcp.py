@@ -8,7 +8,7 @@ import test_core
 
 try:
     from mcp import Client, StdioServerParameters
-    from diffcontext.mcp_server import create_server
+    from codebearing.mcp_server import create_server
     HAS_MCP = True
 except ImportError:
     HAS_MCP = False
@@ -55,8 +55,8 @@ class MCPTests(unittest.IsolatedAsyncioTestCase):
             self.assertFalse(result.is_error)
 
     async def test_memory_filtering_over_protocol(self):
-        from diffcontext.index import build_index
-        from diffcontext.memory import Memory
+        from codebearing.index import build_index
+        from codebearing.memory import Memory
         store = Memory(self.root)
         index = build_index(self.root)
         confirmed = store.add(index, "billing.py:refund_total", "Round per item", "test_billing.py")
@@ -101,7 +101,7 @@ class StdioTests(unittest.IsolatedAsyncioTestCase):
         project = Path(__file__).resolve().parents[1]
         parameters = StdioServerParameters(
             command=sys.executable,
-            args=["-m", "diffcontext", "--repo", str(self.root), "serve"],
+            args=["-m", "codebearing", "--repo", str(self.root), "serve"],
             cwd=project,
         )
         async with Client(parameters, read_timeout_seconds=30) as client:

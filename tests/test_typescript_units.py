@@ -5,11 +5,11 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
-from diffcontext.index import Index
+from codebearing.index import Index
 
 try:
     from tree_sitter import Parser as RealParser
-    from diffcontext.typescript import extend_index
+    from codebearing.typescript import extend_index
 except ImportError:
     extend_index = None
 
@@ -30,7 +30,7 @@ class TypeScriptUnitTests(unittest.TestCase):
                 calls.append(raw)
                 return self.parser.parse(raw)
 
-        return calls, patch("diffcontext.typescript.Parser", CountingParser)
+        return calls, patch("codebearing.typescript.Parser", CountingParser)
 
     def test_json_roundtrip_warm_units_skip_parser_and_preserve_output(self):
         sources = {

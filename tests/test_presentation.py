@@ -10,11 +10,11 @@ from pathlib import Path
 
 import test_core
 import test_changes
-from diffcontext.service import RepositoryService
+from codebearing.service import RepositoryService
 
 try:
     from mcp import Client, StdioServerParameters
-    from diffcontext.mcp_server import create_server
+    from codebearing.mcp_server import create_server
     HAS_MCP = True
 except ImportError:
     HAS_MCP = False
@@ -28,7 +28,7 @@ class PresentationTests(unittest.TestCase):
     write = test_core.CoreTests.write
 
     def test_distinct_ranking_diagnostics_are_bounded_without_dropping_rows(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).investigate(task="refund_total")
         rows = [{"id": f"symbol-{n}", "score": n / 100, "distance": n % 3,
@@ -70,7 +70,7 @@ class PresentationTests(unittest.TestCase):
         self.assertLess(len(json.dumps(compact)), len(json.dumps(report)) // 3)
 
     def test_small_ranking_diagnostics_remain_exact(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).investigate(task="refund_total")
         compact = present_report(report)
@@ -78,7 +78,7 @@ class PresentationTests(unittest.TestCase):
         self.assertEqual(compact["context"]["retrieval"], report["context"]["retrieval"])
 
     def test_null_context_stops_preserve_original_status(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).investigate(task="zzzzunfindable")
         self.assertEqual(report["stop_reason"], "no_matches")
@@ -88,7 +88,7 @@ class PresentationTests(unittest.TestCase):
             self.assertEqual(compact[key], report[key])
 
     def test_search_symbols_matches_receive_same_ranking_policy(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).search_symbols("refund_total")
         row = report["matches"][0]
@@ -107,7 +107,7 @@ class PresentationTests(unittest.TestCase):
         self.assertEqual(present_report(report, "full"), before)
 
     def test_warning_flood_is_bounded_without_mutating_full_report(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).investigate(symbols=["refund_total"])
         # Repeated warnings across capture/compile/verification caused the actual
@@ -142,7 +142,7 @@ class PresentationTests(unittest.TestCase):
         self.assertGreater(fields["verification.index_warnings"]["omitted"], 0)
 
     def test_coverage_gaps_and_budget_evidence_survive_compaction(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         service = RepositoryService(self.root)
         for arguments in ({"symbols": ["round_line"], "max_depth": 0},
@@ -161,7 +161,7 @@ class PresentationTests(unittest.TestCase):
             self.assertEqual(compact["trace"][-1]["stage"], "stop")
 
     def test_distinct_trace_evidence_is_not_replaced_by_a_false_reference(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).investigate(symbols=["round_line"])
         verifications = [row for row in report["trace"] if row["stage"] == "verify"]
@@ -171,7 +171,7 @@ class PresentationTests(unittest.TestCase):
         self.assertEqual(first["frontier"], verifications[0]["frontier"])
 
     def test_serialized_context_and_gaps_precede_long_search_diagnostics(self):
-        from diffcontext.presentation import present_report
+        from codebearing.presentation import present_report
 
         report = RepositoryService(self.root).investigate(task="refund_total")
         original_order = list(report)
@@ -238,7 +238,7 @@ class PresentationProtocolTests(unittest.IsolatedAsyncioTestCase):
         direct = RepositoryService(self.root).investigate(symbols=["refund_total"])
         parameters = StdioServerParameters(
             command=sys.executable,
-            args=["-m", "diffcontext.connect", "--repo", str(self.root)],
+            args=["-m", "codebearing.connect", "--repo", str(self.root)],
             cwd=Path(__file__).resolve().parents[1])
         async with Client(parameters, read_timeout_seconds=30) as client:
             compact_result = await client.call_tool("investigate", {"symbols": ["refund_total"]})

@@ -3,8 +3,8 @@ import unittest
 
 import test_core
 from test_experiments import SUITE, ScriptedRunner
-from diffcontext.coding import load_suite, trial_workspace
-from diffcontext.experiments import HYBRID_CONDITIONS, export_requests, make_request, run_experiment, summarize_results
+from codebearing.coding import load_suite, trial_workspace
+from codebearing.experiments import HYBRID_CONDITIONS, export_requests, make_request, run_experiment, summarize_results
 
 
 class HybridExperimentTests(unittest.TestCase):

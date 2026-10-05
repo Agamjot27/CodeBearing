@@ -1,15 +1,8 @@
 # CodeBearing development reference
 
-Legacy `diffcontext-lab` commands below remain supported aliases. For the normal
-install/connect flow, use [the main guide](../README.md).
-
-# DiffContext Lab
-
-A local context engine for coding agents, with evidence-backed correction memory.
-This is an original implementation inspired by the project direction we discussed;
-it is not a clone or an affiliated release of trakshan-mishra/Diffcontext.
-The distribution name is `diffcontext-lab`; use a dedicated environment if the
-other project's `diffcontext` package is installed.
+The distribution, import package and public CLI now use `codebearing`.
+For install/connect, see [the main guide](../README.md); existing installations
+should read [namespace migration](NAMING.md).
 
 ## What works today
 
@@ -18,7 +11,8 @@ fresh/stale memory controls and bounded subprocess cleanup. Run
 `python evals/coding_bench.py self-check --condition-set hybrid` for model-free
 calibration; [evaluation details](CODING_EVALS.md) explain the limits.
 An explicit OpenRouter adapter and local configuration preflight support future
-live trials; no real-model results or independent held-out scores exist yet.
+live trials. [Recorded smaller-model trials](demos/SMALL_MODEL_PACKET_TRIALS.md)
+are available; independent held-out outcomes remain unmeasured.
 
 - Parse Python modules into functions, methods, and statically resolved call edges.
 - Optionally parse TypeScript/JavaScript functions and methods, with conservative
@@ -50,14 +44,14 @@ The tool parses source; it never imports or executes the target repository.
 
 ## Use with a coding assistant
 
-The installed `diffcontext-lab-mcp` launcher connects the six tools to Claude
+The installed `codebearing-mcp` launcher connects the six tools to Claude
 Code, Cursor or Codex. Python 3.10+ is required. This release is not published to
 PyPI yet; install from a built wheel or this source checkout:
 
 ```powershell
 python -m pip install ".[mcp]"
-diffcontext-lab-mcp --repo "C:\path\to\your-project" --config claude
-diffcontext-lab-mcp --repo "C:\path\to\your-project" --check
+codebearing-mcp --repo "C:\path\to\your-project" --config claude
+codebearing-mcp --repo "C:\path\to\your-project" --check
 ```
 
 Use `--config cursor` or `--config codex` for those clients. Merge the output
@@ -74,10 +68,10 @@ and the remaining publication requirements.
 Run these from the project directory:
 
 ```powershell
-python -m diffcontext --repo examples/refunds index
-python -m diffcontext --repo examples/refunds search "refund_total"
-python -m diffcontext --repo examples/refunds impact --symbol billing.py:refund_total
-python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
+python -m codebearing --repo examples/refunds index
+python -m codebearing --repo examples/refunds search "refund_total"
+python -m codebearing --repo examples/refunds impact --symbol billing.py:refund_total
+python -m codebearing --repo examples/refunds compile --symbol billing.py:refund_total --max-tokens 2000
 ```
 
 The compile result is JSON. Send only its `text` field as repository evidence to
@@ -91,8 +85,8 @@ exact IDs rather than picking an arbitrary function.
 ## Investigate automatically
 
 ```powershell
-python -m diffcontext --repo examples/refunds investigate --task refund_total --summary
-python -m diffcontext --repo examples/refunds investigate --symbol billing.py:round_line --max-tokens 2000
+python -m codebearing --repo examples/refunds investigate --task refund_total --summary
+python -m codebearing --repo examples/refunds investigate --symbol billing.py:round_line --max-tokens 2000
 ```
 
 The investigator locates once, gathers reviewed memory, and expands static
@@ -108,9 +102,9 @@ for Git runs, limits, status handling and saving/inspecting results.
 From the root of a Git repository containing supported source code:
 
 ```powershell
-python -m diffcontext --repo . changes --ref HEAD
-python -m diffcontext --repo . impact --ref HEAD --depth 2
-python -m diffcontext --repo . compile --ref HEAD --max-tokens 4000
+python -m codebearing --repo . changes --ref HEAD
+python -m codebearing --repo . impact --ref HEAD --depth 2
+python -m codebearing --repo . compile --ref HEAD --max-tokens 4000
 ```
 
 `--ref` compares the selected commit with the tracked working tree, including both
@@ -130,10 +124,10 @@ deletion plus addition. An unchanged comparison returns no symbol evidence.
 ## Record and review a correction
 
 ```powershell
-python -m diffcontext --repo examples/refunds memory add --scope billing.py:refund_total --lesson "Round each line before summing to match invoice totals." --evidence test_billing.py
-python -m diffcontext --repo examples/refunds memory list
-python -m diffcontext --repo examples/refunds memory status 1 confirmed
-python -m diffcontext --repo examples/refunds compile --symbol billing.py:refund_total
+python -m codebearing --repo examples/refunds memory add --scope billing.py:refund_total --lesson "Round each line before summing to match invoice totals." --evidence test_billing.py
+python -m codebearing --repo examples/refunds memory list
+python -m codebearing --repo examples/refunds memory status 1 confirmed
+python -m codebearing --repo examples/refunds compile --symbol billing.py:refund_total
 ```
 
 Use the ID returned by `memory add` instead of `1` if you already have lessons.

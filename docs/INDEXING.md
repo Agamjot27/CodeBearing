@@ -3,7 +3,7 @@
 Enable caching once in your assistant's generated configuration:
 
 ```powershell
-diffcontext-lab-mcp --repo "C:/path/to/project" --cache --config claude
+codebearing-mcp --repo "C:/path/to/project" --cache --config claude
 ```
 
 Use `cursor` or `codex` in place of `claude` for those clients. Merge the generated
@@ -15,8 +15,8 @@ disposable derived index state.
 For the CLI:
 
 ```powershell
-python -m diffcontext --repo examples/refunds --cache index
-python -m diffcontext --repo examples/refunds --cache compile --symbol billing.py:refund_total
+python -m codebearing --repo examples/refunds --cache index
+python -m codebearing --repo examples/refunds --cache compile --symbol billing.py:refund_total
 ```
 
 The first request captures and parses files, then saves functions, call facts and

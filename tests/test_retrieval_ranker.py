@@ -3,8 +3,8 @@
 from pathlib import Path
 import unittest
 
-from diffcontext.index import build_index_from_sources
-from diffcontext.retrieval import eligible_lessons, hybrid_search, lexical_search, rank_candidates, select_task_seeds
+from codebearing.index import build_index_from_sources
+from codebearing.retrieval import eligible_lessons, hybrid_search, lexical_search, rank_candidates, select_task_seeds
 
 
 class RetrievalRankerTests(unittest.TestCase):

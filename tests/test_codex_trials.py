@@ -4,8 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from diffcontext.coding import load_suite
-from diffcontext.codex_trials import parse_events, prepare_trials, run_trials
+from codebearing.coding import load_suite
+from codebearing.codex_trials import parse_events, prepare_trials, run_trials
 
 ROOT = Path(__file__).resolve().parents[1]
 

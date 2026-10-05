@@ -6,9 +6,9 @@ import unittest
 import uuid
 from pathlib import Path
 
-from diffcontext.context import compile_context, estimate_tokens, impact
-from diffcontext.index import build_index, safe_path, select_symbol
-from diffcontext.memory import Memory
+from codebearing.context import compile_context, estimate_tokens, impact
+from codebearing.index import build_index, safe_path, select_symbol
+from codebearing.memory import Memory
 
 
 class CoreTests(unittest.TestCase):
@@ -101,10 +101,10 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(memory.list({"checkout.py:checkout"}), [])
 
     def test_cli_roundtrip_and_actionable_error(self):
-        result = subprocess.run([sys.executable, "-m", "diffcontext", "--repo", str(self.root), "compile", "--symbol", "refund_total"], capture_output=True, text=True)
+        result = subprocess.run([sys.executable, "-m", "codebearing", "--repo", str(self.root), "compile", "--symbol", "refund_total"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("billing.py:refund_total", [r["id"] for r in json.loads(result.stdout)["included"]])
-        result = subprocess.run([sys.executable, "-m", "diffcontext", "--repo", str(self.root), "impact", "--symbol", "missing"], capture_output=True, text=True)
+        result = subprocess.run([sys.executable, "-m", "codebearing", "--repo", str(self.root), "impact", "--symbol", "missing"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 2)
         self.assertIn("Unknown symbol", result.stderr)
 

@@ -1,10 +1,9 @@
 # Packaging and release checks
 
-The distribution is `codebearing`, currently version 0.9.0. Its installed
-commands are `codebearing` and `codebearing-mcp`; old diffcontext/diffcontext-lab/
-diffcontext-lab-mcp commands remain compatibility aliases. Generated host entries
-use codebearing. The import package remains `diffcontext` and can conflict with another
-distribution using that name. Validate in an isolated environment.
+The distribution and import package are both `codebearing`, version 0.10.0.
+Installed commands are `codebearing` and `codebearing-mcp`; new host entries use
+`python -m codebearing.connect`. The old `diffcontext` Python namespace and legacy
+console aliases are no longer shipped. See [migration notes](NAMING.md).
 
 **No public PyPI release has been performed.** No publisher account, publishing
 credentials, or Trusted Publishing configuration is supplied by this repository.
@@ -18,6 +17,11 @@ tool was upgraded and its actual configured interpreter reported0.9.0. Existing
 chats need reconnect. Details and wheel digest:
 [WI-029](work-items/WI-029-codebearing-090-release/FEATURE.md).
 
+0.10.0 namespace validation on 2026-10-06: 188 source tests passed and clean
+wheel/TypeScript/MCP/setup/cache validation passed outside checkout. Only
+`codebearing/` is shipped; existing user installations/configurations were not
+upgraded automatically. [Migration record](work-items/WI-031-codebearing-namespace/FEATURE.md).
+
 ## Build and validate a wheel
 
 From the repository root, using Python 3.10+ and pip 22.3+ (the checker uses pip's
@@ -25,8 +29,13 @@ From the repository root, using Python 3.10+ and pip 22.3+ (the checker uses pip
 
 ```powershell
 python -m pip wheel . --no-deps --wheel-dir dist
-python scripts/check_wheel.py dist/codebearing-0.9.0-py3-none-any.whl --typescript
+python scripts/check_wheel.py dist/codebearing-0.10.0-py3-none-any.whl --typescript
 ```
+
+Before a namespace migration build, remove only the verified generated `build/`
+directory if it retains the old package. Setuptools can otherwise include stale
+modules in a wheel. The checker explicitly rejects a `diffcontext/` namespace.
+Do not delete source, user environments or data directories.
 
 The wheel checker creates a clean temporary environment, installs the wheel
 with `[mcp,typescript]` when `--typescript` is supplied (otherwise `[mcp]`), and checks installed entry points, generated configuration,
@@ -37,7 +46,8 @@ status before calling a wheel validated; merely building a wheel is insufficient
 See the script for the exact checks. Neither check changes user assistant settings
 or calls a model provider.
 
-Keep `pyproject.toml` and `diffcontext/__init__.py` versions synchronized before
+Keep `pyproject.toml`, `codebearing/__init__.py` and the wheel-check filename in
+`.github/workflows/checks.yml` synchronized before
 building a later version; use that version's actual wheel filename. Build tools
 and dependency installations may contact package indexes. Generated `dist/`,
 build metadata, and temporary environments are local artifacts, not source.
@@ -75,7 +85,7 @@ with an actual pushed commit; do not invent a release tag. A validated wheel can
 also be shared as an artifact and installed with:
 
 ```powershell
-python -m pip install "C:/path/to/codebearing-0.9.0-py3-none-any.whl[mcp]"
+python -m pip install "C:/path/to/codebearing-0.10.0-py3-none-any.whl[mcp]"
 ```
 
 The receiver still needs access to the wheel's dependency packages. Package users

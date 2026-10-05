@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from diffcontext.index import build_index, build_index_from_sources
+from codebearing.index import build_index, build_index_from_sources
 
 
 class SnapshotTests(unittest.TestCase):

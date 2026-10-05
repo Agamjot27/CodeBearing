@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/RELEASING.md"><img src="https://img.shields.io/badge/version-0.9.0-81e4cb?style=flat-square&amp;labelColor=172e40" alt="Version 0.9.0"></a>
+  <a href="docs/RELEASING.md"><img src="https://img.shields.io/badge/version-0.10.0-81e4cb?style=flat-square&amp;labelColor=172e40" alt="Version 0.10.0"></a>
   <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.10%2B-a9c7ed?style=flat-square&amp;labelColor=172e40" alt="Python 3.10 or newer"></a>
   <a href="#six-tools-one-local-server"><img src="https://img.shields.io/badge/MCP-6_read--only_tools-81e4cb?style=flat-square&amp;labelColor=172e40" alt="MCP: six read-only tools"></a>
   <a href="docs/LANGUAGES.md"><img src="https://img.shields.io/badge/indexing-Python_%7C_JS_%7C_TS-a9c7ed?style=flat-square&amp;labelColor=172e40" alt="Python, JavaScript and TypeScript indexing"></a>
@@ -62,7 +62,7 @@ Try this prompt:
 > and run the tests.
 
 **Runs locally. No separate model API key.** Your assistant uses its own account.
-The command includes optional JavaScript/TypeScript indexing. Version 0.9.0 is
+The command includes optional JavaScript/TypeScript indexing. Version 0.10.0 is
 installed from Git; it is not published to PyPI.
 
 [Full quickstart](docs/QUICKSTART.md) · [Setup and troubleshooting](docs/MCP.md) ·
@@ -74,11 +74,11 @@ installed from Git; it is not published to PyPI.
 
 | Stage | What happens | Implementation |
 | --- | --- | --- |
-| **Index** | Capture source and extract symbols, imports and static relationships. | [index.py](diffcontext/index.py), [typescript.py](diffcontext/typescript.py) |
-| **Localize** | Rank task evidence or map tracked Git changes, including deleted code. | [retrieval.py](diffcontext/retrieval.py), [changes.py](diffcontext/changes.py) |
-| **Expand** | Follow callers and callees within explicit bounds. | [index.py](diffcontext/index.py), [investigation.py](diffcontext/investigation.py) |
-| **Recall** | Retrieve confirmed lessons whose source evidence is still fresh. | [memory.py](diffcontext/memory.py), [service.py](diffcontext/service.py) |
-| **Compile** | Pack complete excerpts, imports and recognized local Python exceptions; disclose gaps. | [context.py](diffcontext/context.py) |
+| **Index** | Capture source and extract symbols, imports and static relationships. | [index.py](codebearing/index.py), [typescript.py](codebearing/typescript.py) |
+| **Localize** | Rank task evidence or map tracked Git changes, including deleted code. | [retrieval.py](codebearing/retrieval.py), [changes.py](codebearing/changes.py) |
+| **Expand** | Follow callers and callees within explicit bounds. | [index.py](codebearing/index.py), [investigation.py](codebearing/investigation.py) |
+| **Recall** | Retrieve confirmed lessons whose source evidence is still fresh. | [memory.py](codebearing/memory.py), [service.py](codebearing/service.py) |
+| **Compile** | Pack complete excerpts, imports and recognized local Python exceptions; disclose gaps. | [context.py](codebearing/context.py) |
 
 Python uses the standard-library AST; optional JS/TS adapters use Tree-sitter.
 SQLite stores local memory and optional indexing cache. Context preparation needs
@@ -135,6 +135,9 @@ assistant's own instructions.
 | `get_lessons` | What confirmed, fresh advice applies to these symbols? |
 | `investigate` | Gather context through a bounded loop and explain its stopping point. |
 
+The Python package is now `codebearing/`; [upgrade and folder naming notes](docs/NAMING.md)
+explain the change from 0.9.0.
+
 All six tools are read-only and bound to the configured repository. They do not
 edit source, run tests or confirm lessons.
 
@@ -156,7 +159,7 @@ on changed or deleted evidence from being silently reused. Proposal and
 confirmation are manual; the MCP server does not automatically learn from chats.
 
 [Memory continuity walkthrough](docs/demos/MEMORY_CONTINUITY.md) ·
-[Memory implementation](diffcontext/memory.py)
+[Memory implementation](codebearing/memory.py)
 
 ## Built to be inspected
 
@@ -165,7 +168,7 @@ model trials and inspectable investigation traces.
 
 | Evidence | What you can inspect |
 | --- | --- |
-| **188 passing tests** | Latest recorded 0.9.0 integrated suite; indexing, retrieval, budgets, memory, MCP and harness behavior. |
+| **188 passing tests** | 0.10.0 renamed-source suite; indexing, retrieval, budgets, memory, MCP and harness behavior. |
 | **32 repeated model trials** | Four authored tasks × two context policies × two requested smaller models × two repetitions. Frozen inputs, grader fingerprints, checkpoints and observed token usage. |
 | **Failure → compiler fix** | A retrieved function was missing its exception declaration. The compiler now bundles recognized local exceptions; eight separate same-task repair checks passed. |
 | **Fresh-process memory demo** | Proposal exclusion, explicit review, persisted retrieval and stale exclusion. |

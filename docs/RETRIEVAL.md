@@ -3,8 +3,8 @@
 Describe the change in plain language; task investigation now defaults to hybrid:
 
 ```powershell
-python -m diffcontext --repo examples/refunds investigate --task "refund total rounding" --summary
-python -m diffcontext --repo examples/typescript-refunds search "refund total"
+python -m codebearing --repo examples/refunds investigate --task "refund total rounding" --summary
+python -m codebearing --repo examples/typescript-refunds search "refund total"
 ```
 
 TypeScript needs the optional parser extra. The same six MCP tools expose this

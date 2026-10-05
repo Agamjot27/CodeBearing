@@ -9,9 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from diffcontext.coding import calibrate, load_suite
-from diffcontext.experiments import CONDITIONS, HYBRID_CONDITIONS, CommandRunner, ReplayRunner, export_requests, run_experiment
-from diffcontext.providers import OpenRouterRunner
+from codebearing.coding import calibrate, load_suite
+from codebearing.experiments import CONDITIONS, HYBRID_CONDITIONS, CommandRunner, ReplayRunner, export_requests, run_experiment
+from codebearing.providers import OpenRouterRunner
 
 
 class CalibrationRunner:

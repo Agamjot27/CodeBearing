@@ -40,6 +40,8 @@ def _checksum(payload: str) -> str:
 class IndexStore:
     def __init__(self, root: Path):
         root = root.resolve()
+        # Preserve the existing on-disk format across the package rename: creating
+        # a new directory would hide previously confirmed lessons or cached facts.
         directory = root / ".diffcontext"
         path = directory / "index.sqlite3"
         # Cache writes must never follow a repository-created link elsewhere.

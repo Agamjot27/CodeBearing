@@ -9,10 +9,10 @@ from pathlib import Path
 
 import test_core
 import test_typescript
-from diffcontext.context import compile_context, estimate_tokens, search
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
-from diffcontext.service import RepositoryService
+from codebearing.context import compile_context, estimate_tokens, search
+from codebearing.index import build_index
+from codebearing.memory import Memory
+from codebearing.service import RepositoryService
 
 try:
     from mcp import Client, StdioServerParameters
@@ -60,7 +60,7 @@ class HybridPackingTests(unittest.TestCase):
         self.assertLessEqual(estimate_tokens(packet["text"]), budget)
 
     def test_cli_exposes_hybrid_and_legacy_choice(self):
-        command = [sys.executable, "-m", "diffcontext", "--repo", str(self.root), "investigate", "--task", "refund total", "--summary"]
+        command = [sys.executable, "-m", "codebearing", "--repo", str(self.root), "investigate", "--task", "refund total", "--summary"]
         for policy in ("hybrid", "legacy"):
             result = subprocess.run([*command, "--retrieval", policy], cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
@@ -79,7 +79,7 @@ class HybridStdioTests(unittest.IsolatedAsyncioTestCase):
     async def test_natural_language_typescript_task_and_policy_over_stdio(self):
         self.refund_fixture()
         parameters = StdioServerParameters(command=sys.executable,
-            args=["-m", "diffcontext.connect", "--repo", str(self.root)],
+            args=["-m", "codebearing.connect", "--repo", str(self.root)],
             cwd=Path(__file__).resolve().parents[1])
         async with Client(parameters, read_timeout_seconds=30) as client:
             listing = await client.list_tools()

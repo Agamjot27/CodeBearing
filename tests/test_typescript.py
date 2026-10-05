@@ -9,11 +9,11 @@ import unittest
 import uuid
 from pathlib import Path
 
-from diffcontext.changes import compile_changes, localize_changes
-from diffcontext.context import compile_context, estimate_tokens
-from diffcontext.index import build_index, build_index_from_sources
-from diffcontext.memory import Memory
-from diffcontext.service import RepositoryService
+from codebearing.changes import compile_changes, localize_changes
+from codebearing.context import compile_context, estimate_tokens
+from codebearing.index import build_index, build_index_from_sources
+from codebearing.memory import Memory
+from codebearing.service import RepositoryService
 
 
 HAS_PARSERS = all(importlib.util.find_spec(name) is not None for name in (

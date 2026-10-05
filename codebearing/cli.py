@@ -13,7 +13,7 @@ from .runs import load_summary, summarize
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Local code context and correction memory (optional TypeScript/JavaScript)")
+    parser = argparse.ArgumentParser(prog="codebearing", description="Local code context and correction memory (optional TypeScript/JavaScript)")
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--cache", action="store_true", help="Persist/reuse local parse facts in .diffcontext/index.sqlite3")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -103,7 +103,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, indent=2, ensure_ascii=True))
         return 0
     except (ValueError, OSError, sqlite3.Error) as exc:
-        print(f"diffcontext: {exc}", file=sys.stderr)
+        print(f"codebearing: {exc}", file=sys.stderr)
         return 2
 
 

@@ -6,8 +6,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import test_core
-from diffcontext.coding import load_suite, trial_workspace
-from diffcontext.experiments import CONDITIONS, CommandRunner, ReplayRunner, RunnerError, export_requests, make_request, run_experiment, validate_response, write_json
+from codebearing.coding import load_suite, trial_workspace
+from codebearing.experiments import CONDITIONS, CommandRunner, ReplayRunner, RunnerError, export_requests, make_request, run_experiment, validate_response, write_json
 
 SUITE = Path(__file__).resolve().parents[1] / "evals" / "coding_tasks" / "suite.json"
 

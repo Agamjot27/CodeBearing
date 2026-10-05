@@ -10,9 +10,9 @@ from unittest.mock import patch
 
 import test_core
 from test_experiments import SUITE
-from diffcontext.coding import load_suite
-from diffcontext.experiments import RunnerError, run_experiment, validate_response
-from diffcontext.providers import ENDPOINT, MAX_RESPONSE_BYTES, OpenRouterRunner
+from codebearing.coding import load_suite
+from codebearing.experiments import RunnerError, run_experiment, validate_response
+from codebearing.providers import ENDPOINT, MAX_RESPONSE_BYTES, OpenRouterRunner
 
 
 class Transport:

@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import AsyncMock, patch
 
 import test_core
-from diffcontext.onboarding import main, prepare_config, save_config
+from codebearing.onboarding import main, prepare_config, save_config
 
 
 class SetupTests(unittest.TestCase):
@@ -55,14 +55,14 @@ class SetupTests(unittest.TestCase):
         self.assertEqual(target.read_text(), '{"changed":true}')
 
     def test_connection_failure_writes_no_settings(self):
-        with patch("diffcontext.onboarding.check_connection", new=AsyncMock(side_effect=RuntimeError("offline"))), contextlib.redirect_stderr(io.StringIO()):
+        with patch("codebearing.onboarding.check_connection", new=AsyncMock(side_effect=RuntimeError("offline"))), contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(main(["setup", "--client", "cursor", "--repo", str(self.root)]), 2)
         self.assertFalse((self.root / ".cursor").exists())
 
     def test_setup_reports_plain_next_step_after_verified_connection(self):
         output = io.StringIO()
         checked = AsyncMock(return_value={"tools": ["one", "two"]})
-        with patch("diffcontext.onboarding.check_connection", new=checked), contextlib.redirect_stdout(output):
+        with patch("codebearing.onboarding.check_connection", new=checked), contextlib.redirect_stdout(output):
             self.assertEqual(main(["setup", "--client", "cursor", "--repo", str(self.root)]), 0)
         self.assertIn("CodeBearing", output.getvalue())
         self.assertIn("Open/restart cursor", output.getvalue())

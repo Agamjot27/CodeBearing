@@ -4,14 +4,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from diffcontext.index import build_index_from_sources, is_source_path
+from codebearing.index import build_index_from_sources, is_source_path
 
 
 class LanguageBoundaryTests(unittest.TestCase):
     def test_missing_extra_retains_bytes_and_python_evidence(self):
         sources = {"main.py": b"def run(): return 1\n",
                    "main.ts": b"export function run() { return 1; }\n"}
-        with patch.dict("sys.modules", {"diffcontext.typescript": None}):
+        with patch.dict("sys.modules", {"codebearing.typescript": None}):
             index = build_index_from_sources(Path.cwd(), sources)
         self.assertEqual(set(index.sources), set(sources))
         self.assertEqual(set(index.symbols), {"main.py:run"})

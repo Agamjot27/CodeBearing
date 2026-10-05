@@ -7,9 +7,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from diffcontext.context import compile_context, estimate_tokens
-from diffcontext.index import build_index
-from diffcontext.service import RepositoryService
+from codebearing.context import compile_context, estimate_tokens
+from codebearing.index import build_index
+from codebearing.service import RepositoryService
 
 
 def main():

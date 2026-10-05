@@ -1,6 +1,6 @@
 # Run the local context investigator
 
-DiffContext now has a bounded evidence-gathering workflow. Give it a task, exact
+CodeBearing now has a bounded evidence-gathering workflow. Give it a task, exact
 symbols, or a Git ref. It locates seeds, compiles context, checks visible gaps,
 expands static callers/callees, and stops with a trace. It does not edit code, run
 tests, or call a model. A coding assistant can use the returned evidence through MCP.
@@ -10,8 +10,8 @@ tests, or call a model. A coding assistant can use the returned evidence through
 From the project root:
 
 ```powershell
-python -m diffcontext --repo examples/refunds investigate --task "refund_total" --summary
-python -m diffcontext --repo examples/refunds investigate --symbol billing.py:round_line --max-tokens 2000
+python -m codebearing --repo examples/refunds investigate --task "refund_total" --summary
+python -m codebearing --repo examples/refunds investigate --symbol billing.py:round_line --max-tokens 2000
 python evals/investigate.py
 ```
 
@@ -35,7 +35,7 @@ switch to exact `--symbol` IDs if the task selected the wrong code.
 For tracked Git changes from the actual repository root:
 
 ```powershell
-python -m diffcontext --repo . investigate --ref HEAD --max-tokens 4000 --summary
+python -m codebearing --repo . investigate --ref HEAD --max-tokens 4000 --summary
 ```
 
 Both current and historical graphs are checked. Deleted code stays labeled as
@@ -77,8 +77,8 @@ unreviewed/stale text is excluded. No memory or run storage is automatically cre
 Save the **full report**, without `--summary`, as UTF-8. In PowerShell:
 
 ```powershell
-python -m diffcontext --repo examples/refunds investigate --task refund_total | Set-Content -Encoding utf8 run.json
-python -m diffcontext inspect run.json
+python -m codebearing --repo examples/refunds investigate --task refund_total | Set-Content -Encoding utf8 run.json
+python -m codebearing inspect run.json
 ```
 
 The inspector reads a versioned report, lists evidence citations and decisions, and

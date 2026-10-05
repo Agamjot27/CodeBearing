@@ -10,9 +10,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from diffcontext.context import compile_context, estimate_tokens, search
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
+from codebearing.context import compile_context, estimate_tokens, search
+from codebearing.index import build_index
+from codebearing.memory import Memory
 
 
 def fixture(root):
@@ -60,7 +60,7 @@ def metrics(packet, matches, expected, elapsed_ms, eligible_lessons):
 
 
 def main():
-    from diffcontext.retrieval import hybrid_search, rank_candidates, eligible_lessons
+    from codebearing.retrieval import hybrid_search, rank_candidates, eligible_lessons
 
     scratch = (ROOT / ".test-tmp").resolve()
     scratch.mkdir(exist_ok=True)

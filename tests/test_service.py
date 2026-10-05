@@ -2,10 +2,10 @@ import sqlite3
 import unittest
 
 import test_core
-from diffcontext.context import compile_context
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
-from diffcontext.service import RepositoryService
+from codebearing.context import compile_context
+from codebearing.index import build_index
+from codebearing.memory import Memory
+from codebearing.service import RepositoryService
 
 
 class ServiceTests(unittest.TestCase):

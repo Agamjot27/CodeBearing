@@ -1134,6 +1134,8 @@ coding_bench.py:main(). **Flow:** F-032. **Work item:** WI-013.
 
 ## D-023 — CodeBearing identity and verified project-scoped setup
 
+Import namespace and compatibility-alias choices superseded by D-038.
+
 **Decision**
 
 Ship version 0.6.0 as CodeBearing, distribution `codebearing`, commands
@@ -1794,3 +1796,45 @@ not continuously refreshed results. Native GitHub Markdown controls final layout
 Update the excerpt and labels when source or interfaces change. Add a recorded
 demo or website only when real onboarding needs justify it. WI-030 tracks this
 presentation change; runtime behavior remains unchanged.
+
+
+## D-038 — Use codebearing as the sole shipped Python namespace
+
+**Decision**
+
+Rename diffcontext/ to codebearing/, update executable imports/configuration,
+remove legacy console aliases and release the namespace change as 0.10.0.
+Retain the .diffcontext data location and historical experiment records.
+
+**Context**
+
+The user requested consistent naming. The old Python namespace collides with
+another author's package even though our distribution was renamed earlier.
+The open desktop workspace itself is registered at a separate absolute path.
+
+**Alternatives Considered**
+
+- Keep the old namespace and only rename public branding.
+- Ship a diffcontext compatibility shim, preserving the collision.
+- Rename package, data and active checkout root together.
+
+**Why This Approach**
+
+A single namespace resolves the import collision without duplicated module state
+or another abstraction. Existing tests, clean-wheel checks and generated host
+entries verify the new entry points. Keeping existing SQLite paths avoids hidden
+lesson loss; manual configuration migration is explicit. An open-root move could
+invalidate this session, virtual environments and host paths, so document close,
+rename and reopen steps rather than silently break registered projects.
+
+**Trade-offs**
+
+Old Python imports and launch entries require updating. Existing installed 0.9.0
+remains unchanged until upgraded. On-disk data and historical evidence retain
+old naming. No backward-compatible import shim is supplied.
+
+**Future Reconsideration**
+
+Introduce an explicit data-format migration only if the legacy storage name
+causes practical confusion; verify rollback and mixed-version access first.
+WI-031 tracks current changes; D-023's setup safeguards remain in force.

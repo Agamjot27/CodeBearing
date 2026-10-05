@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 import test_core
-from diffcontext.connect import configuration
+from codebearing.connect import configuration
 
 try:
     from mcp import Client, StdioServerParameters
@@ -39,7 +39,7 @@ class CacheProtocolTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_cache_reuse_and_edit_refresh_over_real_stdio(self):
         parameters = StdioServerParameters(command=sys.executable,
-            args=["-m", "diffcontext.connect", "--repo", str(self.root), "--cache"],
+            args=["-m", "codebearing.connect", "--repo", str(self.root), "--cache"],
             cwd=Path(__file__).resolve().parents[1])
         async with Client(parameters, read_timeout_seconds=30) as client:
             first = await client.call_tool("search_symbols", {"query": "refund_total"})

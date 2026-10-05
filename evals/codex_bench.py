@@ -6,8 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from diffcontext.coding import load_suite
-from diffcontext.codex_trials import CodexPacketRunner, prepare_trials, run_trials
+from codebearing.coding import load_suite
+from codebearing.codex_trials import CodexPacketRunner, prepare_trials, run_trials
 
 
 def main():

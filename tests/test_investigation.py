@@ -6,12 +6,12 @@ from unittest.mock import patch
 
 import test_core
 import test_changes
-from diffcontext import investigation
-from diffcontext.context import estimate_tokens
-from diffcontext.index import build_index
-from diffcontext.memory import Memory
-from diffcontext.service import RepositoryService
-from diffcontext.runs import load_summary, summarize
+from codebearing import investigation
+from codebearing.context import estimate_tokens
+from codebearing.index import build_index
+from codebearing.memory import Memory
+from codebearing.service import RepositoryService
+from codebearing.runs import load_summary, summarize
 
 
 class InvestigationTests(unittest.TestCase):
@@ -145,7 +145,7 @@ class InvestigationTests(unittest.TestCase):
         self.assertEqual(service.investigate(symbols=["round_line"])["stop_reason"], "index_warnings")
 
     def test_cli_saved_run_and_inspection(self):
-        command = [sys.executable, "-m", "diffcontext", "--repo", str(self.root)]
+        command = [sys.executable, "-m", "codebearing", "--repo", str(self.root)]
         result = subprocess.run([*command, "investigate", "--task", "refund_total"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         report = json.loads(result.stdout)
@@ -153,7 +153,7 @@ class InvestigationTests(unittest.TestCase):
         path = self.root / "run.json"
         path.write_text(result.stdout, encoding="utf-8-sig")
         # Inspection works on saved evidence even after the target disappears.
-        inspected = subprocess.run([sys.executable, "-m", "diffcontext", "--repo", str(self.root / "missing"),
+        inspected = subprocess.run([sys.executable, "-m", "codebearing", "--repo", str(self.root / "missing"),
                                     "inspect", str(path)], capture_output=True, text=True)
         self.assertEqual(inspected.returncode, 0, inspected.stderr)
         view = json.loads(inspected.stdout)
@@ -176,10 +176,10 @@ class InvestigationTests(unittest.TestCase):
             load_summary(path)
         with self.assertRaises(ValueError):
             summarize({"schema_version": 1, "status": "invented"})
-        with patch("diffcontext.runs.MAX_RUN_BYTES", 1):
+        with patch("codebearing.runs.MAX_RUN_BYTES", 1):
             with self.assertRaisesRegex(ValueError, "limit"):
                 load_summary(path)
-        failed = subprocess.run([sys.executable, "-m", "diffcontext", "inspect", str(path)], capture_output=True, text=True)
+        failed = subprocess.run([sys.executable, "-m", "codebearing", "inspect", str(path)], capture_output=True, text=True)
         self.assertEqual(failed.returncode, 2)
         self.assertIn("UTF-8", failed.stderr)
 

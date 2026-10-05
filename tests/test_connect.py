@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 import test_core
-from diffcontext.connect import configuration, main
+from codebearing.connect import configuration, main
 
 
 class ConnectionTests(unittest.TestCase):
@@ -19,7 +19,7 @@ class ConnectionTests(unittest.TestCase):
         for client in ("claude", "cursor"):
             entry = json.loads(configuration(root, client))["mcpServers"]["codebearing"]
             self.assertEqual(entry["command"], str(Path(sys.executable).absolute()))
-            self.assertEqual(entry["args"], ["-m", "diffcontext.connect", "--repo", str(root)])
+            self.assertEqual(entry["args"], ["-m", "codebearing.connect", "--repo", str(root)])
             self.assertEqual(entry.get("type"), "stdio")
         # Parse TOML in the distribution check on Python 3.11+. Core still supports 3.10.
         if sys.version_info >= (3, 11):
@@ -62,7 +62,7 @@ class ConnectionTests(unittest.TestCase):
     def test_missing_sdk_explains_optional_install(self):
         from unittest.mock import patch
         stderr = io.StringIO()
-        with patch.dict(sys.modules, {"diffcontext.mcp_server": None}), contextlib.redirect_stderr(stderr):
+        with patch.dict(sys.modules, {"codebearing.mcp_server": None}), contextlib.redirect_stderr(stderr):
             self.assertEqual(main(["--repo", str(self.root)]), 2)
         self.assertIn('codebearing[mcp]', stderr.getvalue())
 
@@ -80,7 +80,7 @@ class ConnectionProtocolTests(unittest.IsolatedAsyncioTestCase):
     write = test_core.CoreTests.write
 
     async def test_check_uses_real_subprocess_and_leaves_repo_unchanged(self):
-        from diffcontext.connect import TOOLS, check_connection
+        from codebearing.connect import TOOLS, check_connection
         before = {str(p): p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
         result = await check_connection(self.root)
         self.assertEqual(result["status"], "connected")

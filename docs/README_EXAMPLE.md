@@ -4,10 +4,11 @@ From this repository's root, using a development Python environment with the
 package installed:
 
 ```shell
-python -m diffcontext --repo evals/coding_tasks/refund-rounding/repo compile --symbol refunds.py:refund_total --max-tokens 2000
+python -m codebearing --repo evals/coding_tasks/refund-rounding/repo compile --symbol refunds.py:refund_total --max-tokens 2000
 ```
 
-Captured on 2026-10-06 with source version 0.9.0. The README shows two source
+Originally captured on 2026-10-06 with source version 0.9.0. The command above
+uses the current renamed package; the original excerpt and counts are retained. The README shows two source
 sections verbatim from `text`, not a fabricated MCP transcript. The full result
 contains five symbols: `refund_total`, `round_line`, `refund_preview`,
 `invoice_total` and `PublicTests.test_whole_cent_refund`. Recorded values:

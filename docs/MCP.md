@@ -21,7 +21,7 @@ entry; use --config for a manual update. Restart/enable/approve in the host.
 Automatic Codex TOML setup needs Python 3.11; core/manual generation supports 3.10.
 The remaining sections describe pip/manual setup and troubleshooting.
 
-Requires Python 3.10+. **This project's 0.9.0 package is not published to PyPI yet.**
+Requires Python 3.10+. **This project's 0.10.0 package is not published to PyPI yet.**
 Do not use `pip install diffcontext`: that installs a different author's project.
 Install ours from GitHub
 (Git must be installed):
@@ -30,9 +30,8 @@ Install ours from GitHub
 python -m pip install "codebearing[mcp] @ git+https://github.com/Agamjot27/CodeBearing.git"
 ```
 
-Use a dedicated Python environment if another DiffContext package is installed:
-our distribution name is `codebearing`, but the older similarly named project uses the import name
-`diffcontext`. On Windows, create and activate an environment before installing:
+The distribution and Python package are both `codebearing` in 0.10.0.
+Use an isolated environment for installation. On Windows:
 
 ```powershell
 python -m venv .venv-codebearing
@@ -47,7 +46,7 @@ python -m pip install ".[mcp]"
 ```
 
 A release wheel can be installed with
-`python -m pip install "C:/path/to/codebearing-0.9.0-py3-none-any.whl[mcp]"`.
+`python -m pip install "C:/path/to/codebearing-0.10.0-py3-none-any.whl[mcp]"`.
 The optional MCP SDK is pinned to 2.3.0; transitive dependencies are not locked.
 Python-only core CLI installation requires no runtime dependencies.
 For TypeScript/JavaScript projects install `[mcp,typescript]` instead of `[mcp]`
@@ -69,7 +68,7 @@ Use the actual Git root for revision tools. One server is bound to one repositor
 tool calls cannot switch it to another project.
 
 If the launch command is not on PATH, every example also works as
-`python -m diffcontext.connect --repo "C:/path/to/your-project" --check`.
+`python -m codebearing.connect --repo "C:/path/to/your-project" --check`.
 
 ## 3. Generate your assistant's configuration
 
@@ -136,7 +135,7 @@ assistant's context and may be sent to its model provider under the host's setti
 
 ## Troubleshooting
 
-- **Command not found:** use `python -m diffcontext.connect` from the installation
+- **Command not found:** use `python -m codebearing.connect` from the installation
   environment. Generated host configuration already pins that interpreter.
 - **MCP dependency missing:** reinstall from Git/source/wheel with the `[mcp]`
   extra in the same environment. No PyPI installation of our release is available yet.
@@ -244,3 +243,5 @@ Use the same arguments with `detail="full"` to inspect every warning/trace field
 That performs a fresh read-only request against current files, not a fetch of the
 previous snapshot. Full CLI/service reports remain unchanged; use full reports for
 saved-trace inspection. The text budget still excludes JSON/transport overhead.
+
+For upgrades from 0.9.0, see [the namespace migration guide](NAMING.md).

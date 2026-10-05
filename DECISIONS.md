@@ -1838,3 +1838,46 @@ old naming. No backward-compatible import shim is supplied.
 Introduce an explicit data-format migration only if the legacy storage name
 causes practical confusion; verify rollback and mixed-version access first.
 WI-031 tracks current changes; D-023's setup safeguards remain in force.
+
+
+## D-039 — Compare documented contracts separately from measured outcomes
+
+**Decision**
+
+Publish a sourced alternatives review and a proposed controlled evaluation
+protocol. Acknowledge overlap, including Serena/Claude memory and Aider budgets;
+do not label our existing internal-packet trials as competitor comparisons.
+
+**Context**
+
+The user needs an answer to why someone would use CodeBearing over existing
+retrievers or assistant built-ins. Architecture alone cannot establish token,
+latency or repair quality advantage. Current Cursor docs also differ from old
+embedding-index descriptions, making current primary sources necessary.
+
+**Alternatives Considered**
+
+- A checkmark matrix implying undocumented competitor features do not exist.
+- Claim better quality from our small authored suite.
+- Install/run several complete assistant stacks with unmatched providers/settings.
+
+**Why This Approach**
+
+Documented capabilities support defensible scope/trade-off answers now without
+invented numbers or extra infrastructure. Separate retriever and host-workflow
+protocols avoid confusing source maps with full excerpts or attributing host/model
+differences to retrieval. Tests of the proposed benefit need held-out acceptance,
+real usage/latency capture, matched settings, repetitions and blind grading.
+No paid API usage or new competitor benchmark was initiated for this review.
+
+**Trade-offs**
+
+This does not settle practical advantage; docs may lag implementation and custom
+plugins can alter capabilities. Our interview answer must acknowledge these limits.
+Memory/source freshness is a policy choice, not asserted exclusive functionality.
+
+**Future Reconsideration**
+
+Execute the pre-registered protocol when independent tasks and matched host/model
+access are available. Refresh source review as products change. WI-032 records
+sources and scope; the original published trials remain unchanged.

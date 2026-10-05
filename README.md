@@ -196,6 +196,18 @@ budget nor the test suite establishes general quality, speed or cost improvement
 
 </details>
 
+## Where it fits
+
+Aider already offers graph-ranked repo maps; Serena provides semantic navigation,
+editing and memory; code-graph MCP servers and assistant built-ins also overlap.
+CodeBearing focuses on a **read-only context compiler with reviewed, source-validated
+lessons and inspectable omissions**.
+
+Choose it when that explicit evidence policy is useful to your workflow. This is
+a design distinction, not a claim of outperforming those tools.
+
+[Alternatives, trade-offs and a proposed comparison protocol](docs/ALTERNATIVES.md)
+
 ## Explore further
 
 | Use it | Understand it | Develop it |

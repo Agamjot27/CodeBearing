@@ -9,9 +9,9 @@ and active guides updated. Source version 0.10.0; existing global 0.9.0 tool and
 BookMyShow configuration untouched. D-038/F-047; docs/NAMING.md. .diffcontext data
 paths preserved to avoid losing lessons/cache. Open checkout root stays registered
 as DiffContext; close/rename/reopen instructions provided.
-WI-032 alternatives comparison: researched Aider, Serena, CodeGraphContext, Cursor
-and Claude Code primary docs; writing sourced feature review and fair benchmark
-protocol. No competing-tool or new model trial performed.
+WI-032 alternatives comparison complete: researched Aider, Serena, CodeGraphContext, Cursor
+and Claude Code primary docs; docs/ALTERNATIVES.md has sourced trade-offs,
+interview answer and proposed fair benchmark protocol. D-039. No competing-tool or new model trial performed.
 WI-033 CI stale-wheel fix: scoped; synchronize checker filename to new release.
 
 ## Verification
